@@ -1,0 +1,9 @@
+{
+  "name": "HexDvergrAllies",
+  "version_number": "1.0.0",
+  "website_url": "https://discord.gg/wU2FXD94v4",
+  "description": "HexDvergrAllies for Valheim",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2351"
+  ]
+}
