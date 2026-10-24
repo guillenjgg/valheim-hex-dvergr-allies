@@ -67,9 +67,14 @@
   <ItemGroup>
     <Compile Include="Core\SE_Effects\SE_DvergrAlly.cs" />
     <Compile Include="HexDvergrAlliesConfiguration.cs" />
+    <Compile Include="Patches\AttackAddHitPointPatch.cs" />
+    <Compile Include="Patches\AttackAreaHitPatch.cs" />
     <Compile Include="Patches\BaseAIIsEnemyPatch.cs" />
     <Compile Include="Patches\CharacterAwakePatch.cs" />
     <Compile Include="Patches\DvergrDamageDebugPatch.cs" />
+    <Compile Include="Patches\ProjectileDoAOEPatch.cs" />
+    <Compile Include="Patches\ProjectileIsValidTargetPatch.cs" />
+    <Compile Include="Patches\WearNTearRPCDamagePatch.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
