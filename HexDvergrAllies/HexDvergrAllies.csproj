@@ -75,8 +75,8 @@
     <Compile Include="Patches\Debug\PrivateAreaWardDebugPatch.cs" />
     <Compile Include="Patches\Debug\DestructibleRPCDamageDebugPatch.cs" />
     <Compile Include="Patches\Debug\DvergrDamageDebugPatch.cs" />
+    <Compile Include="Patches\PlayerRemovePiecePatch.cs" />
     <Compile Include="Patches\PlayerUpdatePlacementGhostPatch.cs" />
-    <Compile Include="Patches\PrivateAreaCheckAccessPatch.cs" />
     <Compile Include="Patches\ProjectileDoAOEPatch.cs" />
     <Compile Include="Patches\ProjectileIsValidTargetPatch.cs" />
     <Compile Include="Patches\WearNTearRPCDamagePatch.cs" />

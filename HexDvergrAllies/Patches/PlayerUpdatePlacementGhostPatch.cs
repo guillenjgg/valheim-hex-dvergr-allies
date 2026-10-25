@@ -27,9 +27,12 @@ namespace HexDvergrAllies.Patches
             foreach (var instruction in instructions)
             {
                 if (instruction.Calls(original))
-                    yield return new CodeInstruction(OpCodes.Call, replacement);
-                else
-                    yield return instruction;
+                {
+                    instruction.opcode = OpCodes.Call;
+                    instruction.operand = replacement;
+                }
+
+                yield return instruction;
             }
         }
 
