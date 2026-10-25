@@ -8,7 +8,11 @@ namespace HexDvergrAllies.Patches
     {
         private static bool Prefix(Trader ___m_trader)
         {
-            return !___m_trader || !DvergrTraderManager.IsDvergrTrader(___m_trader);
+            if (!___m_trader || !DvergrTraderManager.IsDvergrTrader(___m_trader))
+                return true;
+
+            DvergrTradeRpcManager.RequestPurchase();
+            return false;
         }
     }
 }
