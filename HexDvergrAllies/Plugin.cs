@@ -1,6 +1,7 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
+using HexDvergrAllies.Core.Managers;
 using System.Reflection;
 
 namespace HexDvergrAllies
@@ -26,6 +27,8 @@ namespace HexDvergrAllies
 
             _harmonyInstance = new Harmony(PluginGuid);
             _harmonyInstance.PatchAll(Assembly.GetExecutingAssembly());
+
+            DvergrTradeTerminalCommands.Register();
 
             Log.LogInfo($"{PluginName} v{PluginVersion} loaded.");
         }
