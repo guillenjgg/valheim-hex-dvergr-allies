@@ -1,19 +1,24 @@
-﻿namespace HexDvergrAllies.Core.Managers
+﻿
+namespace HexDvergrAllies.Core.Managers
 {
     internal static class DvergrTraderManager
     {
+        internal const float InteractionDistance = 2f;
+
         internal static bool IsDvergrTrader(Trader trader)
         {
-            return trader.GetComponent<MonsterAI>()?.GetComponent<Character>()?.GetFaction() == Character.Faction.Dverger;
+            return trader.GetComponent<Humanoid>()?.GetFaction() == Character.Faction.Dverger;
         }
 
         internal static void Initialize(Humanoid dvergr)
         {
             if (dvergr.GetComponent<Trader>())
+            {
                 return;
+            }
 
             var trader = dvergr.gameObject.AddComponent<Trader>();
-            trader.m_name = "$enemy_dvergr";
+            trader.m_name = dvergr.m_name;
             trader.m_standRange = 0f;
             trader.m_greetRange = 0f;
             trader.m_byeRange = 0f;

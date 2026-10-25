@@ -7,15 +7,24 @@ namespace HexDvergrAllies.Patches
     [HarmonyPatch(typeof(Player), "Interact")]
     internal static class PlayerInteractPatch
     {
-        private static bool Prefix(GameObject go, bool hold, bool alt)
+        private static bool Prefix(Player __instance, GameObject go, bool hold, bool alt)
         {
             if (hold)
+            {
                 return true;
+            }
 
             var trader = go.GetComponentInParent<Trader>();
 
             if (!trader || !DvergrTraderManager.IsDvergrTrader(trader))
+            {
                 return true;
+            }
+
+            if (Vector3.Distance(__instance.transform.position, trader.transform.position) > DvergrTraderManager.InteractionDistance)
+            {
+                return false;
+            }
 
             StoreGui.instance.Show(trader);
             return false;
