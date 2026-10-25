@@ -84,6 +84,7 @@
     <Compile Include="Patches\Debug\TraderAwakeDebugPatch.cs" />
     <Compile Include="Patches\DvergrTraderHoverPatch.cs" />
     <Compile Include="Patches\DvergrTraderUpdatePatch.cs" />
+    <Compile Include="Patches\MineRock5RPCDamagePatch.cs" />
     <Compile Include="Patches\PlayerInteractPatch.cs" />
     <Compile Include="Patches\PlayerRemovePiecePatch.cs" />
     <Compile Include="Patches\PlayerUpdatePlacementGhostPatch.cs" />

@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿
+using HarmonyLib;
 using System;
 
 namespace HexDvergrAllies.Core.Managers
@@ -10,30 +11,34 @@ namespace HexDvergrAllies.Core.Managers
         private const string PurchaseCountKey = "hex_dvergr_purchases";
 
         private static readonly Func<ZRoutedRpc, long> GetServerPeerID =
-    AccessTools.MethodDelegate<Func<ZRoutedRpc, long>>(
-        AccessTools.Method(typeof(ZRoutedRpc), "GetServerPeerID"));
+            AccessTools.MethodDelegate<Func<ZRoutedRpc, long>>(
+                AccessTools.Method(typeof(ZRoutedRpc), "GetServerPeerID"));
 
         private static int _purchaseCount;
         private static bool _initialized;
 
         internal static void Register()
         {
-            ZRoutedRpc.instance.Register<int>(PurchaseRequestRpc, OnBuyRequest);
+            ZRoutedRpc.instance.Register<ZDOID, int>(PurchaseRequestRpc, OnBuyRequest);
             ZRoutedRpc.instance.Register<int, int>(PurchaseResponseRpc, OnBuyResponse);
         }
 
-        internal static void RequestPurchase()
+        internal static void RequestPurchase(ZDOID traderZdoId)
         {
-            ZRoutedRpc.instance.InvokeRoutedRPC(PurchaseRequestRpc, 1);
+            ZRoutedRpc.instance.InvokeRoutedRPC(PurchaseRequestRpc, traderZdoId, 1);
         }
 
-        private static void OnBuyRequest(long sender, int quantity)
+        private static void OnBuyRequest(long sender, ZDOID traderZdoId, int quantity)
         {
             if (!ZNet.instance.IsServer())
+            {
                 return;
+            }
 
             if (quantity != 1)
+            {
                 return;
+            }
 
             if (sender != ZNet.GetUID() && ZNet.instance.GetPeer(sender) == null)
             {
@@ -41,15 +46,16 @@ namespace HexDvergrAllies.Core.Managers
                 return;
             }
 
-            // A valid peer is not yet proof of proximity to a trader.
-            // Trader identity and distance require additional request data.
+            // Trader identity and distance validation will be implemented next.
 
             if (!_initialized)
             {
                 _purchaseCount = 0;
 
                 if (ZoneSystem.instance.GetGlobalKey(PurchaseCountKey, out var value))
+                {
                     int.TryParse(value, out _purchaseCount);
+                }
 
                 _initialized = true;
             }
@@ -58,7 +64,7 @@ namespace HexDvergrAllies.Core.Managers
             var sapCost = _purchaseCount >= 2 ? 20 : 0;
 
             Plugin.Log.LogInfo(
-                $"[Dvergr Trade] Request: Peer={sender}, Purchase={purchaseNumber}, Trophy=1, Sap={sapCost}");
+                $"[Dvergr Trade] Request: Peer={sender}, Trader={traderZdoId}, Purchase={purchaseNumber}, Trophy=1, Sap={sapCost}");
 
             ZRoutedRpc.instance.InvokeRoutedRPC(sender, PurchaseResponseRpc, purchaseNumber, sapCost);
         }
