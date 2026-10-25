@@ -6,6 +6,7 @@ namespace HexDvergrAllies
     {
         internal static ConfigEntry<bool> EnablePlayerDamageImmunity;
         internal static ConfigEntry<bool> EnableDebugLogs;
+        internal static ConfigEntry<bool> AllowTemporaryHomestead;
 
         internal static void Init(ConfigFile config)
         {
@@ -20,6 +21,12 @@ namespace HexDvergrAllies
                 "EnableDebugLogs",
                 true,
                 "Logs Dvergr damage events, status effects, and AI states.");
+
+            AllowTemporaryHomestead = config.Bind(
+                "Dvergr Wards",
+                "AllowTemporaryHomestead",
+                true,
+                "Allows players to place a workbench, stonecutter, wood portal, and stone portal inside Dvergr ward-protected areas. All other structures remain restricted.");
         }
     }
 }

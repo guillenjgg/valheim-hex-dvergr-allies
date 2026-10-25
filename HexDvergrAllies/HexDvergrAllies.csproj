@@ -71,7 +71,12 @@
     <Compile Include="Patches\AttackAreaHitPatch.cs" />
     <Compile Include="Patches\BaseAIIsEnemyPatch.cs" />
     <Compile Include="Patches\CharacterAwakePatch.cs" />
-    <Compile Include="Patches\DvergrDamageDebugPatch.cs" />
+    <Compile Include="Patches\Debug\PrivateAreaCheckAccessDebugPatch.cs" />
+    <Compile Include="Patches\Debug\PrivateAreaWardDebugPatch.cs" />
+    <Compile Include="Patches\Debug\DestructibleRPCDamageDebugPatch.cs" />
+    <Compile Include="Patches\Debug\DvergrDamageDebugPatch.cs" />
+    <Compile Include="Patches\PlayerUpdatePlacementGhostPatch.cs" />
+    <Compile Include="Patches\PrivateAreaCheckAccessPatch.cs" />
     <Compile Include="Patches\ProjectileDoAOEPatch.cs" />
     <Compile Include="Patches\ProjectileIsValidTargetPatch.cs" />
     <Compile Include="Patches\WearNTearRPCDamagePatch.cs" />
