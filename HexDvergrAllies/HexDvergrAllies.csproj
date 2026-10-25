@@ -65,6 +65,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\Managers\DvergrTraderManager.cs" />
     <Compile Include="Core\SE_Effects\SE_DvergrAlly.cs" />
     <Compile Include="HexDvergrAlliesConfiguration.cs" />
     <Compile Include="Patches\AttackAddHitPointPatch.cs" />
@@ -75,10 +76,14 @@
     <Compile Include="Patches\Debug\PrivateAreaWardDebugPatch.cs" />
     <Compile Include="Patches\Debug\DestructibleRPCDamageDebugPatch.cs" />
     <Compile Include="Patches\Debug\DvergrDamageDebugPatch.cs" />
+    <Compile Include="Patches\Debug\TraderAwakeDebugPatch.cs" />
+    <Compile Include="Patches\DvergrTraderUpdatePatch.cs" />
+    <Compile Include="Patches\PlayerInteractPatch.cs" />
     <Compile Include="Patches\PlayerRemovePiecePatch.cs" />
     <Compile Include="Patches\PlayerUpdatePlacementGhostPatch.cs" />
     <Compile Include="Patches\ProjectileDoAOEPatch.cs" />
     <Compile Include="Patches\ProjectileIsValidTargetPatch.cs" />
+    <Compile Include="Patches\StoreGuiBuySelectedItemPatch.cs" />
     <Compile Include="Patches\WearNTearRPCDamagePatch.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

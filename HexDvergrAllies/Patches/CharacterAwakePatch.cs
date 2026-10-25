@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using HexDvergrAllies.Core.Managers;
 using HexDvergrAllies.SE_Effects;
 using UnityEngine;
 
@@ -18,6 +19,11 @@ namespace HexDvergrAllies.Patches
             if (monsterAI != null)
             {
                 monsterAI.m_attackPlayerObjects = false;
+            }
+
+            if (__instance is Humanoid dvergr)
+            {
+                DvergrTraderManager.Initialize(dvergr);
             }
 
             var statusEffect = ScriptableObject.CreateInstance<SE_DvergrAlly>();
