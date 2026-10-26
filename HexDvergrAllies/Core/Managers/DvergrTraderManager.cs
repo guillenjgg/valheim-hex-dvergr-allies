@@ -20,8 +20,6 @@
 
             var biome = Heightmap.FindBiome(dvergr.transform.position);
 
-            Plugin.Log.LogInfo($"[Dvergr Trader] Biome: {biome}, Position: {dvergr.transform.position}");
-
             if (biome == Heightmap.Biome.None)
             {
                 return;
