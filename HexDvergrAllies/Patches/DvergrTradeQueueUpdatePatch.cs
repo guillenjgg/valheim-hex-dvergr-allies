@@ -9,6 +9,7 @@ namespace HexDvergrAllies.Patches
         private static void Postfix()
         {
             DvergrTradeRpcManager.Update();
+            DvergrTradeSessionManager.Update();
         }
     }
 }

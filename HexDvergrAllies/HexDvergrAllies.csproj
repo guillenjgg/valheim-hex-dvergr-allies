@@ -79,6 +79,7 @@
   <ItemGroup>
     <Compile Include="Core\Managers\DvergrTraderManager.cs" />
     <Compile Include="Core\Managers\DvergrTradeRpcManager.cs" />
+    <Compile Include="Core\Managers\DvergrTradeSessionManager.cs" />
     <Compile Include="Core\Managers\DvergrTradeTerminalCommands.cs" />
     <Compile Include="Core\SE_Effects\SE_DvergrAlly.cs" />
     <Compile Include="Core\Transactions\DvergrTradeTransaction.cs" />
@@ -106,6 +107,7 @@
     <Compile Include="Patches\StoreGuiCanAffordPatch.cs" />
     <Compile Include="Patches\StoreGuiDvergrDisplayPatch.cs" />
     <Compile Include="Patches\StoreGuiDvergrTransactionPatch.cs" />
+    <Compile Include="Patches\StoreGuiTradeSessionPatch.cs" />
     <Compile Include="Patches\WearNTearRPCDamagePatch.cs" />
     <Compile Include="Patches\ZRoutedRpcConstructorPatch.cs" />
     <Compile Include="Plugin.cs" />

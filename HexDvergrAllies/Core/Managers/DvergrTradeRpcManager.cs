@@ -201,6 +201,12 @@ namespace HexDvergrAllies.Core.Managers
                 return;
             }
 
+            if (!DvergrTradeSessionManager.HasAccess(sender, traderZdoId))
+            {
+                Plugin.Log.LogWarning($"[Dvergr Trade] Purchase rejected: Peer={sender} does not own the trading session.");
+                return;
+            }
+
             if (_hasPendingPurchase && _pendingPeer == sender)
             {
                 Plugin.Log.LogWarning($"[Dvergr Trade] Duplicate purchase rejected: Peer={sender} already active.");

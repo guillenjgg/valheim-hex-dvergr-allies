@@ -26,10 +26,7 @@ namespace HexDvergrAllies.Patches
                 return false;
             }
 
-            var traderZdoId = trader.GetComponent<ZNetView>().GetZDO().m_uid;
-
-            DvergrTradeRpcManager.RequestPrice(traderZdoId);
-            StoreGui.instance.Show(trader);
+            DvergrTradeSessionManager.RequestOpen(trader);
 
             return false;
         }
