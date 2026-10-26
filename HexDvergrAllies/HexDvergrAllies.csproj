@@ -92,6 +92,7 @@
     <Compile Include="Patches\Debug\DvergrDamageDebugPatch.cs" />
     <Compile Include="Patches\Debug\StoreGuiHierarchyDebugPatch.cs" />
     <Compile Include="Patches\Debug\TraderAwakeDebugPatch.cs" />
+    <Compile Include="Patches\DvergrTradeQueueUpdatePatch.cs" />
     <Compile Include="Patches\DvergrTraderHoverPatch.cs" />
     <Compile Include="Patches\DvergrTraderUpdatePatch.cs" />
     <Compile Include="Patches\MineRock5RPCDamagePatch.cs" />
