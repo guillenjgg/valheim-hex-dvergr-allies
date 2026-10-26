@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using HexDvergrAllies.Core.Transactions;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,6 +13,7 @@ namespace HexDvergrAllies.Core.Managers
         private const string PurchaseRequestRpc = "HexDvergrBuyRequest";
         private const string PurchaseResponseRpc = "HexDvergrBuyResponse";
         private const string PurchaseCompleteRpc = "HexDvergrBuyComplete";
+        private const string PurchaseResultRpc = "HexDvergrBuyResult";
         private const string PurchaseCountKey = "hex_dvergr_purchases";
         private const float PurchaseTimeout = 15f;
 
@@ -19,20 +21,22 @@ namespace HexDvergrAllies.Core.Managers
             AccessTools.MethodDelegate<Func<ZRoutedRpc, long>>(
                 AccessTools.Method(typeof(ZRoutedRpc), "GetServerPeerID"));
 
-        private static readonly Queue<(long Peer, ZDOID Trader)> _purchaseQueue = new Queue<(long, ZDOID)>();
+        private static readonly Queue<(long Peer, ZDOID Trader, long RequestId)> _purchaseQueue =
+            new Queue<(long, ZDOID, long)>();
+
+        private static readonly HashSet<long> _processedTransactionIds = new HashSet<long>();
 
         private static long _nextTransactionId;
         private static long _pendingTransactionId;
-        private static readonly HashSet<long> _processedTransactionIds = new HashSet<long>();
-
-        private static int _purchaseCount;
-        private static bool _initialized;
-
+        private static long _pendingRequestId;
         private static long _pendingPeer;
         private static ZDOID _pendingTrader;
         private static int _pendingPurchaseNumber;
         private static float _pendingStartTime;
         private static bool _hasPendingPurchase;
+
+        private static int _purchaseCount;
+        private static bool _initialized;
 
         internal static int CurrentPurchaseNumber { get; private set; }
         internal static int CurrentSapCost { get; private set; }
@@ -42,9 +46,10 @@ namespace HexDvergrAllies.Core.Managers
         {
             ZRoutedRpc.instance.Register<ZDOID>(PriceRequestRpc, OnPriceRequest);
             ZRoutedRpc.instance.Register<int, int>(PriceResponseRpc, OnPriceResponse);
-            ZRoutedRpc.instance.Register<ZDOID, int>(PurchaseRequestRpc, OnBuyRequest);
-            ZRoutedRpc.instance.Register<ZDOID, int, int, long>(PurchaseResponseRpc, OnBuyResponse);
-            ZRoutedRpc.instance.Register<ZDOID, int, bool, long>(PurchaseCompleteRpc, OnBuyComplete);
+            ZRoutedRpc.instance.Register<ZDOID, int, long>(PurchaseRequestRpc, OnBuyRequest);
+            ZRoutedRpc.instance.Register<ZDOID, int, int, long, long>(PurchaseResponseRpc, OnBuyResponse);
+            ZRoutedRpc.instance.Register<ZDOID, int, bool, long, long>(PurchaseCompleteRpc, OnBuyComplete);
+            ZRoutedRpc.instance.Register<long, bool>(PurchaseResultRpc, OnBuyResult);
 
             _initialized = false;
             _hasPendingPurchase = false;
@@ -52,22 +57,29 @@ namespace HexDvergrAllies.Core.Managers
             _processedTransactionIds.Clear();
             _nextTransactionId = DateTime.UtcNow.Ticks;
 
+            DvergrTradeTransaction.Reset();
+
             Plugin.Log.LogInfo("[Dvergr Trade] RPC handlers registered.");
         }
 
         internal static void Update()
         {
             if (!ZNet.instance.IsServer())
+            {
                 return;
+            }
 
             if (_hasPendingPurchase && Time.time - _pendingStartTime >= PurchaseTimeout)
             {
-                Plugin.Log.LogWarning($"[Dvergr Trade] Purchase timed out: Peer={_pendingPeer}, Purchase={_pendingPurchaseNumber}");
-                _hasPendingPurchase = false;
+                Plugin.Log.LogWarning($"[Dvergr Trade] Purchase timed out: Peer={_pendingPeer}, Request={_pendingRequestId}");
+
+                FinishPurchase(false);
             }
 
             if (!_hasPendingPurchase && _purchaseQueue.Count > 0)
+            {
                 ProcessNextPurchase();
+            }
         }
 
         internal static void RequestPrice(ZDOID traderZdoId)
@@ -84,26 +96,44 @@ namespace HexDvergrAllies.Core.Managers
 
         internal static void RequestPurchase(ZDOID traderZdoId)
         {
-            Plugin.Log.LogInfo($"[Dvergr Trade] Purchase requested: Trader={traderZdoId}");
+            if (!DvergrTradeTransaction.TryBegin(out var requestId))
+            {
+                Plugin.Log.LogInfo("[Dvergr Trade] Purchase blocked: Transaction already pending.");
+                return;
+            }
+
+            Plugin.Log.LogInfo($"[Dvergr Trade] Purchase requested: Trader={traderZdoId}, Request={requestId}");
 
             ZRoutedRpc.instance.InvokeRoutedRPC(
                 GetServerPeerID(ZRoutedRpc.instance),
                 PurchaseRequestRpc,
                 traderZdoId,
-                1);
+                1,
+                requestId);
         }
 
         internal static void ResetPurchaseCount()
         {
             if (!ZNet.instance.IsServer())
+            {
                 return;
+            }
+
+            if (_hasPendingPurchase)
+            {
+                FinishPurchase(false);
+            }
+
+            while (_purchaseQueue.Count > 0)
+            {
+                var request = _purchaseQueue.Dequeue();
+                SendPurchaseResult(request.Peer, request.RequestId, false);
+            }
 
             ZoneSystem.instance.SetGlobalKey($"{PurchaseCountKey} 0");
 
             _purchaseCount = 0;
             _initialized = true;
-            _hasPendingPurchase = false;
-            _purchaseQueue.Clear();
 
             Plugin.Log.LogInfo("[Dvergr Trade] World purchase counter reset to 0.");
         }
@@ -111,7 +141,9 @@ namespace HexDvergrAllies.Core.Managers
         private static void OnPriceRequest(long sender, ZDOID traderZdoId)
         {
             if (!ZNet.instance.IsServer())
+            {
                 return;
+            }
 
             if (sender != ZNet.GetUID() && ZNet.instance.GetPeer(sender) == null)
             {
@@ -148,18 +180,14 @@ namespace HexDvergrAllies.Core.Managers
             Plugin.Log.LogInfo($"[Dvergr Trade] Price received: Purchase={purchaseNumber}, Trophy=1, Sap={sapCost}");
         }
 
-        private static void OnBuyRequest(long sender, ZDOID traderZdoId, int quantity)
+        private static void OnBuyRequest(long sender, ZDOID traderZdoId, int quantity, long requestId)
         {
             if (!ZNet.instance.IsServer())
-                return;
-
-            Plugin.Log.LogInfo($"[Dvergr Trade] Server received purchase request: Peer={sender}, Trader={traderZdoId}, Quantity={quantity}");
-
-            if (quantity != 1)
             {
-                Plugin.Log.LogWarning("[Dvergr Trade] Purchase rejected: Invalid quantity.");
                 return;
             }
+
+            Plugin.Log.LogInfo($"[Dvergr Trade] Server received purchase request: Peer={sender}, Request={requestId}, Quantity={quantity}");
 
             if (sender != ZNet.GetUID() && ZNet.instance.GetPeer(sender) == null)
             {
@@ -167,9 +195,16 @@ namespace HexDvergrAllies.Core.Managers
                 return;
             }
 
+            if (quantity != 1 || requestId <= 0)
+            {
+                SendPurchaseResult(sender, requestId, false);
+                return;
+            }
+
             if (_hasPendingPurchase && _pendingPeer == sender)
             {
-                Plugin.Log.LogWarning($"[Dvergr Trade] Duplicate purchase rejected: Peer={sender} already has an active purchase.");
+                Plugin.Log.LogWarning($"[Dvergr Trade] Duplicate purchase rejected: Peer={sender} already active.");
+                SendPurchaseResult(sender, requestId, false);
                 return;
             }
 
@@ -178,22 +213,27 @@ namespace HexDvergrAllies.Core.Managers
                 if (request.Peer == sender)
                 {
                     Plugin.Log.LogWarning($"[Dvergr Trade] Duplicate purchase rejected: Peer={sender} already queued.");
+                    SendPurchaseResult(sender, requestId, false);
                     return;
                 }
             }
 
-            _purchaseQueue.Enqueue((sender, traderZdoId));
+            _purchaseQueue.Enqueue((sender, traderZdoId, requestId));
 
-            Plugin.Log.LogInfo($"[Dvergr Trade] Purchase queued: Peer={sender}, Position={_purchaseQueue.Count}");
+            Plugin.Log.LogInfo($"[Dvergr Trade] Purchase queued: Peer={sender}, Request={requestId}, Position={_purchaseQueue.Count}");
 
             if (!_hasPendingPurchase)
+            {
                 ProcessNextPurchase();
+            }
         }
 
         private static void ProcessNextPurchase()
         {
             if (_hasPendingPurchase)
+            {
                 return;
+            }
 
             InitializePurchaseCount();
 
@@ -214,16 +254,16 @@ namespace HexDvergrAllies.Core.Managers
 
                 if (traderZdo == null)
                 {
-                    Plugin.Log.LogWarning($"[Dvergr Trade] Queued purchase skipped: Unknown trader={traderZdoId}");
+                    RejectQueuedPurchase(request, "Unknown trader");
                     continue;
                 }
 
-                var traderObject = ZNetScene.instance.FindInstance(traderZdoId);
-                var trader = traderObject ? traderObject.GetComponent<Trader>() : null;
+                var traderPrefab = ZNetScene.instance.GetPrefab(traderZdo.GetPrefab());
+                var dvergr = traderPrefab ? traderPrefab.GetComponent<Humanoid>() : null;
 
-                if (!trader || !DvergrTraderManager.IsDvergrTrader(trader))
+                if (!dvergr || dvergr.GetFaction() != Character.Faction.Dverger)
                 {
-                    Plugin.Log.LogWarning($"[Dvergr Trade] Queued purchase skipped: Invalid trader={traderZdoId}");
+                    RejectQueuedPurchase(request, "Invalid trader");
                     continue;
                 }
 
@@ -231,11 +271,11 @@ namespace HexDvergrAllies.Core.Managers
                     ? Player.m_localPlayer.transform.position
                     : peer.m_refPos;
 
-                var distance = Vector3.Distance(playerPosition, trader.transform.position);
+                var distance = Vector3.Distance(playerPosition, traderZdo.GetPosition());
 
                 if (distance > DvergrTraderManager.InteractionDistance)
                 {
-                    Plugin.Log.LogWarning($"[Dvergr Trade] Queued purchase skipped: Player too far away. Peer={sender}, Distance={distance:F1}");
+                    RejectQueuedPurchase(request, $"Player too far away ({distance:F1}m)");
                     continue;
                 }
 
@@ -246,10 +286,11 @@ namespace HexDvergrAllies.Core.Managers
                 _pendingTrader = traderZdoId;
                 _pendingPurchaseNumber = purchaseNumber;
                 _pendingTransactionId = ++_nextTransactionId;
+                _pendingRequestId = request.RequestId;
                 _pendingStartTime = Time.time;
                 _hasPendingPurchase = true;
 
-                Plugin.Log.LogInfo($"[Dvergr Trade] Purchase authorized: Peer={sender}, Purchase={purchaseNumber}, Trophy=1, Sap={sapCost}, Distance={distance:F1}");
+                Plugin.Log.LogInfo($"[Dvergr Trade] Purchase authorized: Peer={sender}, Request={_pendingRequestId}, Transaction={_pendingTransactionId}, Purchase={purchaseNumber}, Sap={sapCost}");
 
                 ZRoutedRpc.instance.InvokeRoutedRPC(
                     sender,
@@ -257,17 +298,31 @@ namespace HexDvergrAllies.Core.Managers
                     traderZdoId,
                     purchaseNumber,
                     sapCost,
-                    _pendingTransactionId);
+                    _pendingTransactionId,
+                    _pendingRequestId);
 
                 return;
             }
         }
 
-        private static void OnBuyResponse(long sender, ZDOID traderZdoId, int purchaseNumber, int sapCost, long transactionId)
+        private static void RejectQueuedPurchase((long Peer, ZDOID Trader, long RequestId) request, string reason)
+        {
+            Plugin.Log.LogWarning($"[Dvergr Trade] Queued purchase rejected: Peer={request.Peer}, Request={request.RequestId}, Reason={reason}");
+
+            SendPurchaseResult(request.Peer, request.RequestId, false);
+        }
+
+        private static void OnBuyResponse(long sender, ZDOID traderZdoId, int purchaseNumber, int sapCost, long transactionId, long requestId)
         {
             if (sender != GetServerPeerID(ZRoutedRpc.instance))
             {
                 Plugin.Log.LogWarning($"[Dvergr Trade] Unauthorized purchase response: Sender={sender}");
+                return;
+            }
+
+            if (!DvergrTradeTransaction.IsPending || DvergrTradeTransaction.RequestId != requestId)
+            {
+                Plugin.Log.LogWarning($"[Dvergr Trade] Authorization rejected: No matching client request={requestId}");
                 return;
             }
 
@@ -277,11 +332,11 @@ namespace HexDvergrAllies.Core.Managers
                 return;
             }
 
-            Plugin.Log.LogInfo($"[Dvergr Trade] Client received authorization: Purchase={purchaseNumber}, Trophy=1, Sap={sapCost}");
+            Plugin.Log.LogInfo($"[Dvergr Trade] Client received authorization: Request={requestId}, Purchase={purchaseNumber}, Sap={sapCost}");
 
             var success = ExecutePurchase(traderZdoId, sapCost);
 
-            Plugin.Log.LogInfo($"[Dvergr Trade] Client transaction result: Purchase={purchaseNumber}, Success={success}");
+            Plugin.Log.LogInfo($"[Dvergr Trade] Client transaction result: Request={requestId}, Success={success}");
 
             ZRoutedRpc.instance.InvokeRoutedRPC(
                 GetServerPeerID(ZRoutedRpc.instance),
@@ -289,7 +344,8 @@ namespace HexDvergrAllies.Core.Managers
                 traderZdoId,
                 purchaseNumber,
                 success,
-                transactionId);
+                transactionId,
+                requestId);
         }
 
         private static bool ExecutePurchase(ZDOID traderZdoId, int sapCost)
@@ -341,20 +397,18 @@ namespace HexDvergrAllies.Core.Managers
                 return false;
             }
 
-            Plugin.Log.LogInfo("[Dvergr Trade] Adding DvergrNeedle to inventory.");
-
             if (!inventory.AddItem(needlePrefab, 1))
             {
                 Plugin.Log.LogWarning("[Dvergr Trade] Client purchase failed: Could not add DvergrNeedle.");
                 return false;
             }
 
-            Plugin.Log.LogInfo($"[Dvergr Trade] Removing payment: Trophy={trophyName}, Sap={sapCost}");
-
             inventory.RemoveItem(trophyName, 1);
 
             if (sapCost > 0)
+            {
                 inventory.RemoveItem(sapName, sapCost);
+            }
 
             player.ShowPickupMessage(needlePrefab.GetComponent<ItemDrop>().m_itemData, 1);
 
@@ -363,18 +417,21 @@ namespace HexDvergrAllies.Core.Managers
             return true;
         }
 
-        private static void OnBuyComplete(long sender, ZDOID traderZdoId, int purchaseNumber, bool success, long transactionId)
+        private static void OnBuyComplete(long sender, ZDOID traderZdoId, int purchaseNumber, bool success, long transactionId, long requestId)
         {
             if (!ZNet.instance.IsServer())
+            {
                 return;
+            }
 
-            Plugin.Log.LogInfo($"[Dvergr Trade] Server received completion: Peer={sender}, Purchase={purchaseNumber}, Success={success}");
+            Plugin.Log.LogInfo($"[Dvergr Trade] Server received completion: Peer={sender}, Request={requestId}, Success={success}");
 
             if (!_hasPendingPurchase ||
                 sender != _pendingPeer ||
                 traderZdoId != _pendingTrader ||
                 purchaseNumber != _pendingPurchaseNumber ||
-                transactionId != _pendingTransactionId)
+                transactionId != _pendingTransactionId ||
+                requestId != _pendingRequestId)
             {
                 Plugin.Log.LogWarning("[Dvergr Trade] Completion rejected: No matching pending transaction.");
                 return;
@@ -382,48 +439,89 @@ namespace HexDvergrAllies.Core.Managers
 
             if (Time.time - _pendingStartTime >= PurchaseTimeout)
             {
-                _hasPendingPurchase = false;
                 Plugin.Log.LogWarning("[Dvergr Trade] Completion rejected: Transaction expired.");
+                FinishPurchase(false);
                 ProcessNextPurchase();
                 return;
             }
+
+            if (success)
+            {
+                _purchaseCount++;
+                ZoneSystem.instance.SetGlobalKey($"{PurchaseCountKey} {_purchaseCount}");
+
+                Plugin.Log.LogInfo($"[Dvergr Trade] PURCHASE COMPLETE: Purchase={purchaseNumber}, WorldPurchaseCount={_purchaseCount}");
+
+                var nextPurchaseNumber = _purchaseCount + 1;
+                var nextSapCost = _purchaseCount >= 2 ? 20 : 0;
+
+                ZRoutedRpc.instance.InvokeRoutedRPC(
+                    sender,
+                    PriceResponseRpc,
+                    nextPurchaseNumber,
+                    nextSapCost);
+            }
+            else
+            {
+                Plugin.Log.LogWarning($"[Dvergr Trade] Purchase failed: Purchase={purchaseNumber}. Counter unchanged.");
+            }
+
+            FinishPurchase(success);
+            ProcessNextPurchase();
+        }
+
+        private static void FinishPurchase(bool success)
+        {
+            var peer = _pendingPeer;
+            var requestId = _pendingRequestId;
 
             _hasPendingPurchase = false;
+            _pendingPeer = 0;
+            _pendingRequestId = 0;
+            _pendingTransactionId = 0;
 
-            if (!success)
+            SendPurchaseResult(peer, requestId, success);
+        }
+
+        private static void SendPurchaseResult(long peer, long requestId, bool success)
+        {
+            ZRoutedRpc.instance.InvokeRoutedRPC(
+                peer,
+                PurchaseResultRpc,
+                requestId,
+                success);
+        }
+
+        private static void OnBuyResult(long sender, long requestId, bool success)
+        {
+            if (sender != GetServerPeerID(ZRoutedRpc.instance))
             {
-                Plugin.Log.LogWarning($"[Dvergr Trade] Purchase cancelled: Purchase={purchaseNumber}. Counter unchanged.");
-                ProcessNextPurchase();
+                Plugin.Log.LogWarning($"[Dvergr Trade] Unauthorized purchase result: Sender={sender}");
                 return;
             }
 
-            _purchaseCount++;
+            if (!DvergrTradeTransaction.TryComplete(requestId))
+            {
+                Plugin.Log.LogWarning($"[Dvergr Trade] Ignored stale purchase result: Request={requestId}");
+                return;
+            }
 
-            ZoneSystem.instance.SetGlobalKey($"{PurchaseCountKey} {_purchaseCount}");
-
-            Plugin.Log.LogInfo($"[Dvergr Trade] PURCHASE COMPLETE: Purchase={purchaseNumber}, WorldPurchaseCount={_purchaseCount}, SavedGlobalKey={PurchaseCountKey} {_purchaseCount}");
-
-            var nextPurchaseNumber = _purchaseCount + 1;
-            var nextSapCost = _purchaseCount >= 2 ? 20 : 0;
-
-            ZRoutedRpc.instance.InvokeRoutedRPC(
-                sender,
-                PriceResponseRpc,
-                nextPurchaseNumber,
-                nextSapCost);
-
-            ProcessNextPurchase();
+            Plugin.Log.LogInfo($"[Dvergr Trade] Transaction finalized: Request={requestId}, Success={success}. Client unlocked.");
         }
 
         private static void InitializePurchaseCount()
         {
             if (_initialized)
+            {
                 return;
+            }
 
             _purchaseCount = 0;
 
             if (ZoneSystem.instance.GetGlobalKey(PurchaseCountKey, out var value))
+            {
                 int.TryParse(value, out _purchaseCount);
+            }
 
             _initialized = true;
 

@@ -1,5 +1,4 @@
-﻿
-namespace HexDvergrAllies.Core.Managers
+﻿namespace HexDvergrAllies.Core.Managers
 {
     internal static class DvergrTraderManager
     {

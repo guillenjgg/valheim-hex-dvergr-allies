@@ -1,5 +1,4 @@
-﻿
-using HarmonyLib;
+﻿using HarmonyLib;
 using HexDvergrAllies.Core.Managers;
 using TMPro;
 using UnityEngine;

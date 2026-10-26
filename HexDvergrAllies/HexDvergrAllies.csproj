@@ -81,6 +81,7 @@
     <Compile Include="Core\Managers\DvergrTradeRpcManager.cs" />
     <Compile Include="Core\Managers\DvergrTradeTerminalCommands.cs" />
     <Compile Include="Core\SE_Effects\SE_DvergrAlly.cs" />
+    <Compile Include="Core\Transactions\DvergrTradeTransaction.cs" />
     <Compile Include="HexDvergrAlliesConfiguration.cs" />
     <Compile Include="Patches\AttackAddHitPointPatch.cs" />
     <Compile Include="Patches\AttackAreaHitPatch.cs" />
@@ -104,6 +105,7 @@
     <Compile Include="Patches\StoreGuiBuySelectedItemPatch.cs" />
     <Compile Include="Patches\StoreGuiCanAffordPatch.cs" />
     <Compile Include="Patches\StoreGuiDvergrDisplayPatch.cs" />
+    <Compile Include="Patches\StoreGuiDvergrTransactionPatch.cs" />
     <Compile Include="Patches\WearNTearRPCDamagePatch.cs" />
     <Compile Include="Patches\ZRoutedRpcConstructorPatch.cs" />
     <Compile Include="Plugin.cs" />
