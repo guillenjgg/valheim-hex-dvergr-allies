@@ -142,10 +142,19 @@ namespace HexDvergrAllies.Core.Managers
             }
 
             var approved = false;
+            var reason = "Unknown";
             var traderZdo = ZDOMan.instance.GetZDO(traderZdoId);
             var peer = ZNet.instance.GetPeer(sender);
 
-            if (traderZdo != null && (sender == ZNet.GetUID() || peer != null))
+            if (traderZdo == null)
+            {
+                reason = "Trader ZDO not found";
+            }
+            else if (sender != ZNet.GetUID() && peer == null)
+            {
+                reason = "Player peer not found";
+            }
+            else
             {
                 var traderPrefab = ZNetScene.instance.GetPrefab(traderZdo.GetPrefab());
                 var humanoid = traderPrefab ? traderPrefab.GetComponent<Humanoid>() : null;
@@ -154,26 +163,40 @@ namespace HexDvergrAllies.Core.Managers
                     ? Player.m_localPlayer.transform.position
                     : peer.m_refPos;
 
-                if (humanoid && humanoid.GetFaction() == Character.Faction.Dverger &&
-                    Vector3.Distance(playerPosition, traderZdo.GetPosition()) <= DvergrTraderManager.InteractionDistance)
-                {
-                    if (!_sessions.TryGetValue(traderZdoId, out var session))
-                    {
-                        _sessions[traderZdoId] = new TradeSession
-                        {
-                            Peer = sender,
-                            LastActivity = Time.time
-                        };
+                var distance = Vector3.Distance(playerPosition, traderZdo.GetPosition());
 
-                        approved = true;
-                    }
-                    else if (session.Peer == sender)
+                if (!humanoid || humanoid.GetFaction() != Character.Faction.Dverger)
+                {
+                    reason = "Invalid Dvergr trader";
+                }
+                else if (distance > DvergrTraderManager.InteractionDistance)
+                {
+                    reason = $"Player too far away ({distance:F2}m)";
+                }
+                else if (!_sessions.TryGetValue(traderZdoId, out var session))
+                {
+                    _sessions[traderZdoId] = new TradeSession
                     {
-                        session.LastActivity = Time.time;
-                        approved = true;
-                    }
+                        Peer = sender,
+                        LastActivity = Time.time
+                    };
+
+                    approved = true;
+                    reason = "New session created";
+                }
+                else if (session.Peer == sender)
+                {
+                    session.LastActivity = Time.time;
+                    approved = true;
+                    reason = "Existing session reused";
+                }
+                else
+                {
+                    reason = $"Trader occupied by peer {session.Peer}";
                 }
             }
+
+            Plugin.Log.LogInfo($"[Dvergr Trade Session] Open: Peer={sender}, Trader={traderZdoId}, Approved={approved}, Reason={reason}");
 
             ZRoutedRpc.instance.InvokeRoutedRPC(
                 sender,
@@ -229,10 +252,21 @@ namespace HexDvergrAllies.Core.Managers
                 return;
             }
 
-            if (_sessions.TryGetValue(traderZdoId, out var session) && session.Peer == sender)
+            if (!_sessions.TryGetValue(traderZdoId, out var session))
             {
-                _sessions.Remove(traderZdoId);
+                Plugin.Log.LogInfo($"[Dvergr Trade Session] Close: Peer={sender}, Trader={traderZdoId}, Reason=No active session");
+                return;
             }
+
+            if (session.Peer != sender)
+            {
+                Plugin.Log.LogWarning($"[Dvergr Trade Session] Close rejected: Peer={sender}, Trader={traderZdoId}, Owner={session.Peer}");
+                return;
+            }
+
+            _sessions.Remove(traderZdoId);
+
+            Plugin.Log.LogInfo($"[Dvergr Trade Session] Close: Peer={sender}, Trader={traderZdoId}, Session removed");
         }
 
         private static void OnHeartbeat(long sender, ZDOID traderZdoId)
