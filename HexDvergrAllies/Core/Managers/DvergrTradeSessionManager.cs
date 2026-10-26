@@ -205,7 +205,7 @@ namespace HexDvergrAllies.Core.Managers
             var traderObject = ZNetScene.instance.FindInstance(traderZdoId);
             var trader = traderObject ? traderObject.GetComponent<Trader>() : null;
 
-            if (!trader || Vector3.Distance(Player.m_localPlayer.transform.position, trader.transform.position) > DvergrTraderManager.InteractionDistance)
+            if (!trader || Vector3.Distance(Player.m_localPlayer.transform.position, trader.transform.position) > DvergrTraderManager.InteractionDistance || trader.m_items.Count == 0)
             {
                 ZRoutedRpc.instance.InvokeRoutedRPC(
                     GetServerPeerID(ZRoutedRpc.instance),
@@ -219,12 +219,6 @@ namespace HexDvergrAllies.Core.Managers
             _lastHeartbeatTime = Time.time;
 
             DvergrTradeRpcManager.RequestPrice(traderZdoId);
-
-            if (trader.m_items.Count == 0)
-            {
-                return;
-            }
-
             StoreGui.instance.Show(trader);
         }
 
