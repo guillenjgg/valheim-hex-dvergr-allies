@@ -35,7 +35,7 @@ namespace HexDvergrAllies.Core.Managers
         internal static void Register()
         {
             ZRoutedRpc.instance.Register<ZDOID>(OpenRequestRpc, OnOpenRequest);
-            ZRoutedRpc.instance.Register<ZDOID, bool>(OpenResponseRpc, OnOpenResponse);
+            ZRoutedRpc.instance.Register<ZDOID, bool, string>(OpenResponseRpc, OnOpenResponse);
             ZRoutedRpc.instance.Register<ZDOID>(CloseRequestRpc, OnCloseRequest);
             ZRoutedRpc.instance.Register<ZDOID>(HeartbeatRpc, OnHeartbeat);
 
@@ -142,17 +142,17 @@ namespace HexDvergrAllies.Core.Managers
             }
 
             var approved = false;
-            var reason = "Unknown";
+            var reason = "Unable to open Dvergr store.";
             var traderZdo = ZDOMan.instance.GetZDO(traderZdoId);
             var peer = ZNet.instance.GetPeer(sender);
 
             if (traderZdo == null)
             {
-                reason = "Trader ZDO not found";
+                reason = "Trader ZDO not found.";
             }
             else if (sender != ZNet.GetUID() && peer == null)
             {
-                reason = "Player peer not found";
+                reason = "Player peer not found.";
             }
             else
             {
@@ -164,14 +164,15 @@ namespace HexDvergrAllies.Core.Managers
                     : peer.m_refPos;
 
                 var distance = Vector3.Distance(playerPosition, traderZdo.GetPosition());
+                var maximumDistance = DvergrTraderManager.InteractionDistance + 2f;
 
                 if (!humanoid || humanoid.GetFaction() != Character.Faction.Dverger)
                 {
-                    reason = "Invalid Dvergr trader";
+                    reason = "Invalid Dvergr trader.";
                 }
-                else if (distance > DvergrTraderManager.InteractionDistance)
+                else if (distance > maximumDistance)
                 {
-                    reason = $"Player too far away ({distance:F2}m)";
+                    reason = $"Too far away from Dvergr ({distance:F2}m).";
                 }
                 else if (!_sessions.TryGetValue(traderZdoId, out var session))
                 {
@@ -182,17 +183,17 @@ namespace HexDvergrAllies.Core.Managers
                     };
 
                     approved = true;
-                    reason = "New session created";
+                    reason = "New session created.";
                 }
                 else if (session.Peer == sender)
                 {
                     session.LastActivity = Time.time;
                     approved = true;
-                    reason = "Existing session reused";
+                    reason = "Existing session reused.";
                 }
                 else
                 {
-                    reason = $"Trader occupied by peer {session.Peer}";
+                    reason = "This Dvergr is currently trading with another player.";
                 }
             }
 
@@ -202,10 +203,11 @@ namespace HexDvergrAllies.Core.Managers
                 sender,
                 OpenResponseRpc,
                 traderZdoId,
-                approved);
+                approved,
+                reason);
         }
 
-        private static void OnOpenResponse(long sender, ZDOID traderZdoId, bool approved)
+        private static void OnOpenResponse(long sender, ZDOID traderZdoId, bool approved, string reason)
         {
             if (sender != GetServerPeerID(ZRoutedRpc.instance))
             {
@@ -221,7 +223,7 @@ namespace HexDvergrAllies.Core.Managers
 
             if (!approved)
             {
-                Player.m_localPlayer.Message(MessageHud.MessageType.Center, "This Dvergr is currently trading with another player.");
+                Player.m_localPlayer.Message(MessageHud.MessageType.Center, reason);
                 return;
             }
 
