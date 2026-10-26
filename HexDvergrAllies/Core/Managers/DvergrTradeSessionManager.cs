@@ -219,6 +219,12 @@ namespace HexDvergrAllies.Core.Managers
             _lastHeartbeatTime = Time.time;
 
             DvergrTradeRpcManager.RequestPrice(traderZdoId);
+
+            if (trader.m_items.Count == 0)
+            {
+                return;
+            }
+
             StoreGui.instance.Show(trader);
         }
 
