@@ -338,6 +338,15 @@ namespace HexDvergrAllies.Core.Managers
             ZoneSystem.instance.SetGlobalKey($"{PurchaseCountKey} {_purchaseCount}");
 
             Plugin.Log.LogInfo($"[Dvergr Trade] PURCHASE COMPLETE: Purchase={purchaseNumber}, WorldPurchaseCount={_purchaseCount}, SavedGlobalKey={PurchaseCountKey} {_purchaseCount}");
+
+            var nextPurchaseNumber = _purchaseCount + 1;
+            var nextSapCost = _purchaseCount >= 2 ? 20 : 0;
+
+            ZRoutedRpc.instance.InvokeRoutedRPC(
+                sender,
+                PriceResponseRpc,
+                nextPurchaseNumber,
+                nextSapCost);
         }
 
         private static void InitializePurchaseCount()
