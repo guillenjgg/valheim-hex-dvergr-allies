@@ -11,6 +11,10 @@ namespace HexDvergrAllies.Core.Managers
         private const string OpenResponseRpc = "HexDvergrTradeOpenResponse";
         private const string CloseRequestRpc = "HexDvergrTradeClose";
         private const float SessionTimeout = 30f;
+        private const string HeartbeatRpc = "HexDvergrTradeHeartbeat";
+        private const float HeartbeatInterval = 5f;
+
+        private static float _lastHeartbeatTime;
 
         private static readonly Dictionary<ZDOID, TradeSession> _sessions = new Dictionary<ZDOID, TradeSession>();
 
@@ -33,10 +37,12 @@ namespace HexDvergrAllies.Core.Managers
             ZRoutedRpc.instance.Register<ZDOID>(OpenRequestRpc, OnOpenRequest);
             ZRoutedRpc.instance.Register<ZDOID, bool>(OpenResponseRpc, OnOpenResponse);
             ZRoutedRpc.instance.Register<ZDOID>(CloseRequestRpc, OnCloseRequest);
+            ZRoutedRpc.instance.Register<ZDOID>(HeartbeatRpc, OnHeartbeat);
 
             _sessions.Clear();
             _waitingForApproval = false;
             _sessionApproved = false;
+            _lastHeartbeatTime = 0f;
         }
 
         internal static void RequestOpen(Trader trader)
@@ -94,6 +100,16 @@ namespace HexDvergrAllies.Core.Managers
 
         internal static void Update()
         {
+            if (_sessionApproved && Time.time - _lastHeartbeatTime >= HeartbeatInterval)
+            {
+                _lastHeartbeatTime = Time.time;
+
+                ZRoutedRpc.instance.InvokeRoutedRPC(
+                    GetServerPeerID(ZRoutedRpc.instance),
+                    HeartbeatRpc,
+                    _currentTrader);
+            }
+
             if (!ZNet.instance.IsServer())
             {
                 return;
@@ -200,6 +216,7 @@ namespace HexDvergrAllies.Core.Managers
             }
 
             _sessionApproved = true;
+            _lastHeartbeatTime = Time.time;
 
             DvergrTradeRpcManager.RequestPrice(traderZdoId);
             StoreGui.instance.Show(trader);
@@ -216,6 +233,29 @@ namespace HexDvergrAllies.Core.Managers
             {
                 _sessions.Remove(traderZdoId);
             }
+        }
+
+        private static void OnHeartbeat(long sender, ZDOID traderZdoId)
+        {
+            if (!ZNet.instance.IsServer())
+            {
+                return;
+            }
+
+            if (!_sessions.TryGetValue(traderZdoId, out var session) || session.Peer != sender)
+            {
+                return;
+            }
+
+            var traderZdo = ZDOMan.instance.GetZDO(traderZdoId);
+            var peer = ZNet.instance.GetPeer(sender);
+
+            if (traderZdo == null || (sender != ZNet.GetUID() && peer == null))
+            {
+                return;
+            }
+
+            session.LastActivity = Time.time;
         }
     }
 }

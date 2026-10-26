@@ -86,6 +86,7 @@
     <Compile Include="HexDvergrAlliesConfiguration.cs" />
     <Compile Include="Patches\AttackAddHitPointPatch.cs" />
     <Compile Include="Patches\AttackAreaHitPatch.cs" />
+    <Compile Include="Patches\BaseAIIdleMovementPatch.cs" />
     <Compile Include="Patches\BaseAIIsEnemyPatch.cs" />
     <Compile Include="Patches\CharacterAwakePatch.cs" />
     <Compile Include="Patches\Debug\PrivateAreaCheckAccessDebugPatch.cs" />

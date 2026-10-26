@@ -279,9 +279,9 @@ namespace HexDvergrAllies.Core.Managers
 
                 var distance = Vector3.Distance(playerPosition, traderZdo.GetPosition());
 
-                if (distance > DvergrTraderManager.InteractionDistance)
+                if (!DvergrTradeSessionManager.HasAccess(sender, traderZdoId))
                 {
-                    RejectQueuedPurchase(request, $"Player too far away ({distance:F1}m)");
+                    RejectQueuedPurchase(request, "Trading session expired");
                     continue;
                 }
 
@@ -365,14 +365,6 @@ namespace HexDvergrAllies.Core.Managers
             if (!trader || !DvergrTraderManager.IsDvergrTrader(trader))
             {
                 Plugin.Log.LogWarning("[Dvergr Trade] Client purchase failed: Trader unavailable.");
-                return false;
-            }
-
-            var distance = Vector3.Distance(player.transform.position, trader.transform.position);
-
-            if (distance > DvergrTraderManager.InteractionDistance)
-            {
-                Plugin.Log.LogWarning($"[Dvergr Trade] Client purchase failed: Too far away ({distance:F1}m).");
                 return false;
             }
 

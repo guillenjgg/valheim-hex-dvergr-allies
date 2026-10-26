@@ -19,18 +19,12 @@ namespace HexDvergrAllies.Patches
         private static void FillListPostfix(StoreGui __instance, Trader ___m_trader)
         {
             if (!___m_trader || !DvergrTraderManager.IsDvergrTrader(___m_trader))
-                return;
-
-            foreach (Transform item in __instance.m_listRoot)
             {
-                var coinBackground = item.Find("coin_bkg");
-
-                if (coinBackground)
-                    coinBackground.gameObject.SetActive(false);
+                return;
             }
 
             CreatePaymentPanel(__instance);
-            UpdatePaymentText();
+            UpdateItemPrices(__instance);
         }
 
         [HarmonyPatch(typeof(StoreGui), "Update")]
@@ -38,32 +32,42 @@ namespace HexDvergrAllies.Patches
         private static void UpdatePostfix(StoreGui __instance, Trader ___m_trader)
         {
             if (!__instance.m_rootPanel.activeSelf)
+            {
                 return;
+            }
 
             var isDvergrTrader = ___m_trader && DvergrTraderManager.IsDvergrTrader(___m_trader);
 
             __instance.m_coinText.transform.parent.gameObject.SetActive(!isDvergrTrader);
 
             if (_paymentPanel)
+            {
                 _paymentPanel.SetActive(isDvergrTrader);
+            }
 
             if (!isDvergrTrader)
+            {
                 return;
+            }
 
             if (!_paymentPanel)
+            {
                 CreatePaymentPanel(__instance);
+            }
 
             if (_lastSapCost != DvergrTradeRpcManager.CurrentSapCost ||
                 _lastHasPrice != DvergrTradeRpcManager.HasCurrentPrice)
             {
-                UpdatePaymentText();
+                UpdateItemPrices(__instance);
             }
         }
 
         private static void CreatePaymentPanel(StoreGui storeGui)
         {
             if (_paymentPanel)
+            {
                 return;
+            }
 
             var buyButton = storeGui.m_buyButton.GetComponent<RectTransform>();
             var sourceText = storeGui.m_buyButton.GetComponentInChildren<TMP_Text>();
@@ -103,32 +107,45 @@ namespace HexDvergrAllies.Patches
             textRect.offsetMin = new Vector2(10f, 8f);
             textRect.offsetMax = new Vector2(-10f, -8f);
 
+            _paymentText.text =
+                "<color=#D9A75D><b>ACCEPTED CURRENCY</b></color>\n" +
+                "<size=85%>1 Trophy = Seeker, Seeker Soldier, or Gjall</size>";
+
             _lastSapCost = -1;
             _lastHasPrice = false;
         }
 
-        private static void UpdatePaymentText()
+        private static void UpdateItemPrices(StoreGui storeGui)
         {
-            if (!_paymentText)
-                return;
-
             _lastSapCost = DvergrTradeRpcManager.CurrentSapCost;
             _lastHasPrice = DvergrTradeRpcManager.HasCurrentPrice;
 
-            if (!_lastHasPrice)
+            foreach (Transform item in storeGui.m_listRoot)
             {
-                _paymentText.text = "<color=#D9A75D>Loading payment...</color>";
-                return;
+                var coinBackground = item.Find("coin_bkg");
+                var priceTransform = Utils.FindChild(item, "price", Utils.IterativeSearchType.DepthFirst);
+                var priceText = priceTransform.GetComponent<TMP_Text>();
+
+                coinBackground.gameObject.SetActive(true);
+                coinBackground.GetComponent<Image>().enabled = false;
+                coinBackground.Find("coin icon").gameObject.SetActive(false);
+
+                priceText.text = !_lastHasPrice
+                    ? "Loading..."
+                    : _lastSapCost > 0
+                        ? $"1 Trophy + {_lastSapCost} Sap"
+                        : "1 Trophy";
+
+                priceText.color = Color.white;
+                priceText.enableAutoSizing = false;
+                priceText.fontSizeMin = 15f;
+
+                var priceRect = priceText.GetComponent<RectTransform>();
+                priceRect.anchorMin = Vector2.zero;
+                priceRect.anchorMax = Vector2.one;
+                priceRect.offsetMin = Vector2.zero;
+                priceRect.offsetMax = Vector2.zero;
             }
-
-            var payment = "<color=#D9A75D><b>PAYMENT REQUIRED</b></color>\n" +
-                          "<size=90%>1 Trophy</size>\n" +
-                          "<color=#B9A58A><size=75%>Seeker, Gjall, or Seeker Brute</size></color>";
-
-            if (_lastSapCost > 0)
-                payment += $"\n<color=#E8D8B8>+ {_lastSapCost} Sap</color>";
-
-            _paymentText.text = payment;
         }
     }
 }
