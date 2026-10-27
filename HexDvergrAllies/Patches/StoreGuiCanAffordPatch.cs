@@ -7,9 +7,14 @@ namespace HexDvergrAllies.Patches
     [HarmonyPatch(typeof(StoreGui), "CanAfford")]
     internal static class StoreGuiCanAffordPatch
     {
-        private static void Postfix(Trader ___m_trader, ref bool __result)
+        private static void Postfix(Trader ___m_trader, Trader.TradeItem ___m_selectedItem, ref bool __result)
         {
             if (!___m_trader || !DvergrTraderManager.IsDvergrTrader(___m_trader))
+            {
+                return;
+            }
+
+            if (___m_selectedItem != null && ___m_selectedItem.m_prefab.gameObject.name == "Softtissue")
             {
                 return;
             }
@@ -29,5 +34,6 @@ namespace HexDvergrAllies.Patches
             __result = trophy != null &&
                 inventory.CountItems(sapName) >= DvergrTradeRpcManager.CurrentSapCost;
         }
+
     }
 }

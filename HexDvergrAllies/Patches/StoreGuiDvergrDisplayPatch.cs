@@ -1,4 +1,6 @@
-﻿using HarmonyLib;
+﻿
+using System.Collections.Generic;
+using HarmonyLib;
 using HexDvergrAllies.Core.Managers;
 using TMPro;
 using UnityEngine;
@@ -9,6 +11,9 @@ namespace HexDvergrAllies.Patches
     [HarmonyPatch]
     internal static class StoreGuiDvergrDisplayPatch
     {
+        private static readonly AccessTools.FieldRef<StoreGui, Trader> TraderField = AccessTools.FieldRefAccess<StoreGui, Trader>("m_trader");
+        private static readonly AccessTools.FieldRef<StoreGui, List<GameObject>> ItemListField = AccessTools.FieldRefAccess<StoreGui, List<GameObject>>("m_itemList");
+
         private static GameObject _paymentPanel;
         private static TMP_Text _paymentText;
         private static int _lastSapCost = -1;
@@ -16,27 +21,30 @@ namespace HexDvergrAllies.Patches
 
         [HarmonyPatch(typeof(StoreGui), "FillList")]
         [HarmonyPostfix]
-        private static void FillListPostfix(StoreGui __instance, Trader ___m_trader)
+        private static void FillListPostfix(StoreGui __instance)
         {
-            if (!___m_trader || !DvergrTraderManager.IsDvergrTrader(___m_trader))
+            var trader = TraderField(__instance);
+
+            if (!trader || !DvergrTraderManager.IsDvergrTrader(trader))
             {
                 return;
             }
 
             CreatePaymentPanel(__instance);
-            UpdateItemPrices(__instance);
+            UpdateItemPrices(trader, ItemListField(__instance));
         }
 
         [HarmonyPatch(typeof(StoreGui), "Update")]
         [HarmonyPostfix]
-        private static void UpdatePostfix(StoreGui __instance, Trader ___m_trader)
+        private static void UpdatePostfix(StoreGui __instance)
         {
             if (!__instance.m_rootPanel.activeSelf)
             {
                 return;
             }
 
-            var isDvergrTrader = ___m_trader && DvergrTraderManager.IsDvergrTrader(___m_trader);
+            var trader = TraderField(__instance);
+            var isDvergrTrader = trader && DvergrTraderManager.IsDvergrTrader(trader);
 
             __instance.m_coinText.transform.parent.gameObject.SetActive(!isDvergrTrader);
 
@@ -58,7 +66,7 @@ namespace HexDvergrAllies.Patches
             if (_lastSapCost != DvergrTradeRpcManager.CurrentSapCost ||
                 _lastHasPrice != DvergrTradeRpcManager.HasCurrentPrice)
             {
-                UpdateItemPrices(__instance);
+                UpdateItemPrices(trader, ItemListField(__instance));
             }
         }
 
@@ -115,26 +123,34 @@ namespace HexDvergrAllies.Patches
             _lastHasPrice = false;
         }
 
-        private static void UpdateItemPrices(StoreGui storeGui)
+        private static void UpdateItemPrices(Trader trader, List<GameObject> itemList)
         {
             _lastSapCost = DvergrTradeRpcManager.CurrentSapCost;
             _lastHasPrice = DvergrTradeRpcManager.HasCurrentPrice;
 
-            foreach (Transform item in storeGui.m_listRoot)
+            var tradeItems = trader.GetAvailableItems();
+
+            for (var i = 0; i < tradeItems.Count && i < itemList.Count; i++)
             {
+                var item = itemList[i].transform;
+                var tradeItem = tradeItems[i];
+                var isSoftTissue = tradeItem.m_prefab.gameObject.name == "Softtissue";
+
                 var coinBackground = item.Find("coin_bkg");
                 var priceTransform = Utils.FindChild(item, "price", Utils.IterativeSearchType.DepthFirst);
                 var priceText = priceTransform.GetComponent<TMP_Text>();
 
                 coinBackground.gameObject.SetActive(true);
-                coinBackground.GetComponent<Image>().enabled = false;
-                coinBackground.Find("coin icon").gameObject.SetActive(false);
+                coinBackground.GetComponent<Image>().enabled = isSoftTissue;
+                coinBackground.Find("coin icon").gameObject.SetActive(isSoftTissue);
 
-                priceText.text = !_lastHasPrice
-                    ? "Loading..."
-                    : _lastSapCost > 0
-                        ? $"1 Trophy + {_lastSapCost} Sap"
-                        : "1 Trophy";
+                priceText.text = isSoftTissue
+                    ? tradeItem.m_price.ToString()
+                    : !_lastHasPrice
+                        ? "Loading..."
+                        : _lastSapCost > 0
+                            ? $"1 Trophy + {_lastSapCost} Sap"
+                            : "1 Trophy";
 
                 priceText.color = Color.white;
                 priceText.enableAutoSizing = false;
