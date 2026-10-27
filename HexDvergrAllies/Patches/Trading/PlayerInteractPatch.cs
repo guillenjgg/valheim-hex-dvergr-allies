@@ -41,23 +41,35 @@ namespace HexDvergrAllies.Patches
                 return false;
             }
 
-            var leftShift = ZInput.GetKey(KeyCode.LeftShift);
-            var rightShift = ZInput.GetKey(KeyCode.RightShift);
-            var shiftPressed = leftShift || rightShift;
+            var shiftPressed = ZInput.GetKey(KeyCode.LeftShift) ||
+                               ZInput.GetKey(KeyCode.RightShift);
+
+            var isHired = DvergrCompanionManager.IsHired(character);
 
             Plugin.Log.LogInfo(
-                $"[Dvergr Companion] Player.Interact: Dvergr={character.name}, Hold={hold}, Alt={alt}, Shift={shiftPressed}, LeftShift={leftShift}, RightShift={rightShift}, Distance={distance:F2}, IsHired={DvergrCompanionManager.IsHired(character)}");
+                $"[Dvergr Companion] Player.Interact: Dvergr={character.name}, Hold={hold}, Alt={alt}, Shift={shiftPressed}, Distance={distance:F2}, IsHired={isHired}");
 
             if (shiftPressed)
             {
-                Plugin.Log.LogInfo(
-                    $"[Dvergr Companion] Hire interaction detected: Player={__instance.GetPlayerName()}, Dvergr={character.name}");
+                if (isHired)
+                {
+                    Plugin.Log.LogInfo(
+                        $"[Dvergr Companion] Unhire interaction detected: Player={__instance.GetPlayerName()}, Dvergr={character.name}");
 
-                DvergrCompanionManager.RequestHire(__instance, character);
+                    DvergrCompanionManager.RequestUnhire(__instance, character);
+                }
+                else
+                {
+                    Plugin.Log.LogInfo(
+                        $"[Dvergr Companion] Hire interaction detected: Player={__instance.GetPlayerName()}, Dvergr={character.name}");
+
+                    DvergrCompanionManager.RequestHire(__instance, character);
+                }
+
                 return false;
             }
 
-            if (DvergrCompanionManager.IsHired(character))
+            if (isHired)
             {
                 Plugin.Log.LogInfo(
                     $"[Dvergr Companion] Trade blocked: Dvergr={character.name}, Reason=Already hired");

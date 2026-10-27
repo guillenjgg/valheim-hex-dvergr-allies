@@ -11,6 +11,9 @@ namespace HexDvergrAllies
         internal static ConfigEntry<float> CompanionMovementSpeedMultiplier;
         internal static ConfigEntry<float> CompanionFollowDistance;
         internal static ConfigEntry<bool> CompanionEnableJumping;
+        internal static ConfigEntry<float> CompanionHealthMultiplier;
+        internal static ConfigEntry<float> CompanionDamageTakenMultiplier;
+        internal static ConfigEntry<float> CompanionAttackSpeedMultiplier;
 
         internal static void Init(ConfigFile config)
         {
@@ -45,14 +48,38 @@ namespace HexDvergrAllies
                 "FollowDistance",
                 5f,
                 new ConfigDescription(
-                    "Desired maximum following distance in meters for hired Dvergr companions.",
+                    "Desired following distance in meters. Not implemented yet.",
                     new AcceptableValueRange<float>(1f, 30f)));
 
             CompanionEnableJumping = config.Bind(
                 "Dvergr Companion",
                 "EnableJumping",
                 true,
-                "Allows hired Dvergr companions to jump over obstacles when supported by their movement controller.");
+                "Reserved for a future companion obstacle navigation feature.");
+
+            CompanionHealthMultiplier = config.Bind(
+                "Dvergr Companion",
+                "HealthMultiplier",
+                2f,
+                new ConfigDescription(
+                    "Maximum health multiplier for hired Dvergr companions.",
+                    new AcceptableValueRange<float>(1f, 10f)));
+
+            CompanionDamageTakenMultiplier = config.Bind(
+                "Dvergr Companion",
+                "DamageTakenMultiplier",
+                0.5f,
+                new ConfigDescription(
+                    "Incoming damage multiplier. 0.5 means 50% less damage.",
+                    new AcceptableValueRange<float>(0f, 1f)));
+
+            CompanionAttackSpeedMultiplier = config.Bind(
+                "Dvergr Companion",
+                "AttackSpeedMultiplier",
+                1.25f,
+                new ConfigDescription(
+                    "Attack cooldown speed multiplier. 1.25 means 25% faster cooldown recovery.",
+                    new AcceptableValueRange<float>(1f, 5f)));
         }
     }
 }

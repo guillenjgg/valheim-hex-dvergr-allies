@@ -6,9 +6,11 @@ namespace HexDvergrAllies.Core.Managers
     internal static class DvergrCompanionManager
     {
         private const string HireRpc = "HexDvergrHire";
+        private const string UnhireRpc = "HexDvergrUnhire";
         private const string HiredKey = "HexDvergr_IsHired";
         private const string OwnerKey = "HexDvergr_HiredBy";
         private const string HomeKey = "HexDvergr_HomePosition";
+        private const string HomeSavedKey = "HexDvergr_HomeSaved";
 
         private const float FollowLogInterval = 5f;
 
@@ -33,14 +35,16 @@ namespace HexDvergrAllies.Core.Managers
 
             nview.Register<ZDOID>(HireRpc, (sender, playerId) =>
             {
-                Plugin.Log.LogInfo(
-                    $"[Dvergr Companion] Hire RPC received: Dvergr={character.name}, Sender={sender}, PlayerZDO={playerId}, IsOwner={nview.IsOwner()}");
-
                 Hire(character, sender, playerId);
             });
 
+            nview.Register<ZDOID>(UnhireRpc, (sender, playerId) =>
+            {
+                Unhire(character, sender, playerId);
+            });
+
             Plugin.Log.LogInfo(
-                $"[Dvergr Companion] Initialized: Dvergr={character.name}, ZDO={nview.GetZDO().m_uid}, IsOwner={nview.IsOwner()}, IsHired={nview.GetZDO().GetBool(HiredKey, false)}");
+                $"[Dvergr Companion] Initialized: Dvergr={character.name}, ZDO={nview.GetZDO().m_uid}, IsOwner={nview.IsOwner()}, IsHired={IsHired(character)}");
         }
 
         internal static bool IsHired(Character character)
@@ -59,71 +63,53 @@ namespace HexDvergrAllies.Core.Managers
 
         internal static void RequestHire(Player player, Character character)
         {
-            Plugin.Log.LogInfo(
-                $"[Dvergr Companion] RequestHire entered: Dvergr={character.name}, Player={player.GetPlayerName()}");
-
             var nview = character.GetComponent<ZNetView>();
 
             if (!nview || !nview.IsValid())
             {
                 Plugin.Log.LogWarning(
-                    $"[Dvergr Companion] Hire request rejected: Reason=Invalid ZNetView");
+                    "[Dvergr Companion] Hire request rejected: Reason=Invalid ZNetView");
                 return;
             }
 
             Plugin.Log.LogInfo(
-                $"[Dvergr Companion] Sending hire RPC: DvergrZDO={nview.GetZDO().m_uid}, PlayerZDO={player.GetZDOID()}, IsOwner={nview.IsOwner()}");
+                $"[Dvergr Companion] Sending hire RPC: DvergrZDO={nview.GetZDO().m_uid}, PlayerZDO={player.GetZDOID()}");
 
             nview.InvokeRPC(HireRpc, player.GetZDOID());
         }
 
-        private static void Hire(Character character, long sender, ZDOID playerId)
+        internal static void RequestUnhire(Player player, Character character)
         {
             var nview = character.GetComponent<ZNetView>();
 
             if (!nview || !nview.IsValid())
             {
                 Plugin.Log.LogWarning(
-                    "[Dvergr Companion] Hire failed: Reason=Invalid ZNetView");
+                    "[Dvergr Companion] Unhire request rejected: Reason=Invalid ZNetView");
                 return;
             }
-
-            if (!nview.IsOwner())
-            {
-                Plugin.Log.LogWarning(
-                    $"[Dvergr Companion] Hire rejected: Reason=Not ZDO owner, Sender={sender}");
-                return;
-            }
-
-            var playerObject = ZNetScene.instance.FindInstance(playerId);
-
-            if (!playerObject)
-            {
-                Plugin.Log.LogWarning(
-                    $"[Dvergr Companion] Hire failed: Reason=Player object not found, PlayerZDO={playerId}");
-                return;
-            }
-
-            var player = playerObject.GetComponent<Player>();
-
-            if (!player)
-            {
-                Plugin.Log.LogWarning(
-                    $"[Dvergr Companion] Hire failed: Reason=Resolved object is not a Player, PlayerZDO={playerId}");
-                return;
-            }
-
-            var distance = Vector3.Distance(
-                player.transform.position,
-                character.transform.position);
 
             Plugin.Log.LogInfo(
-                $"[Dvergr Companion] Hire validation: Player={player.GetPlayerName()}, Distance={distance:F2}, MaxDistance={DvergrTraderManager.InteractionDistance:F2}");
+                $"[Dvergr Companion] Sending unhire RPC: DvergrZDO={nview.GetZDO().m_uid}, PlayerZDO={player.GetZDOID()}");
 
-            if (distance > DvergrTraderManager.InteractionDistance)
+            nview.InvokeRPC(UnhireRpc, player.GetZDOID());
+        }
+
+        private static void Hire(Character character, long sender, ZDOID playerId)
+        {
+            var nview = character.GetComponent<ZNetView>();
+
+            if (!nview || !nview.IsValid() || !nview.IsOwner())
+            {
+                return;
+            }
+
+            var player = ResolvePlayer(playerId);
+
+            if (!player || !IsWithinInteractionDistance(player, character))
             {
                 Plugin.Log.LogWarning(
-                    $"[Dvergr Companion] Hire rejected: Reason=Too far away, Distance={distance:F2}");
+                    $"[Dvergr Companion] Hire rejected: PlayerZDO={playerId}, Reason=Player missing or out of range");
                 return;
             }
 
@@ -132,7 +118,7 @@ namespace HexDvergrAllies.Core.Managers
             if (zdo.GetBool(HiredKey, false))
             {
                 Plugin.Log.LogWarning(
-                    $"[Dvergr Companion] Hire rejected: Reason=Already hired, ExistingOwner={zdo.GetLong(OwnerKey, 0L)}");
+                    $"[Dvergr Companion] Hire rejected: Reason=Already hired, Owner={zdo.GetLong(OwnerKey, 0L)}");
                 return;
             }
 
@@ -141,22 +127,107 @@ namespace HexDvergrAllies.Core.Managers
             if (!monsterAI)
             {
                 Plugin.Log.LogWarning(
-                    $"[Dvergr Companion] Hire failed: Reason=MonsterAI component missing, Dvergr={character.name}");
+                    "[Dvergr Companion] Hire rejected: Reason=MonsterAI missing");
                 return;
             }
 
-            zdo.Set(HomeKey, character.transform.position);
+            if (!zdo.GetBool(HomeSavedKey, false))
+            {
+                zdo.Set(HomeKey, character.transform.position);
+                zdo.Set(HomeSavedKey, true);
+
+                Plugin.Log.LogInfo(
+                    $"[Dvergr Companion] Home saved: Dvergr={character.name}, Position={character.transform.position}");
+            }
+
             zdo.Set(OwnerKey, player.GetPlayerID());
             zdo.Set(HiredKey, true);
-
-            Plugin.Log.LogInfo(
-                $"[Dvergr Companion] Hire state saved: DvergrZDO={zdo.m_uid}, Hired={zdo.GetBool(HiredKey, false)}, Owner={zdo.GetLong(OwnerKey, 0L)}, Home={character.transform.position}");
 
             monsterAI.ResetPatrolPoint();
             monsterAI.SetFollowTarget(player.gameObject);
 
             Plugin.Log.LogInfo(
-                $"[Dvergr Companion] Hired successfully: Dvergr={character.name}, Player={player.GetPlayerName()}, PlayerID={player.GetPlayerID()}, FollowTarget={GetFollowTargetName(monsterAI)}");
+                $"[Dvergr Companion] Hired successfully: Dvergr={character.name}, Player={player.GetPlayerName()}, PlayerID={player.GetPlayerID()}");
+        }
+
+        private static void Unhire(Character character, long sender, ZDOID playerId)
+        {
+            var nview = character.GetComponent<ZNetView>();
+
+            if (!nview || !nview.IsValid() || !nview.IsOwner())
+            {
+                return;
+            }
+
+            var zdo = nview.GetZDO();
+
+            if (!zdo.GetBool(HiredKey, false))
+            {
+                Plugin.Log.LogWarning(
+                    $"[Dvergr Companion] Unhire rejected: Dvergr={character.name}, Reason=Not hired");
+                return;
+            }
+
+            var player = ResolvePlayer(playerId);
+
+            if (!player || !IsWithinInteractionDistance(player, character))
+            {
+                Plugin.Log.LogWarning(
+                    $"[Dvergr Companion] Unhire rejected: PlayerZDO={playerId}, Reason=Player missing or out of range");
+                return;
+            }
+
+            var ownerPlayerId = zdo.GetLong(OwnerKey, 0L);
+
+            if (ownerPlayerId != player.GetPlayerID())
+            {
+                Plugin.Log.LogWarning(
+                    $"[Dvergr Companion] Unhire rejected: Player={player.GetPlayerName()}, Reason=Not hiring player");
+                return;
+            }
+
+            var monsterAI = character.GetComponent<MonsterAI>();
+
+            if (!monsterAI)
+            {
+                Plugin.Log.LogWarning(
+                    "[Dvergr Companion] Unhire rejected: Reason=MonsterAI missing");
+                return;
+            }
+
+            monsterAI.SetFollowTarget(null);
+            monsterAI.ResetPatrolPoint();
+
+            DvergrCompanionBehaviorManager.ResetBehavior(character, monsterAI);
+
+            zdo.Set(HiredKey, false);
+            zdo.Set(OwnerKey, 0L);
+
+            _lastFollowLogTimes.Remove(zdo.m_uid);
+
+            Plugin.Log.LogInfo(
+                $"[Dvergr Companion] Unhired successfully: Dvergr={character.name}, Player={player.GetPlayerName()}, HomeSaved={zdo.GetBool(HomeSavedKey, false)}, CurrentPosition={character.transform.position}");
+        }
+
+        private static Player ResolvePlayer(ZDOID playerId)
+        {
+            if (ZNetScene.instance == null)
+            {
+                return null;
+            }
+
+            var playerObject = ZNetScene.instance.FindInstance(playerId);
+
+            return playerObject ? playerObject.GetComponent<Player>() : null;
+        }
+
+        private static bool IsWithinInteractionDistance(Player player, Character character)
+        {
+            var distance = Vector3.Distance(
+                player.transform.position,
+                character.transform.position);
+
+            return distance <= DvergrTraderManager.InteractionDistance;
         }
 
         internal static void UpdateFollow(MonsterAI monsterAI)
@@ -172,12 +243,6 @@ namespace HexDvergrAllies.Core.Managers
 
             if (!nview || !nview.IsValid())
             {
-                if (character.GetFaction() == Character.Faction.Dverger)
-                {
-                    Plugin.Log.LogWarning(
-                        $"[Dvergr Companion] UpdateFollow skipped: Dvergr={character.name}, Reason=Invalid ZNetView");
-                }
-
                 return;
             }
 
@@ -192,23 +257,11 @@ namespace HexDvergrAllies.Core.Managers
 
             if (!nview.IsOwner())
             {
-                if (shouldLog)
-                {
-                    Plugin.Log.LogInfo(
-                        $"[Dvergr Companion] UpdateFollow skipped: Dvergr={character.name}, ZDO={zdo.m_uid}, Reason=Not ZDO owner");
-                }
-
                 return;
             }
 
             var playerId = zdo.GetLong(OwnerKey, 0L);
             var followTarget = monsterAI.GetFollowTarget();
-
-            if (shouldLog)
-            {
-                Plugin.Log.LogInfo(
-                    $"[Dvergr Companion] Follow tick: Dvergr={character.name}, ZDO={zdo.m_uid}, OwnerPlayerID={playerId}, CurrentTarget={GetFollowTargetName(monsterAI)}, Position={character.transform.position}");
-            }
 
             foreach (var player in Player.GetAllPlayers())
             {
@@ -223,20 +276,17 @@ namespace HexDvergrAllies.Core.Managers
 
                 if (followTarget != player.gameObject)
                 {
-                    Plugin.Log.LogInfo(
-                        $"[Dvergr Companion] Assigning follow target: Dvergr={character.name}, Player={player.GetPlayerName()}, Distance={distance:F2}, PreviousTarget={GetFollowTargetName(monsterAI)}");
-
                     monsterAI.ResetPatrolPoint();
                     monsterAI.SetFollowTarget(player.gameObject);
 
                     Plugin.Log.LogInfo(
-                        $"[Dvergr Companion] Follow target assigned: Dvergr={character.name}, NewTarget={GetFollowTargetName(monsterAI)}");
+                        $"[Dvergr Companion] Follow target assigned: Dvergr={character.name}, Player={player.GetPlayerName()}");
                 }
 
                 if (shouldLog)
                 {
                     Plugin.Log.LogInfo(
-                        $"[Dvergr Companion] Follow status: Dvergr={character.name}, Player={player.GetPlayerName()}, Distance={distance:F2}, TargetMatches={monsterAI.GetFollowTarget() == player.gameObject}");
+                        $"[Dvergr Companion] Follow status: Dvergr={character.name}, Player={player.GetPlayerName()}, Distance={distance:F2}");
                 }
 
                 return;
@@ -245,23 +295,18 @@ namespace HexDvergrAllies.Core.Managers
             if (shouldLog)
             {
                 Plugin.Log.LogWarning(
-                    $"[Dvergr Companion] Follow owner not found: Dvergr={character.name}, OwnerPlayerID={playerId}, AvailablePlayers={Player.GetAllPlayers().Count}");
+                    $"[Dvergr Companion] Follow owner not found: Dvergr={character.name}, OwnerPlayerID={playerId}");
             }
 
             if (followTarget)
             {
                 monsterAI.SetFollowTarget(null);
-
-                Plugin.Log.LogInfo(
-                    $"[Dvergr Companion] Follow target cleared: Dvergr={character.name}, Reason=Hiring player not found");
             }
         }
 
         private static bool ShouldLogFollow(ZDOID zdoId)
         {
-            float lastLogTime;
-
-            if (_lastFollowLogTimes.TryGetValue(zdoId, out lastLogTime) &&
+            if (_lastFollowLogTimes.TryGetValue(zdoId, out var lastLogTime) &&
                 Time.time - lastLogTime < FollowLogInterval)
             {
                 return false;
@@ -269,13 +314,6 @@ namespace HexDvergrAllies.Core.Managers
 
             _lastFollowLogTimes[zdoId] = Time.time;
             return true;
-        }
-
-        private static string GetFollowTargetName(MonsterAI monsterAI)
-        {
-            var target = monsterAI.GetFollowTarget();
-
-            return target ? target.name : "None";
         }
     }
 }
