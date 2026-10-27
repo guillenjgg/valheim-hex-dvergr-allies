@@ -14,16 +14,25 @@ namespace HexDvergrAllies.Patches
                 return;
             }
 
-            if (___m_selectedItem != null && ___m_selectedItem.m_prefab.gameObject.name == "Softtissue")
+            if (___m_selectedItem == null)
+            {
+                __result = false;
+                return;
+            }
+
+            if (___m_selectedItem.m_prefab.gameObject.name == "Softtissue")
             {
                 return;
             }
 
-            __result = false;
+            __result = CanAffordExtractor();
+        }
 
+        internal static bool CanAffordExtractor()
+        {
             if (!DvergrTradeRpcManager.HasCurrentPrice)
             {
-                return;
+                return false;
             }
 
             var inventory = Player.m_localPlayer.GetInventory();
@@ -31,9 +40,8 @@ namespace HexDvergrAllies.Patches
             var sapPrefab = ObjectDB.instance.GetItemPrefab("Sap");
             var sapName = sapPrefab.GetComponent<ItemDrop>().m_itemData.m_shared.m_name;
 
-            __result = trophy != null &&
+            return trophy != null &&
                 inventory.CountItems(sapName) >= DvergrTradeRpcManager.CurrentSapCost;
         }
-
     }
 }

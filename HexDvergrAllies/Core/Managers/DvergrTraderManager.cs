@@ -1,5 +1,4 @@
-﻿
-namespace HexDvergrAllies.Core.Managers
+﻿namespace HexDvergrAllies.Core.Managers
 {
     internal static class DvergrTraderManager
     {
@@ -82,14 +81,15 @@ namespace HexDvergrAllies.Core.Managers
                 m_prefab = needlePrefab.GetComponent<ItemDrop>(),
                 m_stack = 1,
                 m_price = 0,
-                m_tooltip = ""
+                m_tooltip = "",
+                m_buyPlayerEffects = new EffectList()
             });
 
             var softTissuePrefab = ObjectDB.instance.GetItemPrefab("Softtissue");
 
             if (softTissuePrefab == null)
             {
-                Plugin.Log.LogWarning("[Dvergr Trader] SoftTissue prefab not found.");
+                Plugin.Log.LogWarning("[Dvergr Trader] Softtissue prefab not found.");
                 return;
             }
 
@@ -98,7 +98,8 @@ namespace HexDvergrAllies.Core.Managers
                 m_prefab = softTissuePrefab.GetComponent<ItemDrop>(),
                 m_stack = 20,
                 m_price = 2000,
-                m_tooltip = ""
+                m_tooltip = "",
+                m_buyPlayerEffects = new EffectList()
             });
         }
 

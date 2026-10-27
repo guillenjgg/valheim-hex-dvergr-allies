@@ -32,6 +32,7 @@ namespace HexDvergrAllies.Patches
 
             CreatePaymentPanel(__instance);
             UpdateItemPrices(trader, ItemListField(__instance));
+            UpdateAffordability(trader, ItemListField(__instance));
         }
 
         [HarmonyPatch(typeof(StoreGui), "Update")]
@@ -68,6 +69,8 @@ namespace HexDvergrAllies.Patches
             {
                 UpdateItemPrices(trader, ItemListField(__instance));
             }
+
+            UpdateAffordability(trader, ItemListField(__instance));
         }
 
         private static void CreatePaymentPanel(StoreGui storeGui)
@@ -132,25 +135,27 @@ namespace HexDvergrAllies.Patches
 
             for (var i = 0; i < tradeItems.Count && i < itemList.Count; i++)
             {
-                var item = itemList[i].transform;
                 var tradeItem = tradeItems[i];
-                var isSoftTissue = tradeItem.m_prefab.gameObject.name == "Softtissue";
 
+                if (tradeItem.m_prefab.gameObject.name == "Softtissue")
+                {
+                    continue;
+                }
+
+                var item = itemList[i].transform;
                 var coinBackground = item.Find("coin_bkg");
                 var priceTransform = Utils.FindChild(item, "price", Utils.IterativeSearchType.DepthFirst);
                 var priceText = priceTransform.GetComponent<TMP_Text>();
 
                 coinBackground.gameObject.SetActive(true);
-                coinBackground.GetComponent<Image>().enabled = isSoftTissue;
-                coinBackground.Find("coin icon").gameObject.SetActive(isSoftTissue);
+                coinBackground.GetComponent<Image>().enabled = false;
+                coinBackground.Find("coin icon").gameObject.SetActive(false);
 
-                priceText.text = isSoftTissue
-                    ? tradeItem.m_price.ToString()
-                    : !_lastHasPrice
-                        ? "Loading..."
-                        : _lastSapCost > 0
-                            ? $"1 Trophy + {_lastSapCost} Sap"
-                            : "1 Trophy";
+                priceText.text = !_lastHasPrice
+                    ? "Loading..."
+                    : _lastSapCost > 0
+                        ? $"1 Trophy + {_lastSapCost} Sap"
+                        : "1 Trophy";
 
                 priceText.color = Color.white;
                 priceText.enableAutoSizing = false;
@@ -161,6 +166,30 @@ namespace HexDvergrAllies.Patches
                 priceRect.anchorMax = Vector2.one;
                 priceRect.offsetMin = Vector2.zero;
                 priceRect.offsetMax = Vector2.zero;
+            }
+        }
+
+        private static void UpdateAffordability(Trader trader, List<GameObject> itemList)
+        {
+            var tradeItems = trader.GetAvailableItems();
+            var canAffordExtractor = StoreGuiCanAffordPatch.CanAffordExtractor();
+
+            for (var i = 0; i < tradeItems.Count && i < itemList.Count; i++)
+            {
+                if (tradeItems[i].m_prefab.gameObject.name == "Softtissue")
+                {
+                    continue;
+                }
+
+                var item = itemList[i];
+                var canvasGroup = item.GetComponent<CanvasGroup>();
+
+                if (!canvasGroup)
+                {
+                    canvasGroup = item.AddComponent<CanvasGroup>();
+                }
+
+                canvasGroup.alpha = canAffordExtractor ? 1f : 0.5f;
             }
         }
     }

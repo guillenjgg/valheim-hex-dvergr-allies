@@ -75,6 +75,10 @@
       <HintPath>..\..\..\valheim_mod_libraries\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>..\..\..\valheim_mod_libraries\UnityEngine.UIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\Managers\DvergrTraderManager.cs" />
