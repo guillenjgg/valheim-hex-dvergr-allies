@@ -93,6 +93,7 @@
     <Compile Include="Patches\Combat\AttackAddHitPointPatch.cs" />
     <Compile Include="Patches\Combat\AttackAreaHitPatch.cs" />
     <Compile Include="Patches\Companions\CharacterCompanionDamagePatch.cs" />
+    <Compile Include="Patches\Companions\DvergrCompanionLedgeFollowPatch.cs" />
     <Compile Include="Patches\Companions\DvergrCompanionTerrainRecoveryPatch.cs" />
     <Compile Include="Patches\Companions\MonsterAIAttackSpeedPatch.cs" />
     <Compile Include="Patches\Companions\MonsterAICompanionAttackSpeedPatch.cs" />
