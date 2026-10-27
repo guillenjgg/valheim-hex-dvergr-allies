@@ -16,14 +16,26 @@ namespace HexDvergrAllies.Patches
                 return true;
             }
 
-            if (Vector3.Distance(Player.m_localPlayer.transform.position, __instance.transform.position) > DvergrTraderManager.InteractionDistance)
+            if (!Player.m_localPlayer ||
+                Vector3.Distance(Player.m_localPlayer.transform.position, __instance.transform.position) >
+                DvergrTraderManager.InteractionDistance)
             {
                 __result = "";
                 return false;
             }
 
+            if (DvergrCompanionManager.IsHired(__instance))
+            {
+                __result = Localization.instance.Localize(
+                    trader.m_name + "\nCompanion");
+
+                return false;
+            }
+
             __result = Localization.instance.Localize(
-                trader.m_name + "\n[<color=yellow><b>$KEY_Use</b></color>] $raven_interact");
+                trader.m_name +
+                "\n[<color=yellow><b>$KEY_Use</b></color>] $raven_interact" +
+                "\n[<color=yellow><b>Shift + E</b></color>] Hire");
 
             return false;
         }

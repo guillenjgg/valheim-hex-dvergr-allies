@@ -81,6 +81,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\Managers\DvergrCompanionBehaviorManager.cs" />
+    <Compile Include="Core\Managers\DvergrCompanionManager.cs" />
     <Compile Include="Core\Managers\DvergrTraderManager.cs" />
     <Compile Include="Core\Managers\DvergrTradeRpcManager.cs" />
     <Compile Include="Core\Managers\DvergrTradeSessionManager.cs" />
@@ -88,33 +90,35 @@
     <Compile Include="Core\SE_Effects\SE_DvergrAlly.cs" />
     <Compile Include="Core\Transactions\DvergrTradeTransaction.cs" />
     <Compile Include="HexDvergrAlliesConfiguration.cs" />
-    <Compile Include="Patches\AttackAddHitPointPatch.cs" />
-    <Compile Include="Patches\AttackAreaHitPatch.cs" />
-    <Compile Include="Patches\BaseAIIdleMovementPatch.cs" />
-    <Compile Include="Patches\BaseAIIsEnemyPatch.cs" />
-    <Compile Include="Patches\CharacterAwakePatch.cs" />
+    <Compile Include="Patches\Combat\AttackAddHitPointPatch.cs" />
+    <Compile Include="Patches\Combat\AttackAreaHitPatch.cs" />
+    <Compile Include="Patches\Companions\MonsterAICompanionBehaviorPatch.cs" />
+    <Compile Include="Patches\Trading\BaseAIIdleMovementPatch.cs" />
+    <Compile Include="Patches\Combat\BaseAIIsEnemyPatch.cs" />
+    <Compile Include="Patches\Dvergr\CharacterAwakePatch.cs" />
     <Compile Include="Patches\Debug\PrivateAreaCheckAccessDebugPatch.cs" />
     <Compile Include="Patches\Debug\PrivateAreaWardDebugPatch.cs" />
     <Compile Include="Patches\Debug\DestructibleRPCDamageDebugPatch.cs" />
     <Compile Include="Patches\Debug\DvergrDamageDebugPatch.cs" />
     <Compile Include="Patches\Debug\StoreGuiHierarchyDebugPatch.cs" />
     <Compile Include="Patches\Debug\TraderAwakeDebugPatch.cs" />
-    <Compile Include="Patches\DvergrTradeQueueUpdatePatch.cs" />
-    <Compile Include="Patches\DvergrTraderHoverPatch.cs" />
-    <Compile Include="Patches\DvergrTraderUpdatePatch.cs" />
-    <Compile Include="Patches\MineRock5RPCDamagePatch.cs" />
-    <Compile Include="Patches\PlayerInteractPatch.cs" />
-    <Compile Include="Patches\PlayerRemovePiecePatch.cs" />
-    <Compile Include="Patches\PlayerUpdatePlacementGhostPatch.cs" />
-    <Compile Include="Patches\ProjectileDoAOEPatch.cs" />
-    <Compile Include="Patches\ProjectileIsValidTargetPatch.cs" />
-    <Compile Include="Patches\StoreGuiBuySelectedItemPatch.cs" />
-    <Compile Include="Patches\StoreGuiCanAffordPatch.cs" />
-    <Compile Include="Patches\StoreGuiDvergrDisplayPatch.cs" />
-    <Compile Include="Patches\StoreGuiDvergrTransactionPatch.cs" />
-    <Compile Include="Patches\StoreGuiTradeSessionPatch.cs" />
-    <Compile Include="Patches\WearNTearRPCDamagePatch.cs" />
-    <Compile Include="Patches\ZRoutedRpcConstructorPatch.cs" />
+    <Compile Include="Patches\Trading\DvergrTradeQueueUpdatePatch.cs" />
+    <Compile Include="Patches\Trading\DvergrTraderHoverPatch.cs" />
+    <Compile Include="Patches\Trading\DvergrTraderUpdatePatch.cs" />
+    <Compile Include="Patches\Combat\MineRock5RPCDamagePatch.cs" />
+    <Compile Include="Patches\Companions\MonsterAICompanionFollowPatch.cs" />
+    <Compile Include="Patches\Trading\PlayerInteractPatch.cs" />
+    <Compile Include="Patches\Homestead\PlayerRemovePiecePatch.cs" />
+    <Compile Include="Patches\Homestead\PlayerUpdatePlacementGhostPatch.cs" />
+    <Compile Include="Patches\Combat\ProjectileDoAOEPatch.cs" />
+    <Compile Include="Patches\Combat\ProjectileIsValidTargetPatch.cs" />
+    <Compile Include="Patches\Trading\StoreGuiBuySelectedItemPatch.cs" />
+    <Compile Include="Patches\Trading\StoreGuiCanAffordPatch.cs" />
+    <Compile Include="Patches\Trading\StoreGuiDvergrDisplayPatch.cs" />
+    <Compile Include="Patches\Trading\StoreGuiDvergrTransactionPatch.cs" />
+    <Compile Include="Patches\Trading\StoreGuiTradeSessionPatch.cs" />
+    <Compile Include="Patches\Combat\WearNTearRPCDamagePatch.cs" />
+    <Compile Include="Patches\Networking\ZRoutedRpcConstructorPatch.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -129,5 +133,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

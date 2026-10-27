@@ -16,6 +16,7 @@ namespace HexDvergrAllies.Patches
             }
 
             var monsterAI = __instance.GetComponent<MonsterAI>();
+
             if (monsterAI != null)
             {
                 monsterAI.m_attackPlayerObjects = false;
@@ -25,6 +26,8 @@ namespace HexDvergrAllies.Patches
             {
                 DvergrTraderManager.Initialize(dvergr);
             }
+
+            DvergrCompanionManager.Initialize(__instance);
 
             var statusEffect = ScriptableObject.CreateInstance<SE_DvergrAlly>();
             statusEffect.name = "SE_DvergrAlly";
