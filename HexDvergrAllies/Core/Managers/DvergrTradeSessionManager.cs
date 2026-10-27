@@ -158,42 +158,47 @@ namespace HexDvergrAllies.Core.Managers
             {
                 var traderPrefab = ZNetScene.instance.GetPrefab(traderZdo.GetPrefab());
                 var humanoid = traderPrefab ? traderPrefab.GetComponent<Humanoid>() : null;
-
-                var playerPosition = sender == ZNet.GetUID()
-                    ? Player.m_localPlayer.transform.position
-                    : peer.m_refPos;
-
-                var distance = Vector3.Distance(playerPosition, traderZdo.GetPosition());
-                var maximumDistance = DvergrTraderManager.InteractionDistance + 2f;
+                var characterId = sender == ZNet.GetUID() ? ZNet.instance.LocalPlayerCharacterID : peer.m_characterID;
+                var playerZdo = ZDOMan.instance.GetZDO(characterId);
 
                 if (!humanoid || humanoid.GetFaction() != Character.Faction.Dverger)
                 {
                     reason = "Invalid Dvergr trader.";
                 }
-                else if (distance > maximumDistance)
+                else if (playerZdo == null)
                 {
-                    reason = $"Too far away from Dvergr ({distance:F2}m).";
-                }
-                else if (!_sessions.TryGetValue(traderZdoId, out var session))
-                {
-                    _sessions[traderZdoId] = new TradeSession
-                    {
-                        Peer = sender,
-                        LastActivity = Time.time
-                    };
-
-                    approved = true;
-                    reason = "New session created.";
-                }
-                else if (session.Peer == sender)
-                {
-                    session.LastActivity = Time.time;
-                    approved = true;
-                    reason = "Existing session reused.";
+                    reason = "Player character ZDO not found.";
                 }
                 else
                 {
-                    reason = "This Dvergr is currently trading with another player.";
+                    var distance = Vector3.Distance(playerZdo.GetPosition(), traderZdo.GetPosition());
+                    var maximumDistance = DvergrTraderManager.InteractionDistance + 2f;
+
+                    if (distance > maximumDistance)
+                    {
+                        reason = $"Too far away from Dvergr ({distance:F2}m).";
+                    }
+                    else if (!_sessions.TryGetValue(traderZdoId, out var session))
+                    {
+                        _sessions[traderZdoId] = new TradeSession
+                        {
+                            Peer = sender,
+                            LastActivity = Time.time
+                        };
+
+                        approved = true;
+                        reason = "New session created.";
+                    }
+                    else if (session.Peer == sender)
+                    {
+                        session.LastActivity = Time.time;
+                        approved = true;
+                        reason = "Existing session reused.";
+                    }
+                    else
+                    {
+                        reason = "This Dvergr is currently trading with another player.";
+                    }
                 }
             }
 
