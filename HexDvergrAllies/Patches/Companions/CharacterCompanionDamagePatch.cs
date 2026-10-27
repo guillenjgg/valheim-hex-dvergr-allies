@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿
+using HarmonyLib;
 using HexDvergrAllies.Core.Managers;
 
 namespace HexDvergrAllies.Patches.Companions
@@ -8,11 +9,6 @@ namespace HexDvergrAllies.Patches.Companions
     {
         private static void Prefix(Character __instance, HitData hit)
         {
-            if (!DvergrCompanionManager.IsHired(__instance))
-            {
-                return;
-            }
-
             var netView = __instance.GetComponent<ZNetView>();
 
             if (netView == null || !netView.IsValid() || !netView.IsOwner())
@@ -20,9 +16,21 @@ namespace HexDvergrAllies.Patches.Companions
                 return;
             }
 
-            var multiplier = HexDvergrAlliesConfiguration.CompanionDamageTakenMultiplier.Value;
+            if (DvergrCompanionManager.IsHired(__instance))
+            {
+                var damageTakenMultiplier = HexDvergrAlliesConfiguration.CompanionDamageTakenMultiplier.Value;
+                hit.ApplyModifier(damageTakenMultiplier);
+            }
 
-            hit.ApplyModifier(multiplier);
+            var attacker = hit.GetAttacker();
+
+            if (attacker == null || !DvergrCompanionManager.IsHired(attacker))
+            {
+                return;
+            }
+
+            var damageDealtMultiplier = HexDvergrAlliesConfiguration.CompanionDamageDealtMultiplier.Value;
+            hit.ApplyModifier(damageDealtMultiplier);
         }
     }
 }

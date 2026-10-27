@@ -131,6 +131,8 @@ namespace HexDvergrAllies.Core.Managers
                 return;
             }
 
+            DvergrCompanionBehaviorManager.CaptureState(character, monsterAI);
+
             if (!zdo.GetBool(HomeSavedKey, false))
             {
                 zdo.Set(HomeKey, character.transform.position);

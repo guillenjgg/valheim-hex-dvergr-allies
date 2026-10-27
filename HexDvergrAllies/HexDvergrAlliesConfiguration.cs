@@ -1,4 +1,5 @@
-﻿using BepInEx.Configuration;
+﻿
+using BepInEx.Configuration;
 
 namespace HexDvergrAllies
 {
@@ -13,7 +14,11 @@ namespace HexDvergrAllies
         internal static ConfigEntry<bool> CompanionEnableJumping;
         internal static ConfigEntry<float> CompanionHealthMultiplier;
         internal static ConfigEntry<float> CompanionDamageTakenMultiplier;
+        internal static ConfigEntry<float> CompanionDamageDealtMultiplier;
         internal static ConfigEntry<float> CompanionAttackSpeedMultiplier;
+        internal static ConfigEntry<bool> CompanionEnableAutoHealing;
+        internal static ConfigEntry<float> CompanionAutoHealThreshold;
+        internal static ConfigEntry<float> CompanionAutoHealCooldown;
 
         internal static void Init(ConfigFile config)
         {
@@ -73,6 +78,14 @@ namespace HexDvergrAllies
                     "Incoming damage multiplier. 0.5 means 50% less damage.",
                     new AcceptableValueRange<float>(0f, 1f)));
 
+            CompanionDamageDealtMultiplier = config.Bind(
+                "Dvergr Companion",
+                "DamageDealtMultiplier",
+                1.5f,
+                new ConfigDescription(
+                    "Outgoing damage multiplier for hired Dvergr companions. 1.5 means 50% more damage.",
+                    new AcceptableValueRange<float>(0f, 10f)));
+
             CompanionAttackSpeedMultiplier = config.Bind(
                 "Dvergr Companion",
                 "AttackSpeedMultiplier",
@@ -80,6 +93,28 @@ namespace HexDvergrAllies
                 new ConfigDescription(
                     "Attack cooldown speed multiplier. 1.25 means 25% faster cooldown recovery.",
                     new AcceptableValueRange<float>(1f, 5f)));
+
+            CompanionEnableAutoHealing = config.Bind(
+                "Dvergr Companion",
+                "EnableAutoHealing",
+                true,
+                "Automatically heals hired Dvergr companions when their health reaches the configured threshold.");
+
+            CompanionAutoHealThreshold = config.Bind(
+                "Dvergr Companion",
+                "AutoHealThreshold",
+                0.5f,
+                new ConfigDescription(
+                    "Health percentage that triggers automatic healing. 0.5 means 50% health.",
+                    new AcceptableValueRange<float>(0.01f, 1f)));
+
+            CompanionAutoHealCooldown = config.Bind(
+                "Dvergr Companion",
+                "AutoHealCooldown",
+                60f,
+                new ConfigDescription(
+                    "Minimum number of seconds between automatic heals for each companion.",
+                    new AcceptableValueRange<float>(0f, 3600f)));
         }
     }
 }
