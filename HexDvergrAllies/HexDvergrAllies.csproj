@@ -93,8 +93,10 @@
     <Compile Include="Patches\Combat\AttackAddHitPointPatch.cs" />
     <Compile Include="Patches\Combat\AttackAreaHitPatch.cs" />
     <Compile Include="Patches\Companions\CharacterCompanionDamagePatch.cs" />
+    <Compile Include="Patches\Companions\MonsterAIAttackSpeedPatch.cs" />
     <Compile Include="Patches\Companions\MonsterAICompanionAttackSpeedPatch.cs" />
     <Compile Include="Patches\Companions\MonsterAICompanionBehaviorPatch.cs" />
+    <Compile Include="Patches\Debug\MonsterAICompanionDiagnosticsPatch.cs" />
     <Compile Include="Patches\Trading\BaseAIIdleMovementPatch.cs" />
     <Compile Include="Patches\Combat\BaseAIIsEnemyPatch.cs" />
     <Compile Include="Patches\Dvergr\CharacterAwakePatch.cs" />
