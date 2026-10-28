@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace HexDvergrAllies.Core.Managers
@@ -28,7 +29,7 @@ namespace HexDvergrAllies.Core.Managers
                 return;
             }
 
-            var nview = character.GetComponent<ZNetView>();
+            ZNetView nview = character.GetComponent<ZNetView>();
 
             if (!nview || !nview.IsValid())
             {
@@ -58,7 +59,7 @@ namespace HexDvergrAllies.Core.Managers
                 return false;
             }
 
-            var nview = character.GetComponent<ZNetView>();
+            ZNetView nview = character.GetComponent<ZNetView>();
 
             return nview &&
                    nview.IsValid() &&
@@ -67,7 +68,7 @@ namespace HexDvergrAllies.Core.Managers
 
         internal static void RequestHire(Player player, Character character)
         {
-            var nview = character.GetComponent<ZNetView>();
+            ZNetView nview = character.GetComponent<ZNetView>();
 
             if (!nview || !nview.IsValid())
             {
@@ -84,7 +85,7 @@ namespace HexDvergrAllies.Core.Managers
 
         internal static void RequestUnhire(Player player, Character character)
         {
-            var nview = character.GetComponent<ZNetView>();
+            ZNetView nview = character.GetComponent<ZNetView>();
 
             if (!nview || !nview.IsValid())
             {
@@ -101,14 +102,14 @@ namespace HexDvergrAllies.Core.Managers
 
         private static void Hire(Character character, long sender, ZDOID playerId)
         {
-            var nview = character.GetComponent<ZNetView>();
+            ZNetView nview = character.GetComponent<ZNetView>();
 
             if (!nview || !nview.IsValid() || !nview.IsOwner())
             {
                 return;
             }
 
-            var player = ResolvePlayer(playerId);
+            Player player = ResolvePlayer(playerId);
 
             if (!player || !IsWithinInteractionDistance(player, character))
             {
@@ -117,7 +118,7 @@ namespace HexDvergrAllies.Core.Managers
                 return;
             }
 
-            var zdo = nview.GetZDO();
+            ZDO zdo = nview.GetZDO();
 
             if (zdo.GetBool(HiredKey, false))
             {
@@ -126,7 +127,7 @@ namespace HexDvergrAllies.Core.Managers
                 return;
             }
 
-            var monsterAI = character.GetComponent<MonsterAI>();
+            MonsterAI monsterAI = character.GetComponent<MonsterAI>();
 
             if (!monsterAI)
             {
@@ -158,14 +159,14 @@ namespace HexDvergrAllies.Core.Managers
 
         private static void Unhire(Character character, long sender, ZDOID playerId)
         {
-            var nview = character.GetComponent<ZNetView>();
+            ZNetView nview = character.GetComponent<ZNetView>();
 
             if (!nview || !nview.IsValid() || !nview.IsOwner())
             {
                 return;
             }
 
-            var zdo = nview.GetZDO();
+            ZDO zdo = nview.GetZDO();
 
             if (!zdo.GetBool(HiredKey, false))
             {
@@ -174,7 +175,7 @@ namespace HexDvergrAllies.Core.Managers
                 return;
             }
 
-            var player = ResolvePlayer(playerId);
+            Player player = ResolvePlayer(playerId);
 
             if (!player || !IsWithinInteractionDistance(player, character))
             {
@@ -183,7 +184,7 @@ namespace HexDvergrAllies.Core.Managers
                 return;
             }
 
-            var ownerPlayerId = zdo.GetLong(OwnerKey, 0L);
+            long ownerPlayerId = zdo.GetLong(OwnerKey, 0L);
 
             if (ownerPlayerId != player.GetPlayerID())
             {
@@ -192,7 +193,7 @@ namespace HexDvergrAllies.Core.Managers
                 return;
             }
 
-            var monsterAI = character.GetComponent<MonsterAI>();
+            MonsterAI monsterAI = character.GetComponent<MonsterAI>();
 
             if (!monsterAI)
             {
@@ -200,6 +201,15 @@ namespace HexDvergrAllies.Core.Managers
                     "[Dvergr Companion] Unhire rejected: Reason=MonsterAI missing");
                 return;
             }
+
+            if (!zdo.GetBool(HomeSavedKey, false))
+            {
+                Plugin.Log.LogWarning(
+                    $"[Dvergr Companion] Unhire rejected: Dvergr={character.name}, Reason=Original home missing");
+                return;
+            }
+
+            Vector3 homePosition = zdo.GetVec3(HomeKey, character.transform.position);
 
             monsterAI.SetFollowTarget(null);
             monsterAI.ResetPatrolPoint();
@@ -212,8 +222,31 @@ namespace HexDvergrAllies.Core.Managers
             _lastFollowLogTimes.Remove(zdo.m_uid);
             _followOwnerMissingSince.Remove(zdo.m_uid);
 
+            ReturnHome(character, zdo, homePosition);
+
             Plugin.Log.LogInfo(
-                $"[Dvergr Companion] Unhired successfully: Dvergr={character.name}, Player={player.GetPlayerName()}, HomeSaved={zdo.GetBool(HomeSavedKey, false)}, CurrentPosition={character.transform.position}");
+                $"[Dvergr Companion] Unhired successfully: Dvergr={character.name}, Player={player.GetPlayerName()}, Home={homePosition}");
+        }
+
+        private static void ReturnHome(Character character, ZDO zdo, Vector3 homePosition)
+        {
+            Vector3 previousPosition = character.transform.position;
+            float distance = Vector3.Distance(previousPosition, homePosition);
+
+            Rigidbody rigidbody = character.GetComponent<Rigidbody>();
+
+            if (rigidbody != null)
+            {
+                rigidbody.velocity = Vector3.zero;
+                rigidbody.angularVelocity = Vector3.zero;
+                rigidbody.position = homePosition;
+            }
+
+            character.transform.position = homePosition;
+            zdo.SetPosition(homePosition);
+
+            Plugin.Log.LogInfo(
+                $"[Dvergr Companion] Returned home: Dvergr={character.name}, ZDO={zdo.m_uid}, From={previousPosition}, To={homePosition}, Distance={distance:F2}");
         }
 
         private static Player ResolvePlayer(ZDOID playerId)
@@ -223,14 +256,14 @@ namespace HexDvergrAllies.Core.Managers
                 return null;
             }
 
-            var playerObject = ZNetScene.instance.FindInstance(playerId);
+            GameObject playerObject = ZNetScene.instance.FindInstance(playerId);
 
             return playerObject ? playerObject.GetComponent<Player>() : null;
         }
 
         private static bool IsWithinInteractionDistance(Player player, Character character)
         {
-            var distance = Vector3.Distance(
+            float distance = Vector3.Distance(
                 player.transform.position,
                 character.transform.position);
 
@@ -332,7 +365,9 @@ namespace HexDvergrAllies.Core.Managers
 
         private static bool ShouldLogFollow(ZDOID zdoId)
         {
-            if (_lastFollowLogTimes.TryGetValue(zdoId, out var lastLogTime) &&
+            float lastLogTime;
+
+            if (_lastFollowLogTimes.TryGetValue(zdoId, out lastLogTime) &&
                 Time.time - lastLogTime < FollowLogInterval)
             {
                 return false;
