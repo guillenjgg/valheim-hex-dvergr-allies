@@ -34,8 +34,7 @@ namespace HexDvergrAllies.Patches
 
             __result = Localization.instance.Localize(
                 trader.m_name +
-                "\n[<color=yellow><b>$KEY_Use</b></color>] $raven_interact" +
-                "\n[<color=yellow><b>Shift + E</b></color>] Hire");
+                "\n[<color=yellow><b>$KEY_Use</b></color>] $raven_interact");
 
             return false;
         }
