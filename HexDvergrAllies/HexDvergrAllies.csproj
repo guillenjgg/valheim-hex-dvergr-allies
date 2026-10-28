@@ -88,6 +88,7 @@
     <Compile Include="Core\Managers\DvergrCompanionBehaviorManager.cs" />
     <Compile Include="Core\Managers\DvergrCompanionManager.cs" />
     <Compile Include="Core\Managers\DvergrCompanionPortalRelocationManager.cs" />
+    <Compile Include="Core\Managers\DvergrCompanionShipManager.cs" />
     <Compile Include="Core\Managers\DvergrTraderManager.cs" />
     <Compile Include="Core\Managers\DvergrTradeRpcManager.cs" />
     <Compile Include="Core\Managers\DvergrTradeSessionManager.cs" />
@@ -105,6 +106,8 @@
     <Compile Include="Patches\Companions\MonsterAIAttackSpeedPatch.cs" />
     <Compile Include="Patches\Companions\MonsterAICompanionAttackSpeedPatch.cs" />
     <Compile Include="Patches\Companions\MonsterAICompanionBehaviorPatch.cs" />
+    <Compile Include="Patches\Companions\MonsterAICompanionShipPatch.cs" />
+    <Compile Include="Patches\Companions\ShipCompanionBoardingPatch.cs" />
     <Compile Include="Patches\Debug\MonsterAICompanionDiagnosticsPatch.cs" />
     <Compile Include="Patches\Homestead\TeleportWorldInteractPatch.cs" />
     <Compile Include="Patches\Trading\BaseAIIdleMovementPatch.cs" />

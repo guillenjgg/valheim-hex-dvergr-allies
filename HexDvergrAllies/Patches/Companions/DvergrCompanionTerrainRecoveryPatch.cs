@@ -38,6 +38,12 @@ namespace HexDvergrAllies.Patches.Companions
                 return;
             }
 
+            if (DvergrCompanionShipManager.IsPassenger(character))
+            {
+                States.Remove(__instance);
+                return;
+            }
+
             var nview = character.GetComponent<ZNetView>();
 
             if (nview == null || !nview.IsValid() || !nview.IsOwner())

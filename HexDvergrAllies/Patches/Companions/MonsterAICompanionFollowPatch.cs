@@ -1,5 +1,4 @@
-﻿
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using HarmonyLib;
 using HexDvergrAllies.Core.Managers;
 
@@ -13,18 +12,25 @@ namespace HexDvergrAllies.Patches
 
         private static void Prefix(MonsterAI __instance)
         {
-            if (!_loggedInstances.Contains(__instance))
+            Character character = __instance.GetComponent<Character>();
+
+            if (!character)
             {
-                var character = __instance.GetComponent<Character>();
+                return;
+            }
 
-                if (character &&
-                    character.GetFaction() == Character.Faction.Dverger)
-                {
-                    _loggedInstances.Add(__instance);
+            if (_loggedInstances.Add(__instance) &&
+                character.GetFaction() == Character.Faction.Dverger)
+            {
+                Plugin.Log.LogInfo(
+                    $"[Dvergr Companion] MonsterAI.UpdateAI patch active: " +
+                    $"Dvergr={character.name}, " +
+                    $"IsHired={DvergrCompanionManager.IsHired(character)}");
+            }
 
-                    Plugin.Log.LogInfo(
-                        $"[Dvergr Companion] MonsterAI.UpdateAI patch active: Dvergr={character.name}, IsHired={DvergrCompanionManager.IsHired(character)}");
-                }
+            if (DvergrCompanionShipManager.IsPassenger(character))
+            {
+                return;
             }
 
             DvergrCompanionManager.UpdateFollow(__instance);
