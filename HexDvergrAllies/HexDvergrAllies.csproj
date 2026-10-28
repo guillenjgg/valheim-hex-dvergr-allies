@@ -67,6 +67,10 @@
       <HintPath>..\..\..\valheim_mod_libraries\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.AnimationModule">
+      <HintPath>..\..\..\valheim_mod_libraries\UnityEngine.AnimationModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>..\..\..\valheim_mod_libraries\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
@@ -103,8 +107,8 @@
     <Compile Include="Patches\Companions\DvergrCompanionLedgeFollowPatch.cs" />
     <Compile Include="Patches\Companions\DvergrCompanionPortalTeleportPatch.cs" />
     <Compile Include="Patches\Companions\DvergrCompanionTerrainRecoveryPatch.cs" />
+    <Compile Include="Patches\Companions\HumanoidCompanionAttackAnimationPatch.cs" />
     <Compile Include="Patches\Companions\MonsterAIAttackSpeedPatch.cs" />
-    <Compile Include="Patches\Companions\MonsterAICompanionAttackSpeedPatch.cs" />
     <Compile Include="Patches\Companions\MonsterAICompanionBehaviorPatch.cs" />
     <Compile Include="Patches\Companions\MonsterAICompanionShipPatch.cs" />
     <Compile Include="Patches\Companions\ShipCompanionBoardingPatch.cs" />

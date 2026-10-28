@@ -1,4 +1,4 @@
-﻿
+﻿using HarmonyLib;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -16,14 +16,20 @@ namespace HexDvergrAllies.Core.Managers
             internal float OriginalRunSpeed;
             internal float OriginalMinAttackInterval;
             internal float OriginalMaxHealth;
+            internal float OriginalAnimationSpeed;
 
             internal float AppliedMovementMultiplier = 1f;
             internal float AppliedAttackSpeedMultiplier = 1f;
+            internal float AppliedAnimationMultiplier = 1f;
             internal float NextAutoHealTime;
+            internal bool AnimationSpeedCaptured;
         }
 
         private static readonly Dictionary<Character, CompanionBehaviorState> CompanionStates =
             new Dictionary<Character, CompanionBehaviorState>();
+
+        private static readonly AccessTools.FieldRef<Character, Animator> AnimatorField =
+    AccessTools.FieldRefAccess<Character, Animator>("m_animator");
 
         internal static void CaptureState(Character character, MonsterAI monsterAI)
         {
@@ -100,6 +106,101 @@ namespace HexDvergrAllies.Core.Managers
             }
         }
 
+        internal static void UpdateAttackAnimation(Humanoid humanoid)
+        {
+            if (humanoid == null)
+            {
+                return;
+            }
+
+            var character = (Character)humanoid;
+            CompanionBehaviorState state;
+
+            if (!CompanionStates.TryGetValue(character, out state))
+            {
+                return;
+            }
+
+            var netView = character.GetComponent<ZNetView>();
+
+            if (netView == null || !netView.IsValid() || !netView.IsOwner())
+            {
+                return;
+            }
+
+            var animator = AnimatorField(character);
+
+            if (!DvergrCompanionManager.IsHired(character))
+            {
+                RestoreAttackAnimation(character, state);
+                return;
+            }
+
+            var syncAnimation = character.GetComponent<ZSyncAnimation>();
+
+            if (syncAnimation == null || animator == null)
+            {
+                return;
+            }
+
+            if (!state.AnimationSpeedCaptured)
+            {
+                state.OriginalAnimationSpeed = animator.speed;
+                state.AnimationSpeedCaptured = true;
+            }
+
+            var multiplier = HexDvergrAlliesConfiguration.CompanionAttackSpeedMultiplier.Value;
+
+            if (multiplier <= 0f)
+            {
+                multiplier = 1f;
+            }
+
+            var targetMultiplier = humanoid.InAttack() ? multiplier : 1f;
+
+            if (Mathf.Approximately(state.AppliedAnimationMultiplier, targetMultiplier))
+            {
+                return;
+            }
+
+            syncAnimation.SetSpeed(state.OriginalAnimationSpeed * targetMultiplier);
+
+            state.AppliedAnimationMultiplier = targetMultiplier;
+
+            if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
+            {
+                Plugin.Log.LogInfo(
+                    $"[Dvergr Companion] Animation speed changed: Dvergr={character.name}, InAttack={humanoid.InAttack()}, Multiplier={targetMultiplier:F2}, Speed={animator.speed:F2}");
+            }
+        }
+
+        private static void RestoreAttackAnimation(Character character, CompanionBehaviorState state)
+        {
+            if (!state.AnimationSpeedCaptured ||
+                Mathf.Approximately(state.AppliedAnimationMultiplier, 1f))
+            {
+                return;
+            }
+
+            var netView = character.GetComponent<ZNetView>();
+
+            if (netView == null || !netView.IsValid() || !netView.IsOwner())
+            {
+                return;
+            }
+
+            var syncAnimation = character.GetComponent<ZSyncAnimation>();
+
+            if (syncAnimation == null)
+            {
+                return;
+            }
+
+            syncAnimation.SetSpeed(state.OriginalAnimationSpeed);
+
+            state.AppliedAnimationMultiplier = 1f;
+        }
+
         private static void ApplyMovementSpeed(Character character, CompanionBehaviorState state)
         {
             var multiplier = HexDvergrAlliesConfiguration.CompanionMovementSpeedMultiplier.Value;
@@ -120,7 +221,7 @@ namespace HexDvergrAllies.Core.Managers
         {
             var multiplier = HexDvergrAlliesConfiguration.CompanionAttackSpeedMultiplier.Value;
 
-            if (state.AppliedAttackSpeedMultiplier == multiplier)
+            if (multiplier <= 0f || state.AppliedAttackSpeedMultiplier == multiplier)
             {
                 return;
             }
@@ -223,8 +324,12 @@ namespace HexDvergrAllies.Core.Managers
 
         internal static void ResetBehavior(Character character, MonsterAI monsterAI)
         {
-            if (CompanionStates.TryGetValue(character, out var state))
+            CompanionBehaviorState state;
+
+            if (CompanionStates.TryGetValue(character, out state))
             {
+                RestoreAttackAnimation(character, state);
+
                 character.m_speed = state.OriginalSpeed;
                 character.m_walkSpeed = state.OriginalWalkSpeed;
                 character.m_runSpeed = state.OriginalRunSpeed;
@@ -263,7 +368,13 @@ namespace HexDvergrAllies.Core.Managers
 
         internal static void RemoveCharacter(Character character)
         {
-            CompanionStates.Remove(character);
+            CompanionBehaviorState state;
+
+            if (CompanionStates.TryGetValue(character, out state))
+            {
+                RestoreAttackAnimation(character, state);
+                CompanionStates.Remove(character);
+            }
         }
     }
 }
