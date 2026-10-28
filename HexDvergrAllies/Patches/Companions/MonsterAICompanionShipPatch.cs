@@ -6,23 +6,28 @@ namespace HexDvergrAllies.Patches.Companions
     [HarmonyPatch(typeof(MonsterAI), nameof(MonsterAI.UpdateAI))]
     internal static class MonsterAICompanionShipPatch
     {
-        private static bool Prefix(MonsterAI __instance)
+        private static void Postfix(MonsterAI __instance)
         {
             Character character = __instance.GetComponent<Character>();
 
+            if (!character)
+            {
+                return;
+            }
+
             if (!DvergrCompanionShipManager.IsPassenger(character))
             {
-                return true;
+                return;
             }
 
             ZNetView netView = character.GetComponent<ZNetView>();
 
-            if (!netView || !netView.IsValid())
+            if (!netView || !netView.IsValid() || !netView.IsOwner())
             {
-                return true;
+                return;
             }
 
-            return !netView.IsOwner();
+            __instance.StopMoving();
         }
     }
 }

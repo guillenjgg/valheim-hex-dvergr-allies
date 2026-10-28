@@ -19,8 +19,8 @@ namespace HexDvergrAllies.Patches
                 return;
             }
 
-            if (_loggedInstances.Add(__instance) &&
-                character.GetFaction() == Character.Faction.Dverger)
+            if (character.GetFaction() == Character.Faction.Dverger &&
+                _loggedInstances.Add(__instance))
             {
                 Plugin.Log.LogInfo(
                     $"[Dvergr Companion] MonsterAI.UpdateAI patch active: " +
