@@ -65,6 +65,26 @@ namespace HexDvergrAllies.Core.Managers
                    nview.GetZDO().GetBool(HiredKey, false);
         }
 
+        internal static bool IsHiredByPlayer(Character character, Player player)
+        {
+            if (!character || !player)
+            {
+                return false;
+            }
+
+            ZNetView nview = character.GetComponent<ZNetView>();
+
+            if (!nview || !nview.IsValid())
+            {
+                return false;
+            }
+
+            ZDO zdo = nview.GetZDO();
+
+            return zdo.GetBool("HexDvergr_IsHired", false) &&
+                   zdo.GetLong("HexDvergr_HiredBy", 0L) == player.GetPlayerID();
+        }
+
         internal static void RequestHire(Player player, Character character)
         {
             ZNetView nview = character.GetComponent<ZNetView>();

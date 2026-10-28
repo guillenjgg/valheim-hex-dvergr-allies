@@ -99,6 +99,7 @@
     <Compile Include="Core\Managers\DvergrTradeTerminalCommands.cs" />
     <Compile Include="Core\SE_Effects\SE_DvergrAlly.cs" />
     <Compile Include="Core\Transactions\DvergrTradeTransaction.cs" />
+    <Compile Include="Core\UI\DvergrPactDialogController.cs" />
     <Compile Include="HexDvergrAlliesConfiguration.cs" />
     <Compile Include="Patches\Combat\AttackAddHitPointPatch.cs" />
     <Compile Include="Patches\Combat\AttackAreaHitPatch.cs" />

@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using HexDvergrAllies.Core.Managers;
+using HexDvergrAllies.Core.UI;
 using UnityEngine;
 
 namespace HexDvergrAllies.Patches
@@ -53,14 +54,8 @@ namespace HexDvergrAllies.Patches
 
             bool isHired = DvergrCompanionManager.IsHired(character);
 
-            Plugin.Log.LogInfo(
-                $"[Dvergr Companion] Player.Interact: Dvergr={character.name}, Hold={hold}, Alt={alt}, Shift={shiftPressed}, Distance={distance:F2}, IsHired={isHired}");
-
             if (alt)
             {
-                Plugin.Log.LogInfo(
-                    $"[Dvergr Companion] Alternate interaction ignored: Dvergr={character.name}");
-
                 return false;
             }
 
@@ -68,17 +63,24 @@ namespace HexDvergrAllies.Patches
             {
                 if (isHired)
                 {
-                    Plugin.Log.LogInfo(
-                        $"[Dvergr Companion] Unhire interaction detected: Player={__instance.GetPlayerName()}, Dvergr={character.name}");
+                    if (!DvergrCompanionManager.IsHiredByPlayer(
+                        character,
+                        __instance))
+                    {
+                        Plugin.Log.LogWarning(
+                            "[Dvergr Companion] Break Pact rejected: Player does not own companion.");
 
-                    DvergrCompanionManager.RequestUnhire(
+                        return false;
+                    }
+
+                    DvergrPactDialogController.ShowBreakPactConfirmation(
                         __instance,
                         character);
                 }
                 else
                 {
                     Plugin.Log.LogInfo(
-                        $"[Dvergr Companion] Hire interaction detected: Player={__instance.GetPlayerName()}, Dvergr={character.name}");
+                        $"[Dvergr Companion] Forge Pact interaction: Player={__instance.GetPlayerName()}, Dvergr={character.name}");
 
                     DvergrCompanionManager.RequestHire(
                         __instance,
@@ -90,14 +92,8 @@ namespace HexDvergrAllies.Patches
 
             if (isHired)
             {
-                Plugin.Log.LogInfo(
-                    $"[Dvergr Companion] Trade blocked: Dvergr={character.name}, Reason=Already hired");
-
                 return false;
             }
-
-            Plugin.Log.LogInfo(
-                $"[Dvergr Companion] Opening trader: Dvergr={character.name}");
 
             DvergrTradeSessionManager.RequestOpen(trader);
 

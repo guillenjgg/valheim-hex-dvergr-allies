@@ -9,7 +9,7 @@ namespace HexDvergrAllies
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     public class Plugin : BaseUnityPlugin
     {
-        private const string PluginGuid = "com.hex.dvergr.allies";
+        internal const string PluginGuid = "com.hex.dvergr.allies";
         private const string PluginName = "HexDvergrAllies";
         private const string PluginVersion = "1.0.0";
 
