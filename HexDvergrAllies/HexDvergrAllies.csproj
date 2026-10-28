@@ -36,15 +36,15 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="assembly_guiutils_publicized">
-      <HintPath>..\..\..\publicized_assemblies\v1.0.20\assembly_guiutils_publicized.dll</HintPath>
+      <HintPath>..\..\..\publicized_assemblies\v1.0.21\assembly_guiutils_publicized.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="assembly_utils_publicized">
-      <HintPath>..\..\..\publicized_assemblies\v1.0.20\assembly_utils_publicized.dll</HintPath>
+      <HintPath>..\..\..\publicized_assemblies\v1.0.21\assembly_utils_publicized.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="assembly_valheim_publicized">
-      <HintPath>..\..\..\publicized_assemblies\v1.0.20\assembly_valheim_publicized.dll</HintPath>
+      <HintPath>..\..\..\publicized_assemblies\v1.0.21\assembly_valheim_publicized.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="BepInEx">
@@ -71,6 +71,10 @@
       <HintPath>..\..\..\valheim_mod_libraries\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>..\..\..\valheim_mod_libraries\UnityEngine.PhysicsModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>..\..\..\valheim_mod_libraries\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
@@ -93,6 +97,7 @@
     <Compile Include="HexDvergrAlliesConfiguration.cs" />
     <Compile Include="Patches\Combat\AttackAddHitPointPatch.cs" />
     <Compile Include="Patches\Combat\AttackAreaHitPatch.cs" />
+    <Compile Include="Patches\Companions\CharacterCompanionCollisionPatch.cs" />
     <Compile Include="Patches\Companions\CharacterCompanionDamagePatch.cs" />
     <Compile Include="Patches\Companions\DvergrCompanionLedgeFollowPatch.cs" />
     <Compile Include="Patches\Companions\DvergrCompanionPortalTeleportPatch.cs" />
