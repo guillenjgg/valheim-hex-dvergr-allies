@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿
+using System;
+using HarmonyLib;
+using UnityEngine;
 
 namespace HexDvergrAllies.Core.Managers
 {
@@ -7,7 +10,14 @@ namespace HexDvergrAllies.Core.Managers
         private const string RelocateRpc = "HexDvergrRelocate";
         private const string HiredKey = "HexDvergr_IsHired";
         private const string OwnerKey = "HexDvergr_HiredBy";
+
         private const float MaximumSourceDistance = 30f;
+        private const float MaximumDestinationDistance = 10f;
+        private const float MinimumTravelDistance = 30f;
+
+        private static readonly Func<ZRoutedRpc, long> GetServerPeerID =
+            AccessTools.MethodDelegate<Func<ZRoutedRpc, long>>(
+                AccessTools.Method(typeof(ZRoutedRpc), "GetServerPeerID"));
 
         internal static void Register()
         {
@@ -30,7 +40,7 @@ namespace HexDvergrAllies.Core.Managers
             var destination = player.transform.position + player.transform.right * 2f;
 
             ZRoutedRpc.instance.InvokeRoutedRPC(
-                ZRoutedRpc.instance.GetServerPeerID(),
+                GetServerPeerID(ZRoutedRpc.instance),
                 RelocateRpc,
                 player.GetZDOID(),
                 companionId,
@@ -53,55 +63,64 @@ namespace HexDvergrAllies.Core.Managers
                 return;
             }
 
-            var playerObject = ZNetScene.instance.FindInstance(playerId);
-            var player = playerObject ? playerObject.GetComponent<Player>() : null;
+            var playerZdo = ZDOMan.instance.GetZDO(playerId);
 
-            if (!player)
+            if (playerZdo == null || playerZdo.GetOwner() != sender)
             {
                 Plugin.Log.LogWarning(
-                    $"[Dvergr Portal] Relocation rejected: Player={playerId}, Reason=Player not found");
+                    $"[Dvergr Portal] Relocation rejected: Companion={companionId}, Reason=Invalid player or sender");
                 return;
             }
 
-            var playerView = player.GetComponent<ZNetView>();
+            var companionZdo = ZDOMan.instance.GetZDO(companionId);
 
-            if (!playerView || !playerView.IsValid() ||
-                playerView.GetZDO().GetOwner() != sender)
-            {
-                Plugin.Log.LogWarning(
-                    $"[Dvergr Portal] Relocation rejected: Companion={companionId}, Reason=Invalid sender");
-                return;
-            }
-
-            var zdo = ZDOMan.instance.GetZDO(companionId);
-
-            if (zdo == null)
+            if (companionZdo == null)
             {
                 Plugin.Log.LogWarning(
                     $"[Dvergr Portal] Relocation rejected: Companion={companionId}, Reason=ZDO not found");
                 return;
             }
 
-            if (!zdo.GetBool(HiredKey, false) ||
-                zdo.GetLong(OwnerKey, 0L) != player.GetPlayerID())
+            if (!companionZdo.GetBool(HiredKey, false))
             {
                 Plugin.Log.LogWarning(
-                    $"[Dvergr Portal] Relocation rejected: Companion={companionId}, Reason=Not hired by player");
+                    $"[Dvergr Portal] Relocation rejected: Companion={companionId}, Reason=Not hired");
                 return;
             }
 
-            if (Vector3.Distance(zdo.GetPosition(), sourcePosition) > MaximumSourceDistance)
+            var hiredBy = companionZdo.GetLong(OwnerKey, 0L);
+
+            if (hiredBy == 0L)
             {
                 Plugin.Log.LogWarning(
-                    $"[Dvergr Portal] Relocation rejected: Companion={companionId}, Reason=Source position mismatch");
+                    $"[Dvergr Portal] Relocation rejected: Companion={companionId}, Reason=Missing hiring player");
                 return;
             }
 
-            if (Vector3.Distance(player.transform.position, destination) > 10f)
+            var sourceDistance = Vector3.Distance(
+                companionZdo.GetPosition(), sourcePosition);
+
+            if (sourceDistance > MaximumSourceDistance)
             {
                 Plugin.Log.LogWarning(
-                    $"[Dvergr Portal] Relocation rejected: Companion={companionId}, Reason=Destination mismatch");
+                    $"[Dvergr Portal] Relocation rejected: Companion={companionId}, Reason=Source position mismatch, Distance={sourceDistance:F2}");
                 return;
+            }
+
+            if (Vector3.Distance(sourcePosition, destination) < MinimumTravelDistance)
+            {
+                Plugin.Log.LogWarning(
+                    $"[Dvergr Portal] Relocation rejected: Companion={companionId}, Reason=Travel distance too short");
+                return;
+            }
+
+            var playerPosition = playerZdo.GetPosition();
+            var playerDistance = Vector3.Distance(playerPosition, destination);
+
+            if (playerDistance > MaximumDestinationDistance)
+            {
+                Plugin.Log.LogWarning(
+                    $"[Dvergr Portal] Player position not synchronized: Companion={companionId}, ServerPosition={playerPosition}, RequestedDestination={destination}, Distance={playerDistance:F2}");
             }
 
             var loadedObject = ZNetScene.instance.FindInstance(companionId);
@@ -113,14 +132,14 @@ namespace HexDvergrAllies.Core.Managers
                 return;
             }
 
-            var previousPosition = zdo.GetPosition();
+            var previousPosition = companionZdo.GetPosition();
 
-            zdo.SetOwner(ZDOMan.GetSessionID());
-            zdo.SetPosition(destination);
+            companionZdo.SetOwner(ZDOMan.GetSessionID());
+            companionZdo.SetPosition(destination);
             ZDOMan.instance.ForceSendZDO(companionId);
 
             Plugin.Log.LogInfo(
-                $"[Dvergr Portal] Relocated: Companion={companionId}, From={previousPosition}, To={destination}");
+                $"[Dvergr Portal] Relocated: Companion={companionId}, From={previousPosition}, To={destination}, HiredBy={hiredBy}");
         }
     }
 }

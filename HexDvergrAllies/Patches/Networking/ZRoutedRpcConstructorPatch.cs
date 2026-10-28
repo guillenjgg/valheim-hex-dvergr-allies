@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿
+using HarmonyLib;
 using HexDvergrAllies.Core.Managers;
 
 namespace HexDvergrAllies.Patches
@@ -10,6 +11,7 @@ namespace HexDvergrAllies.Patches
         {
             DvergrTradeRpcManager.Register();
             DvergrTradeSessionManager.Register();
+            DvergrCompanionPortalRelocationManager.Register();
         }
     }
 }

@@ -13,10 +13,16 @@ namespace HexDvergrAllies.Patches.Companions
         private const float ArrivalOffset = 2f;
         private const float MinimumTravelDistance = 30f;
 
+        private sealed class CompanionState
+        {
+            internal ZDOID ZdoId;
+            internal Vector3 SourcePosition;
+        }
+
         private sealed class TeleportState
         {
             internal Vector3 DeparturePosition;
-            internal readonly List<ZDOID> Companions = new List<ZDOID>();
+            internal readonly List<CompanionState> Companions = new List<CompanionState>();
         }
 
         private static readonly Dictionary<Player, TeleportState> States =
@@ -57,17 +63,21 @@ namespace HexDvergrAllies.Patches.Companions
                     continue;
                 }
 
-                if (Vector3.Distance(
-                    character.transform.position,
-                    state.DeparturePosition) > CompanionRange)
+                var sourcePosition = character.transform.position;
+
+                if (Vector3.Distance(sourcePosition, state.DeparturePosition) > CompanionRange)
                 {
                     continue;
                 }
 
-                state.Companions.Add(zdo.m_uid);
+                state.Companions.Add(new CompanionState
+                {
+                    ZdoId = zdo.m_uid,
+                    SourcePosition = sourcePosition
+                });
 
                 Plugin.Log.LogInfo(
-                    $"[Dvergr Portal] Captured: Dvergr={character.name}, ZDO={zdo.m_uid}, NetworkOwner={nview.IsOwner()}");
+                    $"[Dvergr Portal] Captured: Dvergr={character.name}, ZDO={zdo.m_uid}, Source={sourcePosition}, NetworkOwner={nview.IsOwner()}");
             }
 
             States[__instance] = state;
@@ -101,22 +111,27 @@ namespace HexDvergrAllies.Patches.Companions
 
             var destination = __instance.transform.position;
 
-            if (Vector3.Distance(state.DeparturePosition, destination) <
-                MinimumTravelDistance)
+            if (Vector3.Distance(state.DeparturePosition, destination) < MinimumTravelDistance)
             {
                 Plugin.Log.LogInfo(
                     "[Dvergr Portal] Teleport completed without significant movement. Skipping companions.");
                 return;
             }
 
-            foreach (var companionId in state.Companions)
+            foreach (var companion in state.Companions)
             {
-                var companionObject = ZNetScene.instance.FindInstance(companionId);
+                var companionObject = ZNetScene.instance.FindInstance(companion.ZdoId);
 
                 if (!companionObject)
                 {
-                    Plugin.Log.LogWarning(
-                        $"[Dvergr Portal] Companion unloaded: ZDO={companionId}. Server relocation required.");
+                    Plugin.Log.LogInfo(
+                        $"[Dvergr Portal] Companion unloaded. Requesting server relocation: ZDO={companion.ZdoId}");
+
+                    DvergrCompanionPortalRelocationManager.RequestRelocation(
+                        __instance,
+                        companion.ZdoId,
+                        companion.SourcePosition);
+
                     continue;
                 }
 
@@ -126,27 +141,31 @@ namespace HexDvergrAllies.Patches.Companions
                 if (!nview || !nview.IsValid() || !nview.IsOwner() ||
                     !character || !DvergrCompanionManager.IsHired(character))
                 {
-                    Plugin.Log.LogWarning(
-                        $"[Dvergr Portal] Companion not locally owned: ZDO={companionId}. Server relocation required.");
+                    Plugin.Log.LogInfo(
+                        $"[Dvergr Portal] Companion not locally owned. Requesting server relocation: ZDO={companion.ZdoId}");
+
+                    DvergrCompanionPortalRelocationManager.RequestRelocation(
+                        __instance,
+                        companion.ZdoId,
+                        companion.SourcePosition);
+
                     continue;
                 }
 
                 var zdo = nview.GetZDO();
 
-                if (zdo.GetLong("HexDvergr_HiredBy", 0L) !=
-                    __instance.GetPlayerID())
+                if (zdo.GetLong("HexDvergr_HiredBy", 0L) != __instance.GetPlayerID())
                 {
                     continue;
                 }
 
-                var arrivalPosition = destination +
-                    __instance.transform.right * ArrivalOffset;
+                var arrivalPosition = destination + __instance.transform.right * ArrivalOffset;
 
                 character.transform.position = arrivalPosition;
                 zdo.SetPosition(arrivalPosition);
 
                 Plugin.Log.LogInfo(
-                    $"[Dvergr Portal] Companion relocated: ZDO={companionId}, Destination={arrivalPosition}");
+                    $"[Dvergr Portal] Companion relocated locally: ZDO={companion.ZdoId}, Destination={arrivalPosition}");
             }
         }
     }
