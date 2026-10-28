@@ -1,5 +1,4 @@
-﻿
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace HexDvergrAllies.Core.Managers
@@ -237,7 +236,7 @@ namespace HexDvergrAllies.Core.Managers
 
             if (rigidbody != null)
             {
-                rigidbody.velocity = Vector3.zero;
+                rigidbody.linearVelocity = Vector3.zero;
                 rigidbody.angularVelocity = Vector3.zero;
                 rigidbody.position = homePosition;
             }
