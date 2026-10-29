@@ -1,5 +1,4 @@
-﻿
-using HarmonyLib;
+﻿using HarmonyLib;
 using HexDvergrAllies.Core.Managers;
 using HexDvergrAllies.Core.UI;
 using UnityEngine;
@@ -18,29 +17,14 @@ namespace HexDvergrAllies.Patches
                 return;
             }
 
-            if (DvergrCompanionManager.IsHired(character))
+            if (!DvergrCompanionManager.IsHiredByPlayer(
+                character,
+                player))
             {
-                if (!DvergrCompanionManager.IsHiredByPlayer(
-                    character,
-                    player))
-                {
-                    Plugin.Log.LogWarning(
-                        "[Dvergr Companion] Break Pact rejected: Player does not own companion.");
-
-                    return;
-                }
-
-                DvergrPactDialogController.ShowBreakPactConfirmation(
-                    player,
-                    character);
-
                 return;
             }
 
-            Plugin.Log.LogInfo(
-                $"[Dvergr Companion] Forge Pact interaction: Player={player.GetPlayerName()}, Dvergr={character.name}");
-
-            DvergrCompanionManager.RequestHire(
+            DvergrPactDialogController.ShowBreakPactConfirmation(
                 player,
                 character);
         }
@@ -67,9 +51,6 @@ namespace HexDvergrAllies.Patches
 
             if (!character)
             {
-                Plugin.Log.LogWarning(
-                    $"[Dvergr Companion] Interaction rejected: Trader={trader.name}, Reason=Character missing");
-
                 return false;
             }
 
@@ -79,14 +60,9 @@ namespace HexDvergrAllies.Patches
 
             if (distance > DvergrTraderManager.InteractionDistance)
             {
-                Plugin.Log.LogWarning(
-                    $"[Dvergr Companion] Interaction rejected: Dvergr={character.name}, Distance={distance:F2}, Reason=Out of range");
-
                 return false;
             }
 
-            // The configured companion shortcut is handled by Player.Update.
-            // Do not allow the same keypress to open the trader.
             if (HexDvergrAlliesConfiguration
                 .CompanionInteractionShortcut.Value.IsPressed())
             {

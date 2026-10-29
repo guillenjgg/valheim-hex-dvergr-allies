@@ -1,5 +1,4 @@
-﻿
-using HarmonyLib;
+﻿using HarmonyLib;
 using HexDvergrAllies.Core.Managers;
 using UnityEngine;
 
@@ -32,15 +31,6 @@ namespace HexDvergrAllies.Patches
                 return false;
             }
 
-            string shortcutText =
-                HexDvergrAlliesConfiguration
-                    .CompanionInteractionShortcut.Value.ToString();
-
-            string companionPrompt =
-                "[<color=yellow><b>" +
-                shortcutText +
-                "</b></color>] ";
-
             if (DvergrCompanionManager.IsHired(__instance))
             {
                 __result = Localization.instance.Localize(
@@ -50,8 +40,14 @@ namespace HexDvergrAllies.Patches
                     __instance,
                     player))
                 {
+                    string shortcutText =
+                        HexDvergrAlliesConfiguration
+                            .CompanionInteractionShortcut.Value.ToString();
+
                     __result +=
-                        "\n" + companionPrompt + "Break Pact";
+                        "\n[<color=yellow><b>" +
+                        shortcutText +
+                        "</b></color>] Break Pact";
                 }
 
                 return false;
@@ -60,12 +56,6 @@ namespace HexDvergrAllies.Patches
             __result = Localization.instance.Localize(
                 trader.m_name +
                 "\n[<color=yellow><b>$KEY_Use</b></color>] $raven_interact");
-
-            if (!DvergrCompanionManager.HasHiredCompanion(player))
-            {
-                __result +=
-                    "\n" + companionPrompt + "Forge Pact";
-            }
 
             return false;
         }

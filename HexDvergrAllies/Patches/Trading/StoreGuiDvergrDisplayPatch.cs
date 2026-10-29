@@ -1,5 +1,4 @@
-﻿
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using HarmonyLib;
 using HexDvergrAllies.Core.Managers;
 using TMPro;
@@ -11,8 +10,11 @@ namespace HexDvergrAllies.Patches
     [HarmonyPatch]
     internal static class StoreGuiDvergrDisplayPatch
     {
-        private static readonly AccessTools.FieldRef<StoreGui, Trader> TraderField = AccessTools.FieldRefAccess<StoreGui, Trader>("m_trader");
-        private static readonly AccessTools.FieldRef<StoreGui, List<GameObject>> ItemListField = AccessTools.FieldRefAccess<StoreGui, List<GameObject>>("m_itemList");
+        private static readonly AccessTools.FieldRef<StoreGui, Trader> TraderField =
+            AccessTools.FieldRefAccess<StoreGui, Trader>("m_trader");
+
+        private static readonly AccessTools.FieldRef<StoreGui, List<GameObject>> ItemListField =
+            AccessTools.FieldRefAccess<StoreGui, List<GameObject>>("m_itemList");
 
         private static GameObject _paymentPanel;
         private static TMP_Text _paymentText;
@@ -23,7 +25,7 @@ namespace HexDvergrAllies.Patches
         [HarmonyPostfix]
         private static void FillListPostfix(StoreGui __instance)
         {
-            var trader = TraderField(__instance);
+            Trader trader = TraderField(__instance);
 
             if (!trader || !DvergrTraderManager.IsDvergrTrader(trader))
             {
@@ -31,8 +33,11 @@ namespace HexDvergrAllies.Patches
             }
 
             CreatePaymentPanel(__instance);
-            UpdateItemPrices(trader, ItemListField(__instance));
-            UpdateAffordability(trader, ItemListField(__instance));
+
+            List<GameObject> itemList = ItemListField(__instance);
+
+            UpdateItemPrices(trader, itemList);
+            UpdateAffordability(trader, itemList);
         }
 
         [HarmonyPatch(typeof(StoreGui), "Update")]
@@ -44,8 +49,8 @@ namespace HexDvergrAllies.Patches
                 return;
             }
 
-            var trader = TraderField(__instance);
-            var isDvergrTrader = trader && DvergrTraderManager.IsDvergrTrader(trader);
+            Trader trader = TraderField(__instance);
+            bool isDvergrTrader = trader && DvergrTraderManager.IsDvergrTrader(trader);
 
             __instance.m_coinText.transform.parent.gameObject.SetActive(!isDvergrTrader);
 
@@ -64,13 +69,15 @@ namespace HexDvergrAllies.Patches
                 CreatePaymentPanel(__instance);
             }
 
+            List<GameObject> itemList = ItemListField(__instance);
+
             if (_lastSapCost != DvergrTradeRpcManager.CurrentSapCost ||
                 _lastHasPrice != DvergrTradeRpcManager.HasCurrentPrice)
             {
-                UpdateItemPrices(trader, ItemListField(__instance));
+                UpdateItemPrices(trader, itemList);
             }
 
-            UpdateAffordability(trader, ItemListField(__instance));
+            UpdateAffordability(trader, itemList);
         }
 
         private static void CreatePaymentPanel(StoreGui storeGui)
@@ -80,13 +87,18 @@ namespace HexDvergrAllies.Patches
                 return;
             }
 
-            var buyButton = storeGui.m_buyButton.GetComponent<RectTransform>();
-            var sourceText = storeGui.m_buyButton.GetComponentInChildren<TMP_Text>();
+            RectTransform buyButton = storeGui.m_buyButton.GetComponent<RectTransform>();
+            TMP_Text sourceText = storeGui.m_buyButton.GetComponentInChildren<TMP_Text>();
 
-            _paymentPanel = new GameObject("HexDvergrPaymentPanel", typeof(RectTransform), typeof(Image));
+            _paymentPanel = new GameObject(
+                "HexDvergrPaymentPanel",
+                typeof(RectTransform),
+                typeof(Image));
+
             _paymentPanel.transform.SetParent(buyButton.parent, false);
 
-            var panelRect = _paymentPanel.GetComponent<RectTransform>();
+            RectTransform panelRect = _paymentPanel.GetComponent<RectTransform>();
+
             panelRect.anchorMin = new Vector2(0.5f, 0.5f);
             panelRect.anchorMax = new Vector2(0.5f, 0.5f);
             panelRect.pivot = new Vector2(0.5f, 0f);
@@ -94,16 +106,19 @@ namespace HexDvergrAllies.Patches
             panelRect.position = buyButton.position;
             panelRect.anchoredPosition += new Vector2(0f, 48f);
 
-            var background = _paymentPanel.GetComponent<Image>();
+            Image background = _paymentPanel.GetComponent<Image>();
             background.color = new Color(0.12f, 0.10f, 0.08f, 0.92f);
             background.raycastTarget = false;
 
-            var outline = _paymentPanel.AddComponent<Outline>();
+            Outline outline = _paymentPanel.AddComponent<Outline>();
             outline.effectColor = new Color(0.55f, 0.42f, 0.25f, 1f);
             outline.effectDistance = new Vector2(1f, -1f);
             outline.useGraphicAlpha = false;
 
-            var paymentObject = Object.Instantiate(sourceText.gameObject, _paymentPanel.transform);
+            GameObject paymentObject = Object.Instantiate(
+                sourceText.gameObject,
+                _paymentPanel.transform);
+
             paymentObject.name = "PaymentText";
 
             _paymentText = paymentObject.GetComponent<TMP_Text>();
@@ -112,7 +127,8 @@ namespace HexDvergrAllies.Patches
             _paymentText.fontSize = 15f;
             _paymentText.raycastTarget = false;
 
-            var textRect = paymentObject.GetComponent<RectTransform>();
+            RectTransform textRect = paymentObject.GetComponent<RectTransform>();
+
             textRect.anchorMin = Vector2.zero;
             textRect.anchorMax = Vector2.one;
             textRect.offsetMin = new Vector2(10f, 8f);
@@ -126,70 +142,150 @@ namespace HexDvergrAllies.Patches
             _lastHasPrice = false;
         }
 
-        private static void UpdateItemPrices(Trader trader, List<GameObject> itemList)
+        private static void UpdateItemPrices(
+            Trader trader,
+            List<GameObject> itemList)
         {
             _lastSapCost = DvergrTradeRpcManager.CurrentSapCost;
             _lastHasPrice = DvergrTradeRpcManager.HasCurrentPrice;
 
-            var tradeItems = trader.GetAvailableItems();
+            List<Trader.TradeItem> tradeItems = trader.GetAvailableItems();
 
-            for (var i = 0; i < tradeItems.Count && i < itemList.Count; i++)
+            for (int i = 0; i < tradeItems.Count && i < itemList.Count; i++)
             {
-                var tradeItem = tradeItems[i];
+                Trader.TradeItem tradeItem = tradeItems[i];
+                Transform item = itemList[i].transform;
+
+                if (DvergrTraderManager.IsForgePact(tradeItem))
+                {
+                    UpdateForgePactEntry(item);
+                    continue;
+                }
 
                 if (tradeItem.m_prefab.gameObject.name == "Softtissue")
                 {
                     continue;
                 }
 
-                var item = itemList[i].transform;
-                var coinBackground = item.Find("coin_bkg");
-                var priceTransform = Utils.FindChild(item, "price", Utils.IterativeSearchType.DepthFirst);
-                var priceText = priceTransform.GetComponent<TMP_Text>();
-
-                coinBackground.gameObject.SetActive(true);
-                coinBackground.GetComponent<Image>().enabled = false;
-                coinBackground.Find("coin icon").gameObject.SetActive(false);
+                TMP_Text priceText = ConfigureCustomPrice(item);
 
                 priceText.text = !_lastHasPrice
                     ? "Loading..."
                     : _lastSapCost > 0
                         ? $"1 Trophy + {_lastSapCost} Sap"
                         : "1 Trophy";
-
-                priceText.color = Color.white;
-                priceText.enableAutoSizing = false;
-                priceText.fontSizeMin = 15f;
-
-                var priceRect = priceText.GetComponent<RectTransform>();
-                priceRect.anchorMin = Vector2.zero;
-                priceRect.anchorMax = Vector2.one;
-                priceRect.offsetMin = Vector2.zero;
-                priceRect.offsetMax = Vector2.zero;
             }
         }
 
-        private static void UpdateAffordability(Trader trader, List<GameObject> itemList)
+        private static void UpdateForgePactEntry(Transform item)
         {
-            var tradeItems = trader.GetAvailableItems();
-            var canAffordExtractor = StoreGuiCanAffordPatch.CanAffordExtractor();
+            TMP_Text[] textComponents = item.GetComponentsInChildren<TMP_Text>(true);
 
-            for (var i = 0; i < tradeItems.Count && i < itemList.Count; i++)
+            foreach (TMP_Text textComponent in textComponents)
             {
-                if (tradeItems[i].m_prefab.gameObject.name == "Softtissue")
+                if (textComponent.name == "price")
                 {
                     continue;
                 }
 
-                var item = itemList[i];
-                var canvasGroup = item.GetComponent<CanvasGroup>();
+                string localizedName = Localization.instance.Localize(
+                    "$item_mead_tasty");
+
+                if (textComponent.text == localizedName ||
+                    textComponent.text == "Tasty Mead")
+                {
+                    textComponent.text = "Forge Pact";
+                    break;
+                }
+            }
+
+            TMP_Text priceText = ConfigureCustomPrice(item);
+            priceText.text = "2 Tasty Mead";
+        }
+
+        private static TMP_Text ConfigureCustomPrice(Transform item)
+        {
+            Transform coinBackground = item.Find("coin_bkg");
+
+            if (coinBackground)
+            {
+                coinBackground.gameObject.SetActive(true);
+
+                Image backgroundImage = coinBackground.GetComponent<Image>();
+
+                if (backgroundImage)
+                {
+                    backgroundImage.enabled = false;
+                }
+
+                Transform coinIcon = coinBackground.Find("coin icon");
+
+                if (coinIcon)
+                {
+                    coinIcon.gameObject.SetActive(false);
+                }
+            }
+
+            Transform priceTransform = Utils.FindChild(
+                item,
+                "price",
+                Utils.IterativeSearchType.DepthFirst);
+
+            TMP_Text priceText = priceTransform.GetComponent<TMP_Text>();
+
+            priceText.color = Color.white;
+            priceText.enableAutoSizing = false;
+            priceText.fontSizeMin = 15f;
+
+            RectTransform priceRect = priceText.GetComponent<RectTransform>();
+
+            priceRect.anchorMin = Vector2.zero;
+            priceRect.anchorMax = Vector2.one;
+            priceRect.offsetMin = Vector2.zero;
+            priceRect.offsetMax = Vector2.zero;
+
+            return priceText;
+        }
+
+        private static void UpdateAffordability(
+            Trader trader,
+            List<GameObject> itemList)
+        {
+            List<Trader.TradeItem> tradeItems = trader.GetAvailableItems();
+
+            bool canAffordExtractor =
+                StoreGuiCanAffordPatch.CanAffordExtractor();
+
+            Character character = trader.GetComponent<Character>();
+
+            bool canAffordForgePact =
+                DvergrTraderManager.CanAffordForgePact(
+                    Player.m_localPlayer,
+                    character);
+
+            for (int i = 0; i < tradeItems.Count && i < itemList.Count; i++)
+            {
+                Trader.TradeItem tradeItem = tradeItems[i];
+
+                if (tradeItem.m_prefab.gameObject.name == "Softtissue")
+                {
+                    continue;
+                }
+
+                bool canAfford = DvergrTraderManager.IsForgePact(tradeItem)
+                    ? canAffordForgePact
+                    : canAffordExtractor;
+
+                GameObject item = itemList[i];
+
+                CanvasGroup canvasGroup = item.GetComponent<CanvasGroup>();
 
                 if (!canvasGroup)
                 {
                     canvasGroup = item.AddComponent<CanvasGroup>();
                 }
 
-                canvasGroup.alpha = canAffordExtractor ? 1f : 0.5f;
+                canvasGroup.alpha = canAfford ? 1f : 0.5f;
             }
         }
     }
