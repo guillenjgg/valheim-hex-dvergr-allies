@@ -29,6 +29,7 @@ namespace HexDvergrAllies.Patches
             }
 
             DvergrCompanionManager.UpdateFollow(__instance);
+            DvergrCompanionBehaviorManager.UpdateCombatLeash(__instance);
         }
     }
 }

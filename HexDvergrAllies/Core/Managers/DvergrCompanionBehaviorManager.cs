@@ -8,6 +8,7 @@ namespace HexDvergrAllies.Core.Managers
     {
         private const string OriginalMaxHealthKey = "HexDvergr_OriginalMaxHealth";
         private const string OriginalMaxHealthSavedKey = "HexDvergr_OriginalMaxHealthSaved";
+        private const float CompanionCombatLeashDistance = 15f;
 
         private class CompanionBehaviorState
         {
@@ -26,8 +27,9 @@ namespace HexDvergrAllies.Core.Managers
         }
 
         private static readonly Dictionary<Character, CompanionBehaviorState> CompanionStates = new Dictionary<Character, CompanionBehaviorState>();
-
         private static readonly AccessTools.FieldRef<Character, Animator> AnimatorField = AccessTools.FieldRefAccess<Character, Animator>("m_animator");
+        private static readonly AccessTools.FieldRef<MonsterAI, Character> CombatTargetField = AccessTools.FieldRefAccess<MonsterAI, Character>("m_targetCreature");
+        private static readonly System.Action<BaseAI, bool> SetAlertedMethod = AccessTools.MethodDelegate<System.Action<BaseAI, bool>>(AccessTools.Method(typeof(BaseAI), "SetAlerted", new[] { typeof(bool) }));
 
         internal static void CaptureState(Character character, MonsterAI monsterAI)
         {
@@ -61,6 +63,61 @@ namespace HexDvergrAllies.Core.Managers
             }
 
             Plugin.Log.LogInfo($"[Dvergr Companion] Original stats cached: Dvergr={character.name}, Speed={state.OriginalSpeed}, WalkSpeed={state.OriginalWalkSpeed}, RunSpeed={state.OriginalRunSpeed}, AttackInterval={state.OriginalMinAttackInterval}, MaxHealth={state.OriginalMaxHealth}");
+        }
+
+        internal static void UpdateCombatLeash(MonsterAI monsterAI)
+        {
+            if (monsterAI == null)
+            {
+                return;
+            }
+
+            Character character = monsterAI.GetComponent<Character>();
+
+            if (character == null || !DvergrCompanionManager.IsHired(character))
+            {
+                return;
+            }
+
+            ZNetView netView = character.GetComponent<ZNetView>();
+
+            if (netView == null || !netView.IsValid() || !netView.IsOwner())
+            {
+                return;
+            }
+
+            GameObject followTarget = monsterAI.GetFollowTarget();
+
+            if (followTarget == null)
+            {
+                return;
+            }
+
+            Character combatTarget = CombatTargetField(monsterAI);
+
+            if (combatTarget == null)
+            {
+                return;
+            }
+
+            float companionDistance = Vector3.Distance(
+                followTarget.transform.position,
+                character.transform.position);
+
+            if (companionDistance <= CompanionCombatLeashDistance)
+            {
+                return;
+            }
+
+            if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
+            {
+                Plugin.Log.LogInfo(
+                    $"[Dvergr Companion] Combat leash exceeded: " +
+                    $"Dvergr={character.name}, " +
+                    $"Target={combatTarget.name}, " +
+                    $"CompanionDistanceFromOwner={companionDistance:F1}, " +
+                    $"LeashDistance={CompanionCombatLeashDistance:F1}");
+            }
         }
 
         internal static void UpdateBehavior(MonsterAI monsterAI)
@@ -167,6 +224,86 @@ namespace HexDvergrAllies.Core.Managers
             if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
             {
                 Plugin.Log.LogInfo($"[Dvergr Companion] Animation speed changed: Dvergr={character.name}, InAttack={humanoid.InAttack()}, Multiplier={targetMultiplier:F2}, Speed={animator.speed:F2}");
+            }
+        }
+
+        internal static bool ShouldSuppressAutomaticTargeting(BaseAI baseAI)
+        {
+            if (baseAI == null)
+            {
+                return false;
+            }
+
+            MonsterAI monsterAI = baseAI as MonsterAI;
+
+            if (monsterAI == null)
+            {
+                return false;
+            }
+
+            Character character = monsterAI.GetComponent<Character>();
+
+            if (!character || !DvergrCompanionManager.IsHired(character))
+            {
+                return false;
+            }
+
+            ZNetView netView = character.GetComponent<ZNetView>();
+
+            return netView != null && netView.IsValid() && netView.IsOwner();
+        }
+
+        internal static void ResetBehavior(Character character, MonsterAI monsterAI)
+        {
+            CompanionBehaviorState state;
+
+            if (CompanionStates.TryGetValue(character, out state))
+            {
+                RestoreAttackAnimation(character, state);
+
+                character.m_speed = state.OriginalSpeed;
+                character.m_walkSpeed = state.OriginalWalkSpeed;
+                character.m_runSpeed = state.OriginalRunSpeed;
+
+                if (monsterAI != null)
+                {
+                    monsterAI.m_minAttackInterval = state.OriginalMinAttackInterval;
+                }
+
+                CompanionStates.Remove(character);
+            }
+
+            var netView = character.GetComponent<ZNetView>();
+
+            if (netView == null || !netView.IsValid() || !netView.IsOwner())
+            {
+                return;
+            }
+
+            var zdo = netView.GetZDO();
+
+            if (!zdo.GetBool(OriginalMaxHealthSavedKey, false))
+            {
+                return;
+            }
+
+            var originalMaxHealth = zdo.GetFloat(OriginalMaxHealthKey, character.GetMaxHealth());
+
+            SetMaximumHealthPreservingPercentage(character, originalMaxHealth);
+
+            zdo.Set(OriginalMaxHealthSavedKey, false);
+
+            Plugin.Log.LogInfo($"[Dvergr Companion] Original stats restored: Dvergr={character.name}, MaxHealth={originalMaxHealth}");
+        }
+
+        internal static void RemoveCharacter(Character character)
+        {
+            CompanionBehaviorState state;
+
+            if (CompanionStates.TryGetValue(character, out state))
+            {
+                RestoreAttackAnimation(character, state);
+                CompanionStates.Remove(character);
             }
         }
 
@@ -314,60 +451,6 @@ namespace HexDvergrAllies.Core.Managers
 
             character.SetMaxHealth(targetMaxHealth);
             character.SetHealth(Mathf.Clamp(targetMaxHealth * healthPercentage, 0f, targetMaxHealth));
-        }
-
-        internal static void ResetBehavior(Character character, MonsterAI monsterAI)
-        {
-            CompanionBehaviorState state;
-
-            if (CompanionStates.TryGetValue(character, out state))
-            {
-                RestoreAttackAnimation(character, state);
-
-                character.m_speed = state.OriginalSpeed;
-                character.m_walkSpeed = state.OriginalWalkSpeed;
-                character.m_runSpeed = state.OriginalRunSpeed;
-
-                if (monsterAI != null)
-                {
-                    monsterAI.m_minAttackInterval = state.OriginalMinAttackInterval;
-                }
-
-                CompanionStates.Remove(character);
-            }
-
-            var netView = character.GetComponent<ZNetView>();
-
-            if (netView == null || !netView.IsValid() || !netView.IsOwner())
-            {
-                return;
-            }
-
-            var zdo = netView.GetZDO();
-
-            if (!zdo.GetBool(OriginalMaxHealthSavedKey, false))
-            {
-                return;
-            }
-
-            var originalMaxHealth = zdo.GetFloat(OriginalMaxHealthKey, character.GetMaxHealth());
-
-            SetMaximumHealthPreservingPercentage(character, originalMaxHealth);
-
-            zdo.Set(OriginalMaxHealthSavedKey, false);
-
-            Plugin.Log.LogInfo($"[Dvergr Companion] Original stats restored: Dvergr={character.name}, MaxHealth={originalMaxHealth}");
-        }
-
-        internal static void RemoveCharacter(Character character)
-        {
-            CompanionBehaviorState state;
-
-            if (CompanionStates.TryGetValue(character, out state))
-            {
-                RestoreAttackAnimation(character, state);
-                CompanionStates.Remove(character);
-            }
         }
     }
 }

@@ -104,8 +104,12 @@
     <Compile Include="HexDvergrAlliesConfiguration.cs" />
     <Compile Include="Patches\Combat\AttackAddHitPointPatch.cs" />
     <Compile Include="Patches\Combat\AttackAreaHitPatch.cs" />
+    <Compile Include="Patches\Companions\BaseAICompanionBossTargetPatch.cs" />
+    <Compile Include="Patches\Companions\BaseAICompanionCombatLeashPatch.cs" />
+    <Compile Include="Patches\Companions\BaseAICompanionFindEnemyPatch.cs" />
     <Compile Include="Patches\Companions\CharacterCompanionCollisionPatch.cs" />
     <Compile Include="Patches\Companions\CharacterCompanionDamagePatch.cs" />
+    <Compile Include="Patches\Companions\CharacterCompanionOwnerDefensePatch.cs" />
     <Compile Include="Patches\Companions\DvergrCompanionLedgeFollowPatch.cs" />
     <Compile Include="Patches\Companions\DvergrCompanionPortalTeleportPatch.cs" />
     <Compile Include="Patches\Companions\DvergrCompanionTerrainRecoveryPatch.cs" />
