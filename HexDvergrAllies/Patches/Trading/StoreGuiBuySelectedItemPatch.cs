@@ -12,13 +12,9 @@ namespace HexDvergrAllies.Patches
 
         private static bool _hirePending;
 
-        private static bool Prefix(
-            StoreGui __instance,
-            Trader ___m_trader,
-            Trader.TradeItem ___m_selectedItem)
+        private static bool Prefix(StoreGui __instance, Trader ___m_trader, Trader.TradeItem ___m_selectedItem)
         {
-            if (!___m_trader ||
-                !DvergrTraderManager.IsDvergrTrader(___m_trader))
+            if (!___m_trader || !DvergrTraderManager.IsDvergrTrader(___m_trader))
             {
                 return true;
             }
@@ -32,8 +28,7 @@ namespace HexDvergrAllies.Patches
             {
                 if (_hirePending)
                 {
-                    Plugin.Log.LogInfo(
-                        "[Dvergr Companion] Forge Pact blocked: Hire already pending.");
+                    Plugin.Log.LogInfo("[Dvergr Companion] Forge Pact blocked: Hire already pending.");
 
                     return false;
                 }
@@ -41,24 +36,18 @@ namespace HexDvergrAllies.Patches
                 Player player = Player.m_localPlayer;
                 Character character = ___m_trader.GetComponent<Character>();
 
-                if (!DvergrTraderManager.CanAffordForgePact(
-                    player,
-                    character))
+                if (!DvergrTraderManager.CanAffordForgePact(player, character))
                 {
-                    Plugin.Log.LogWarning(
-                        "[Dvergr Companion] Forge Pact rejected: Player ineligible or insufficient MeadTasty.");
+                    Plugin.Log.LogWarning("[Dvergr Companion] Forge Pact rejected: Player ineligible or insufficient MeadTasty.");
 
                     return false;
                 }
 
-                float distance = Vector3.Distance(
-                    player.transform.position,
-                    character.transform.position);
+                float distance = Vector3.Distance(player.transform.position, character.transform.position);
 
                 if (distance > DvergrTraderManager.InteractionDistance)
                 {
-                    Plugin.Log.LogWarning(
-                        "[Dvergr Companion] Forge Pact rejected: Out of range.");
+                    Plugin.Log.LogWarning("[Dvergr Companion] Forge Pact rejected: Out of range.");
 
                     return false;
                 }
@@ -74,21 +63,11 @@ namespace HexDvergrAllies.Patches
 
                 _hirePending = true;
 
-                Plugin.Log.LogInfo(
-                    $"[Dvergr Companion] Forge Pact requested: " +
-                    $"Player={player.GetPlayerName()}, " +
-                    $"Dvergr={character.name}, " +
-                    $"ZDO={companionId}, " +
-                    $"Cost={DvergrTraderManager.ForgePactCost} MeadTasty");
+                Plugin.Log.LogInfo($"[Dvergr Companion] Forge Pact requested: " + $"Player={player.GetPlayerName()}, " + $"Dvergr={character.name}, " + $"ZDO={companionId}, " + $"Cost={DvergrTraderManager.ForgePactCost} MeadTasty");
 
-                __instance.StartCoroutine(
-                    CompleteForgePact(
-                        player,
-                        companionId));
+                __instance.StartCoroutine(CompleteForgePact(player, companionId));
 
-                DvergrCompanionManager.RequestHire(
-                    player,
-                    character);
+                DvergrCompanionManager.RequestHire(player, character);
 
                 __instance.Hide();
 
@@ -99,41 +78,34 @@ namespace HexDvergrAllies.Patches
             {
                 if (!__instance.m_coinPrefab)
                 {
-                    GameObject coinPrefab = ObjectDB.instance.GetItemPrefab(
-                        "Coins");
+                    GameObject coinPrefab = ObjectDB.instance.GetItemPrefab("Coins");
 
                     if (!coinPrefab)
                     {
-                        Plugin.Log.LogError(
-                            "[Dvergr Trader] Coins prefab not found.");
+                        Plugin.Log.LogError("[Dvergr Trader] Coins prefab not found.");
 
                         return false;
                     }
 
-                    __instance.m_coinPrefab =
-                        coinPrefab.GetComponent<ItemDrop>();
+                    __instance.m_coinPrefab = coinPrefab.GetComponent<ItemDrop>();
                 }
 
                 return true;
             }
 
-            ZNetView traderNview =
-                ___m_trader.GetComponent<ZNetView>();
+            ZNetView traderNview = ___m_trader.GetComponent<ZNetView>();
 
             if (!traderNview || !traderNview.IsValid())
             {
                 return false;
             }
 
-            DvergrTradeRpcManager.RequestPurchase(
-                traderNview.GetZDO().m_uid);
+            DvergrTradeRpcManager.RequestPurchase(traderNview.GetZDO().m_uid);
 
             return false;
         }
 
-        private static IEnumerator CompleteForgePact(
-            Player player,
-            ZDOID companionId)
+        private static IEnumerator CompleteForgePact(Player player, ZDOID companionId)
         {
             float startTime = Time.time;
 
@@ -144,61 +116,44 @@ namespace HexDvergrAllies.Patches
                     break;
                 }
 
-                GameObject companionObject =
-                    ZNetScene.instance.FindInstance(companionId);
+                GameObject companionObject = ZNetScene.instance.FindInstance(companionId);
 
                 Character character = companionObject
                     ? companionObject.GetComponent<Character>()
                     : null;
 
-                if (character &&
-                    DvergrCompanionManager.IsHired(character))
+                if (character && DvergrCompanionManager.IsHired(character))
                 {
-                    if (!DvergrCompanionManager.IsHiredByPlayer(
-                        character,
-                        player))
+                    if (!DvergrCompanionManager.IsHiredByPlayer(character, player))
                     {
-                        Plugin.Log.LogWarning(
-                            "[Dvergr Companion] Forge Pact failed: Dvergr hired by another player.");
+                        Plugin.Log.LogWarning("[Dvergr Companion] Forge Pact failed: Dvergr hired by another player.");
 
                         break;
                     }
 
-                    string paymentName =
-                        DvergrTraderManager.GetForgePactPaymentName();
+                    string paymentName = DvergrTraderManager.GetForgePactPaymentName();
 
                     if (string.IsNullOrEmpty(paymentName))
                     {
-                        Plugin.Log.LogError(
-                            "[Dvergr Companion] Forge Pact payment failed: MeadTasty prefab unavailable.");
+                        Plugin.Log.LogError("[Dvergr Companion] Forge Pact payment failed: MeadTasty prefab unavailable.");
 
                         break;
                     }
 
                     Inventory inventory = player.GetInventory();
 
-                    if (inventory.CountItems(paymentName) <
-                        DvergrTraderManager.ForgePactCost)
+                    if (inventory.CountItems(paymentName) < DvergrTraderManager.ForgePactCost)
                     {
-                        Plugin.Log.LogError(
-                            "[Dvergr Companion] Forge Pact payment failed: MeadTasty no longer available.");
+                        Plugin.Log.LogError("[Dvergr Companion] Forge Pact payment failed: MeadTasty no longer available.");
 
                         break;
                     }
 
-                    inventory.RemoveItem(
-                        paymentName,
-                        DvergrTraderManager.ForgePactCost);
+                    inventory.RemoveItem(paymentName, DvergrTraderManager.ForgePactCost);
 
-                    Plugin.Log.LogInfo(
-                        $"[Dvergr Companion] Forge Pact completed: " +
-                        $"Player={player.GetPlayerName()}, " +
-                        $"Dvergr={character.name}, " +
-                        $"Cost={DvergrTraderManager.ForgePactCost} MeadTasty");
+                    Plugin.Log.LogInfo($"[Dvergr Companion] Forge Pact completed: " + $"Player={player.GetPlayerName()}, " + $"Dvergr={character.name}, " + $"Cost={DvergrTraderManager.ForgePactCost} MeadTasty");
 
-                    player.Message(
-                        MessageHud.MessageType.Center,
-                        "Forge Pact established.");
+                    player.Message(MessageHud.MessageType.Center, "Forge Pact established.");
 
                     _hirePending = false;
 
@@ -208,16 +163,11 @@ namespace HexDvergrAllies.Patches
                 yield return null;
             }
 
-            Plugin.Log.LogWarning(
-                $"[Dvergr Companion] Forge Pact not completed: " +
-                $"Companion={companionId}, " +
-                $"Timeout={HireTimeout}s");
+            Plugin.Log.LogWarning($"[Dvergr Companion] Forge Pact not completed: " + $"Companion={companionId}, " + $"Timeout={HireTimeout}s");
 
             if (player)
             {
-                player.Message(
-                    MessageHud.MessageType.Center,
-                    "Unable to complete Forge Pact.");
+                player.Message(MessageHud.MessageType.Center, "Unable to complete Forge Pact.");
             }
 
             _hirePending = false;

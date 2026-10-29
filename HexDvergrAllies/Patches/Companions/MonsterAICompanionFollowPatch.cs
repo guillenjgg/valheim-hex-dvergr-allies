@@ -7,8 +7,7 @@ namespace HexDvergrAllies.Patches
     [HarmonyPatch(typeof(MonsterAI), nameof(MonsterAI.UpdateAI))]
     internal static class MonsterAICompanionFollowPatch
     {
-        private static readonly HashSet<MonsterAI> _loggedInstances =
-            new HashSet<MonsterAI>();
+        private static readonly HashSet<MonsterAI> _loggedInstances = new HashSet<MonsterAI>();
 
         private static void Prefix(MonsterAI __instance)
         {
@@ -19,13 +18,9 @@ namespace HexDvergrAllies.Patches
                 return;
             }
 
-            if (character.GetFaction() == Character.Faction.Dverger &&
-                _loggedInstances.Add(__instance))
+            if (character.GetFaction() == Character.Faction.Dverger && _loggedInstances.Add(__instance))
             {
-                Plugin.Log.LogInfo(
-                    $"[Dvergr Companion] MonsterAI.UpdateAI patch active: " +
-                    $"Dvergr={character.name}, " +
-                    $"IsHired={DvergrCompanionManager.IsHired(character)}");
+                Plugin.Log.LogInfo($"[Dvergr Companion] MonsterAI.UpdateAI patch active: " + $"Dvergr={character.name}, " + $"IsHired={DvergrCompanionManager.IsHired(character)}");
             }
 
             if (DvergrCompanionShipManager.IsPassenger(character))

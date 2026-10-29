@@ -7,8 +7,7 @@ namespace HexDvergrAllies.Patches
     {
         private static void Prefix(Character __instance, HitData hit)
         {
-            if (!HexDvergrAlliesConfiguration.EnableDebugLogs.Value ||
-                __instance.GetFaction() != Character.Faction.Dverger)
+            if (!HexDvergrAlliesConfiguration.EnableDebugLogs.Value || __instance.GetFaction() != Character.Faction.Dverger)
             {
                 return;
             }
@@ -18,8 +17,7 @@ namespace HexDvergrAllies.Patches
 
         private static void Postfix(Character __instance, HitData hit)
         {
-            if (!HexDvergrAlliesConfiguration.EnableDebugLogs.Value ||
-                __instance.GetFaction() != Character.Faction.Dverger)
+            if (!HexDvergrAlliesConfiguration.EnableDebugLogs.Value || __instance.GetFaction() != Character.Faction.Dverger)
             {
                 return;
             }
@@ -31,19 +29,9 @@ namespace HexDvergrAllies.Patches
         {
             var attacker = hit.GetAttacker();
             var ai = character.GetBaseAI();
-            var statusEffect = character.GetSEMan().GetStatusEffect(
-                "SE_DvergrAlly".GetStableHashCode());
+            var statusEffect = character.GetSEMan().GetStatusEffect("SE_DvergrAlly".GetStableHashCode());
 
-            Plugin.Log.LogInfo(
-                $"[Dvergr Damage - {phase}] " +
-                $"Attacker={attacker?.name ?? "None"}, " +
-                $"Player={attacker != null && attacker.IsPlayer()}, " +
-                $"Damage={hit.GetTotalDamage():F1}, " +
-                $"Health={character.GetHealth():F1}, " +
-                $"Alerted={ai != null && ai.IsAlerted()}, " +
-                $"Aggravated={ai != null && ai.IsAggravated()}, " +
-                $"AllyEffect={statusEffect != null}, " +
-                $"Immunity={HexDvergrAlliesConfiguration.EnablePlayerDamageImmunity.Value}");
+            Plugin.Log.LogInfo($"[Dvergr Damage - {phase}] " + $"Attacker={attacker?.name ?? "None"}, " + $"Player={attacker != null && attacker.IsPlayer()}, " + $"Damage={hit.GetTotalDamage():F1}, " + $"Health={character.GetHealth():F1}, " + $"Alerted={ai != null && ai.IsAlerted()}, " + $"Aggravated={ai != null && ai.IsAggravated()}, " + $"AllyEffect={statusEffect != null}, " + $"Immunity={HexDvergrAlliesConfiguration.EnablePlayerDamageImmunity.Value}");
         }
     }
 }

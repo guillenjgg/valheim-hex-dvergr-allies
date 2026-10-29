@@ -38,9 +38,7 @@ namespace HexDvergrAllies.Patches
 
             if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
             {
-                Plugin.Log.LogInfo(
-                    $"[Dvergr Init] Name={__instance.name}, " +
-                    $"AttackPlayerObjects={monsterAI?.m_attackPlayerObjects}");
+                Plugin.Log.LogInfo($"[Dvergr Init] Name={__instance.name}, " + $"AttackPlayerObjects={monsterAI?.m_attackPlayerObjects}");
             }
         }
     }

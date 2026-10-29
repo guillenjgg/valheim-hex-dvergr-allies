@@ -24,8 +24,7 @@ namespace HexDvergrAllies.Patches.Companions
             internal GameObject FollowTarget;
         }
 
-        private static readonly Dictionary<MonsterAI, RecoveryState> States =
-            new Dictionary<MonsterAI, RecoveryState>();
+        private static readonly Dictionary<MonsterAI, RecoveryState> States = new Dictionary<MonsterAI, RecoveryState>();
 
         [HarmonyPostfix]
         private static void Postfix(MonsterAI __instance)
@@ -60,16 +59,13 @@ namespace HexDvergrAllies.Patches.Companions
                 return;
             }
 
-            if (__instance.GetTargetCreature() != null ||
-                __instance.GetStaticTarget() != null)
+            if (__instance.GetTargetCreature() != null || __instance.GetStaticTarget() != null)
             {
                 States.Remove(__instance);
                 return;
             }
 
-            var distance = Vector3.Distance(
-                character.transform.position,
-                followTarget.transform.position);
+            var distance = Vector3.Distance(character.transform.position, followTarget.transform.position);
 
             if (distance < RecoveryDistance)
             {
@@ -129,22 +125,12 @@ namespace HexDvergrAllies.Patches.Companions
             States.Remove(__instance);
         }
 
-        private static void Recover(
-            Character character,
-            GameObject followTarget,
-            float distance,
-            string reason)
+        private static void Recover(Character character, GameObject followTarget, float distance, string reason)
         {
             var destination = followTarget.transform.position +
                 followTarget.transform.right * RecoveryOffset;
 
-            Plugin.Log.LogInfo(
-                $"[Dvergr Terrain Recovery] " +
-                $"Dvergr={character.name}, " +
-                $"Reason={reason}, " +
-                $"Distance={distance:F1}, " +
-                $"From={character.transform.position}, " +
-                $"To={destination}");
+            Plugin.Log.LogInfo($"[Dvergr Terrain Recovery] " + $"Dvergr={character.name}, " + $"Reason={reason}, " + $"Distance={distance:F1}, " + $"From={character.transform.position}, " + $"To={destination}");
 
             character.transform.position = destination;
         }

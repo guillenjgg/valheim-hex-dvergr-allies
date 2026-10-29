@@ -8,8 +8,7 @@ namespace HexDvergrAllies.Patches
     [HarmonyPatch(typeof(Player), "UpdatePlacementGhost")]
     internal static class PlayerUpdatePlacementGhostPatch
     {
-        private static readonly AccessTools.FieldRef<Player, PieceTable> BuildPieces =
-            AccessTools.FieldRefAccess<Player, PieceTable>("m_buildPieces");
+        private static readonly AccessTools.FieldRef<Player, PieceTable> BuildPieces = AccessTools.FieldRefAccess<Player, PieceTable>("m_buildPieces");
 
         private static readonly HashSet<string> AllowedPieces = new HashSet<string>
         {

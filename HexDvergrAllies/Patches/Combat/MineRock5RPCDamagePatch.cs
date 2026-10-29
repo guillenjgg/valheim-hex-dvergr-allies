@@ -12,13 +12,9 @@ namespace HexDvergrAllies.Patches
         private static ref List<PrivateArea> AllAreas =>
             ref AccessTools.StaticFieldRefAccess<List<PrivateArea>>(typeof(PrivateArea), "m_allAreas");
 
-        private static readonly Func<PrivateArea, bool> IsAreaEnabled =
-            AccessTools.MethodDelegate<Func<PrivateArea, bool>>(
-                AccessTools.Method(typeof(PrivateArea), "IsEnabled"));
+        private static readonly Func<PrivateArea, bool> IsAreaEnabled = AccessTools.MethodDelegate<Func<PrivateArea, bool>>(AccessTools.Method(typeof(PrivateArea), "IsEnabled"));
 
-        private static readonly Func<PrivateArea, Vector3, float, bool> IsInsideArea =
-            AccessTools.MethodDelegate<Func<PrivateArea, Vector3, float, bool>>(
-                AccessTools.Method(typeof(PrivateArea), "IsInside"));
+        private static readonly Func<PrivateArea, Vector3, float, bool> IsInsideArea = AccessTools.MethodDelegate<Func<PrivateArea, Vector3, float, bool>>(AccessTools.Method(typeof(PrivateArea), "IsInside"));
 
         private static void Prefix(MineRock5 __instance, HitData hit, out bool __state)
         {

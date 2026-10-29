@@ -36,10 +36,7 @@ namespace HexDvergrAllies.Patches
 
             var prefabName = Utils.GetPrefabName(piece.gameObject);
 
-            if (prefabName != "piece_workbench" &&
-                prefabName != "piece_stonecutter" &&
-                prefabName != "portal_wood" &&
-                prefabName != "portal_stone")
+            if (prefabName != "piece_workbench" && prefabName != "piece_stonecutter" && prefabName != "portal_wood" && prefabName != "portal_stone")
                 return false;
 
             return PrivateArea.InsideFactionArea(point, Character.Faction.Dverger);

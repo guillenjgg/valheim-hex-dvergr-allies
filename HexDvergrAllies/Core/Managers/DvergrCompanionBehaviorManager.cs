@@ -25,11 +25,9 @@ namespace HexDvergrAllies.Core.Managers
             internal bool AnimationSpeedCaptured;
         }
 
-        private static readonly Dictionary<Character, CompanionBehaviorState> CompanionStates =
-            new Dictionary<Character, CompanionBehaviorState>();
+        private static readonly Dictionary<Character, CompanionBehaviorState> CompanionStates = new Dictionary<Character, CompanionBehaviorState>();
 
-        private static readonly AccessTools.FieldRef<Character, Animator> AnimatorField =
-    AccessTools.FieldRefAccess<Character, Animator>("m_animator");
+        private static readonly AccessTools.FieldRef<Character, Animator> AnimatorField = AccessTools.FieldRefAccess<Character, Animator>("m_animator");
 
         internal static void CaptureState(Character character, MonsterAI monsterAI)
         {
@@ -62,8 +60,7 @@ namespace HexDvergrAllies.Core.Managers
                 }
             }
 
-            Plugin.Log.LogInfo(
-                $"[Dvergr Companion] Original stats cached: Dvergr={character.name}, Speed={state.OriginalSpeed}, WalkSpeed={state.OriginalWalkSpeed}, RunSpeed={state.OriginalRunSpeed}, AttackInterval={state.OriginalMinAttackInterval}, MaxHealth={state.OriginalMaxHealth}");
+            Plugin.Log.LogInfo($"[Dvergr Companion] Original stats cached: Dvergr={character.name}, Speed={state.OriginalSpeed}, WalkSpeed={state.OriginalWalkSpeed}, RunSpeed={state.OriginalRunSpeed}, AttackInterval={state.OriginalMinAttackInterval}, MaxHealth={state.OriginalMaxHealth}");
         }
 
         internal static void UpdateBehavior(MonsterAI monsterAI)
@@ -169,15 +166,13 @@ namespace HexDvergrAllies.Core.Managers
 
             if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
             {
-                Plugin.Log.LogInfo(
-                    $"[Dvergr Companion] Animation speed changed: Dvergr={character.name}, InAttack={humanoid.InAttack()}, Multiplier={targetMultiplier:F2}, Speed={animator.speed:F2}");
+                Plugin.Log.LogInfo($"[Dvergr Companion] Animation speed changed: Dvergr={character.name}, InAttack={humanoid.InAttack()}, Multiplier={targetMultiplier:F2}, Speed={animator.speed:F2}");
             }
         }
 
         private static void RestoreAttackAnimation(Character character, CompanionBehaviorState state)
         {
-            if (!state.AnimationSpeedCaptured ||
-                Mathf.Approximately(state.AppliedAnimationMultiplier, 1f))
+            if (!state.AnimationSpeedCaptured || Mathf.Approximately(state.AppliedAnimationMultiplier, 1f))
             {
                 return;
             }
@@ -284,8 +279,7 @@ namespace HexDvergrAllies.Core.Managers
             var cooldown = HexDvergrAlliesConfiguration.CompanionAutoHealCooldown.Value;
             state.NextAutoHealTime = Time.time + cooldown;
 
-            Plugin.Log.LogInfo(
-                $"[Dvergr Companion] Auto-healed: Dvergr={character.name}, PreviousHealth={currentHealth:F1}, MaxHealth={maxHealth:F1}, Cooldown={cooldown:F1}s");
+            Plugin.Log.LogInfo($"[Dvergr Companion] Auto-healed: Dvergr={character.name}, PreviousHealth={currentHealth:F1}, MaxHealth={maxHealth:F1}, Cooldown={cooldown:F1}s");
         }
 
         private static float GetOriginalMaxHealth(Character character, CompanionBehaviorState state)
@@ -362,8 +356,7 @@ namespace HexDvergrAllies.Core.Managers
 
             zdo.Set(OriginalMaxHealthSavedKey, false);
 
-            Plugin.Log.LogInfo(
-                $"[Dvergr Companion] Original stats restored: Dvergr={character.name}, MaxHealth={originalMaxHealth}");
+            Plugin.Log.LogInfo($"[Dvergr Companion] Original stats restored: Dvergr={character.name}, MaxHealth={originalMaxHealth}");
         }
 
         internal static void RemoveCharacter(Character character)

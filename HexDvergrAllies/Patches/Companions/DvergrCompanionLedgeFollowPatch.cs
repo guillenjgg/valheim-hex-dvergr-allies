@@ -34,8 +34,7 @@ namespace HexDvergrAllies.Patches.Companions
                 return;
             }
 
-            if (__instance.GetTargetCreature() != null ||
-                __instance.GetStaticTarget() != null)
+            if (__instance.GetTargetCreature() != null || __instance.GetStaticTarget() != null)
             {
                 return;
             }
@@ -55,8 +54,7 @@ namespace HexDvergrAllies.Patches.Companions
 
             var horizontalDistance = direction.magnitude;
 
-            if (horizontalDistance < MinimumHorizontalDistance ||
-                horizontalDistance > MaximumHorizontalDistance)
+            if (horizontalDistance < MinimumHorizontalDistance || horizontalDistance > MaximumHorizontalDistance)
             {
                 return;
             }

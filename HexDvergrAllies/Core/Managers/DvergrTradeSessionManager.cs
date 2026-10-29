@@ -18,9 +18,7 @@ namespace HexDvergrAllies.Core.Managers
 
         private static readonly Dictionary<ZDOID, TradeSession> _sessions = new Dictionary<ZDOID, TradeSession>();
 
-        private static readonly Func<ZRoutedRpc, long> GetServerPeerID =
-            AccessTools.MethodDelegate<Func<ZRoutedRpc, long>>(
-                AccessTools.Method(typeof(ZRoutedRpc), "GetServerPeerID"));
+        private static readonly Func<ZRoutedRpc, long> GetServerPeerID = AccessTools.MethodDelegate<Func<ZRoutedRpc, long>>(AccessTools.Method(typeof(ZRoutedRpc), "GetServerPeerID"));
 
         private static ZDOID _currentTrader;
         private static bool _waitingForApproval;
@@ -55,10 +53,7 @@ namespace HexDvergrAllies.Core.Managers
             _currentTrader = trader.GetComponent<ZNetView>().GetZDO().m_uid;
             _waitingForApproval = true;
 
-            ZRoutedRpc.instance.InvokeRoutedRPC(
-                GetServerPeerID(ZRoutedRpc.instance),
-                OpenRequestRpc,
-                _currentTrader);
+            ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), OpenRequestRpc, _currentTrader);
         }
 
         internal static void Close()
@@ -68,10 +63,7 @@ namespace HexDvergrAllies.Core.Managers
                 return;
             }
 
-            ZRoutedRpc.instance.InvokeRoutedRPC(
-                GetServerPeerID(ZRoutedRpc.instance),
-                CloseRequestRpc,
-                _currentTrader);
+            ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), CloseRequestRpc, _currentTrader);
 
             _waitingForApproval = false;
             _sessionApproved = false;
@@ -104,10 +96,7 @@ namespace HexDvergrAllies.Core.Managers
             {
                 _lastHeartbeatTime = Time.time;
 
-                ZRoutedRpc.instance.InvokeRoutedRPC(
-                    GetServerPeerID(ZRoutedRpc.instance),
-                    HeartbeatRpc,
-                    _currentTrader);
+                ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), HeartbeatRpc, _currentTrader);
             }
 
             if (!ZNet.instance.IsServer())
@@ -119,8 +108,7 @@ namespace HexDvergrAllies.Core.Managers
 
             foreach (var entry in _sessions)
             {
-                var disconnected = entry.Value.Peer != ZNet.GetUID() &&
-                                   ZNet.instance.GetPeer(entry.Value.Peer) == null;
+                var disconnected = entry.Value.Peer != ZNet.GetUID() && ZNet.instance.GetPeer(entry.Value.Peer) == null;
 
                 if (disconnected || Time.time - entry.Value.LastActivity >= SessionTimeout)
                 {
@@ -204,12 +192,7 @@ namespace HexDvergrAllies.Core.Managers
 
             Plugin.Log.LogInfo($"[Dvergr Trade Session] Open: Peer={sender}, Trader={traderZdoId}, Approved={approved}, Reason={reason}");
 
-            ZRoutedRpc.instance.InvokeRoutedRPC(
-                sender,
-                OpenResponseRpc,
-                traderZdoId,
-                approved,
-                reason);
+            ZRoutedRpc.instance.InvokeRoutedRPC(sender, OpenResponseRpc, traderZdoId, approved, reason);
         }
 
         private static void OnOpenResponse(long sender, ZDOID traderZdoId, bool approved, string reason)
@@ -237,10 +220,7 @@ namespace HexDvergrAllies.Core.Managers
 
             if (!trader || Vector3.Distance(Player.m_localPlayer.transform.position, trader.transform.position) > DvergrTraderManager.InteractionDistance || trader.m_items.Count == 0)
             {
-                ZRoutedRpc.instance.InvokeRoutedRPC(
-                    GetServerPeerID(ZRoutedRpc.instance),
-                    CloseRequestRpc,
-                    traderZdoId);
+                ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), CloseRequestRpc, traderZdoId);
 
                 return;
             }

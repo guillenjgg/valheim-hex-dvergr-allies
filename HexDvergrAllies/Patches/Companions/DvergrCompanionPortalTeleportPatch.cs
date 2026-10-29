@@ -25,8 +25,7 @@ namespace HexDvergrAllies.Patches.Companions
             internal readonly List<CompanionState> Companions = new List<CompanionState>();
         }
 
-        private static readonly Dictionary<Player, TeleportState> States =
-            new Dictionary<Player, TeleportState>();
+        private static readonly Dictionary<Player, TeleportState> States = new Dictionary<Player, TeleportState>();
 
         [HarmonyPatch(typeof(Player), nameof(Player.TeleportTo))]
         [HarmonyPostfix]
@@ -70,20 +69,14 @@ namespace HexDvergrAllies.Patches.Companions
                     continue;
                 }
 
-                state.Companions.Add(new CompanionState
-                {
-                    ZdoId = zdo.m_uid,
-                    SourcePosition = sourcePosition
-                });
+                state.Companions.Add(new CompanionState { ZdoId = zdo.m_uid, SourcePosition = sourcePosition });
 
-                Plugin.Log.LogInfo(
-                    $"[Dvergr Portal] Captured: Dvergr={character.name}, ZDO={zdo.m_uid}, Source={sourcePosition}, NetworkOwner={nview.IsOwner()}");
+                Plugin.Log.LogInfo($"[Dvergr Portal] Captured: Dvergr={character.name}, ZDO={zdo.m_uid}, Source={sourcePosition}, NetworkOwner={nview.IsOwner()}");
             }
 
             States[__instance] = state;
 
-            Plugin.Log.LogInfo(
-                $"[Dvergr Portal] Teleport started: Companions={state.Companions.Count}, From={state.DeparturePosition}");
+            Plugin.Log.LogInfo($"[Dvergr Portal] Teleport started: Companions={state.Companions.Count}, From={state.DeparturePosition}");
         }
 
         [HarmonyPatch(typeof(Player), "UpdateTeleport")]
@@ -113,8 +106,7 @@ namespace HexDvergrAllies.Patches.Companions
 
             if (Vector3.Distance(state.DeparturePosition, destination) < MinimumTravelDistance)
             {
-                Plugin.Log.LogInfo(
-                    "[Dvergr Portal] Teleport completed without significant movement. Skipping companions.");
+                Plugin.Log.LogInfo("[Dvergr Portal] Teleport completed without significant movement. Skipping companions.");
                 return;
             }
 
@@ -124,13 +116,9 @@ namespace HexDvergrAllies.Patches.Companions
 
                 if (!companionObject)
                 {
-                    Plugin.Log.LogInfo(
-                        $"[Dvergr Portal] Companion unloaded. Requesting server relocation: ZDO={companion.ZdoId}");
+                    Plugin.Log.LogInfo($"[Dvergr Portal] Companion unloaded. Requesting server relocation: ZDO={companion.ZdoId}");
 
-                    DvergrCompanionPortalRelocationManager.RequestRelocation(
-                        __instance,
-                        companion.ZdoId,
-                        companion.SourcePosition);
+                    DvergrCompanionPortalRelocationManager.RequestRelocation(__instance, companion.ZdoId, companion.SourcePosition);
 
                     continue;
                 }
@@ -138,16 +126,11 @@ namespace HexDvergrAllies.Patches.Companions
                 var nview = companionObject.GetComponent<ZNetView>();
                 var character = companionObject.GetComponent<Character>();
 
-                if (!nview || !nview.IsValid() || !nview.IsOwner() ||
-                    !character || !DvergrCompanionManager.IsHired(character))
+                if (!nview || !nview.IsValid() || !nview.IsOwner() || !character || !DvergrCompanionManager.IsHired(character))
                 {
-                    Plugin.Log.LogInfo(
-                        $"[Dvergr Portal] Companion not locally owned. Requesting server relocation: ZDO={companion.ZdoId}");
+                    Plugin.Log.LogInfo($"[Dvergr Portal] Companion not locally owned. Requesting server relocation: ZDO={companion.ZdoId}");
 
-                    DvergrCompanionPortalRelocationManager.RequestRelocation(
-                        __instance,
-                        companion.ZdoId,
-                        companion.SourcePosition);
+                    DvergrCompanionPortalRelocationManager.RequestRelocation(__instance, companion.ZdoId, companion.SourcePosition);
 
                     continue;
                 }
@@ -164,8 +147,7 @@ namespace HexDvergrAllies.Patches.Companions
                 character.transform.position = arrivalPosition;
                 zdo.SetPosition(arrivalPosition);
 
-                Plugin.Log.LogInfo(
-                    $"[Dvergr Portal] Companion relocated locally: ZDO={companion.ZdoId}, Destination={arrivalPosition}");
+                Plugin.Log.LogInfo($"[Dvergr Portal] Companion relocated locally: ZDO={companion.ZdoId}, Destination={arrivalPosition}");
             }
         }
     }

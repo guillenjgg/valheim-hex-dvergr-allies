@@ -38,10 +38,7 @@ namespace HexDvergrAllies.Patches
             // Locate the loop increment near the end of the method.
             for (int i = codes.Count - 4; i > targetIndex; i--)
             {
-                if (!codes[i].IsLdloc() ||
-                    codes[i + 1].opcode != OpCodes.Ldc_I4_1 ||
-                    codes[i + 2].opcode != OpCodes.Add ||
-                    !codes[i + 3].IsStloc())
+                if (!codes[i].IsLdloc() || codes[i + 1].opcode != OpCodes.Ldc_I4_1 || codes[i + 2].opcode != OpCodes.Add || !codes[i + 3].IsStloc())
                 {
                     continue;
                 }
@@ -83,13 +80,7 @@ namespace HexDvergrAllies.Patches
                 loadTarget = new CodeInstruction(OpCodes.Ldloc, storeInstruction.operand);
             }
 
-            codes.InsertRange(targetIndex + 1, new[]
-            {
-                new CodeInstruction(OpCodes.Ldarg_0),
-                loadTarget,
-                new CodeInstruction(OpCodes.Call, isProtectedDvergr),
-                new CodeInstruction(OpCodes.Brtrue, skipTarget)
-            });
+            codes.InsertRange(targetIndex + 1, new[] { new CodeInstruction(OpCodes.Ldarg_0), loadTarget, new CodeInstruction(OpCodes.Call, isProtectedDvergr), new CodeInstruction(OpCodes.Brtrue, skipTarget) });
 
             return codes;
         }

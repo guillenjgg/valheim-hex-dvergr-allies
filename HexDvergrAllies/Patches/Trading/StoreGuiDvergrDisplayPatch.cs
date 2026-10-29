@@ -68,8 +68,7 @@ namespace HexDvergrAllies.Patches
 
             List<GameObject> itemList = ItemListField(__instance);
 
-            if (_lastSapCost != DvergrTradeRpcManager.CurrentSapCost ||
-                _lastHasPrice != DvergrTradeRpcManager.HasCurrentPrice)
+            if (_lastSapCost != DvergrTradeRpcManager.CurrentSapCost || _lastHasPrice != DvergrTradeRpcManager.HasCurrentPrice)
             {
                 UpdateItemPrices(trader, itemList);
             }
@@ -132,9 +131,7 @@ namespace HexDvergrAllies.Patches
             textRect.offsetMin = new Vector2(10f, 8f);
             textRect.offsetMax = new Vector2(-10f, -8f);
 
-            _paymentText.text =
-                "<color=#D9A75D><b>ACCEPTED CURRENCY</b></color>\n" +
-                "<size=85%>1 Trophy = Seeker, Seeker Soldier, or Gjall</size>";
+            _paymentText.text = "<color=#D9A75D><b>ACCEPTED CURRENCY</b></color>\n" + "<size=85%>1 Trophy = Seeker, Seeker Soldier, or Gjall</size>";
 
             _lastSapCost = -1;
             _lastHasPrice = false;
@@ -193,9 +190,7 @@ namespace HexDvergrAllies.Patches
                     continue;
                 }
 
-                if (textComponent.text == localizedName ||
-                    textComponent.text == sharedName ||
-                    textComponent.text == "Tasty Mead")
+                if (textComponent.text == localizedName || textComponent.text == sharedName || textComponent.text == "Tasty Mead")
                 {
                     textComponent.text = "Forge Pact";
                     return;
@@ -206,17 +201,14 @@ namespace HexDvergrAllies.Patches
             {
                 string objectName = textComponent.gameObject.name.ToLowerInvariant();
 
-                if (objectName == "name" ||
-                    objectName == "itemname" ||
-                    objectName == "item_name")
+                if (objectName == "name" || objectName == "itemname" || objectName == "item_name")
                 {
                     textComponent.text = "Forge Pact";
                     return;
                 }
             }
 
-            Plugin.Log.LogWarning(
-                "[Dvergr Trader] Forge Pact name field not found.");
+            Plugin.Log.LogWarning("[Dvergr Trader] Forge Pact name field not found.");
         }
 
         private static TMP_Text ConfigureCustomPrice(Transform item)

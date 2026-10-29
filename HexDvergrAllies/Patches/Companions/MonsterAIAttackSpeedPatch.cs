@@ -10,11 +10,9 @@ namespace HexDvergrAllies.Patches
     [HarmonyPatch(typeof(MonsterAI), nameof(MonsterAI.UpdateAI))]
     internal static class MonsterAIAttackSpeedPatch
     {
-        private static readonly FieldInfo AttackIntervalField =
-            AccessTools.Field(typeof(ItemDrop.ItemData.SharedData), "m_aiAttackInterval");
+        private static readonly FieldInfo AttackIntervalField = AccessTools.Field(typeof(ItemDrop.ItemData.SharedData), "m_aiAttackInterval");
 
-        private static readonly MethodInfo AdjustAttackIntervalMethod =
-            AccessTools.Method(typeof(MonsterAIAttackSpeedPatch), nameof(AdjustAttackInterval));
+        private static readonly MethodInfo AdjustAttackIntervalMethod = AccessTools.Method(typeof(MonsterAIAttackSpeedPatch), nameof(AdjustAttackInterval));
 
         [HarmonyTranspiler]
         private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
@@ -47,8 +45,7 @@ namespace HexDvergrAllies.Patches
 
             if (replacements != 1)
             {
-                throw new InvalidOperationException(
-                    $"Expected one MonsterAI weapon attack interval read, found {replacements}.");
+                throw new InvalidOperationException($"Expected one MonsterAI weapon attack interval read, found {replacements}.");
             }
 
             return codes;

@@ -29,10 +29,7 @@ namespace HexDvergrAllies.Patches
 
             for (int i = 0; i < codes.Count - 3; i++)
             {
-                if (codes[i].opcode == OpCodes.Ldloc_0 &&
-                    codes[i + 1].opcode == OpCodes.Ldc_I4_1 &&
-                    codes[i + 2].opcode == OpCodes.Add &&
-                    codes[i + 3].opcode == OpCodes.Stloc_0)
+                if (codes[i].opcode == OpCodes.Ldloc_0 && codes[i + 1].opcode == OpCodes.Ldc_I4_1 && codes[i + 2].opcode == OpCodes.Add && codes[i + 3].opcode == OpCodes.Stloc_0)
                 {
                     codes[i].labels.Add(loopContinue);
                     foundLoopContinue = true;
@@ -52,13 +49,7 @@ namespace HexDvergrAllies.Patches
                     continue;
                 }
 
-                codes.InsertRange(i + 2, new[]
-                {
-                    new CodeInstruction(OpCodes.Ldarg_0),
-                    new CodeInstruction(OpCodes.Ldloc_2),
-                    new CodeInstruction(OpCodes.Call, isProtectedDvergr),
-                    new CodeInstruction(OpCodes.Brtrue, loopContinue)
-                });
+                codes.InsertRange(i + 2, new[] { new CodeInstruction(OpCodes.Ldarg_0), new CodeInstruction(OpCodes.Ldloc_2), new CodeInstruction(OpCodes.Call, isProtectedDvergr), new CodeInstruction(OpCodes.Brtrue, loopContinue) });
 
                 foundHitObject = true;
                 break;

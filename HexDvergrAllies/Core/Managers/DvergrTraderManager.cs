@@ -8,8 +8,7 @@ namespace HexDvergrAllies.Core.Managers
         internal const string ForgePactPrefab = "MeadTasty";
         internal const int ForgePactCost = 2;
 
-        private static readonly string[] MistlandsTrophyPrefabs =
-        {
+        private static readonly string[] MistlandsTrophyPrefabs = {
             "TrophySeeker",
             "TrophyGjall",
             "TrophySeekerBrute"
@@ -22,8 +21,7 @@ namespace HexDvergrAllies.Core.Managers
                 return;
             }
 
-            Heightmap.Biome biome = Heightmap.FindBiome(
-                dvergr.transform.position);
+            Heightmap.Biome biome = Heightmap.FindBiome(dvergr.transform.position);
 
             if (biome == Heightmap.Biome.None)
             {
@@ -43,28 +41,22 @@ namespace HexDvergrAllies.Core.Managers
 
             switch (biome)
             {
-                case Heightmap.Biome.Mistlands:
-                    AddMistlandsItems(trader);
+                case Heightmap.Biome.Mistlands: AddMistlandsItems(trader);
                     break;
 
-                case Heightmap.Biome.AshLands:
-                    AddAshlandsItems(trader);
+                case Heightmap.Biome.AshLands: AddAshlandsItems(trader);
                     break;
             }
         }
 
         internal static bool IsDvergrTrader(Trader trader)
         {
-            return trader &&
-                   trader.GetComponent<Humanoid>()?.GetFaction() ==
-                   Character.Faction.Dverger;
+            return trader && trader.GetComponent<Humanoid>()?.GetFaction() == Character.Faction.Dverger;
         }
 
         internal static bool IsForgePact(Trader.TradeItem item)
         {
-            return item != null &&
-                   item.m_prefab &&
-                   item.m_prefab.gameObject.name == ForgePactPrefab;
+            return item != null && item.m_prefab && item.m_prefab.gameObject.name == ForgePactPrefab;
         }
 
         internal static string GetForgePactPaymentName()
@@ -90,8 +82,7 @@ namespace HexDvergrAllies.Core.Managers
                 return false;
             }
 
-            if (DvergrCompanionManager.IsHired(character) ||
-                DvergrCompanionManager.HasHiredCompanion(player))
+            if (DvergrCompanionManager.IsHired(character) || DvergrCompanionManager.HasHiredCompanion(player))
             {
                 return false;
             }
@@ -110,8 +101,7 @@ namespace HexDvergrAllies.Core.Managers
         {
             foreach (string prefabName in MistlandsTrophyPrefabs)
             {
-                GameObject prefab = ObjectDB.instance.GetItemPrefab(
-                    prefabName);
+                GameObject prefab = ObjectDB.instance.GetItemPrefab(prefabName);
 
                 if (!prefab)
                 {
@@ -132,67 +122,40 @@ namespace HexDvergrAllies.Core.Managers
 
         private static void AddForgePact(Trader trader)
         {
-            GameObject prefab = ObjectDB.instance.GetItemPrefab(
-                ForgePactPrefab);
+            GameObject prefab = ObjectDB.instance.GetItemPrefab(ForgePactPrefab);
 
             if (!prefab)
             {
-                Plugin.Log.LogWarning(
-                    "[Dvergr Trader] MeadTasty prefab not found.");
+                Plugin.Log.LogWarning("[Dvergr Trader] MeadTasty prefab not found.");
 
                 return;
             }
 
-            trader.m_items.Add(new Trader.TradeItem
-            {
-                m_prefab = prefab.GetComponent<ItemDrop>(),
-                m_stack = 1,
-                m_price = 0,
-                m_tooltip = "Forge Pact: Hire this Dvergr for 2 Tasty Mead.",
-                m_buyPlayerEffects = new EffectList()
-            });
+            trader.m_items.Add(new Trader.TradeItem { m_prefab = prefab.GetComponent<ItemDrop>(), m_stack = 1, m_price = 0, m_tooltip = "Forge Pact: Hire this Dvergr for 2 Tasty Mead.", m_buyPlayerEffects = new EffectList() });
         }
 
         private static void AddMistlandsItems(Trader trader)
         {
-            GameObject needlePrefab = ObjectDB.instance.GetItemPrefab(
-                "DvergrNeedle");
+            GameObject needlePrefab = ObjectDB.instance.GetItemPrefab("DvergrNeedle");
 
             if (needlePrefab)
             {
-                trader.m_items.Add(new Trader.TradeItem
-                {
-                    m_prefab = needlePrefab.GetComponent<ItemDrop>(),
-                    m_stack = 1,
-                    m_price = 0,
-                    m_tooltip = "",
-                    m_buyPlayerEffects = new EffectList()
-                });
+                trader.m_items.Add(new Trader.TradeItem { m_prefab = needlePrefab.GetComponent<ItemDrop>(), m_stack = 1, m_price = 0, m_tooltip = "", m_buyPlayerEffects = new EffectList() });
             }
             else
             {
-                Plugin.Log.LogWarning(
-                    "[Dvergr Trader] DvergrNeedle prefab not found.");
+                Plugin.Log.LogWarning("[Dvergr Trader] DvergrNeedle prefab not found.");
             }
 
-            GameObject softTissuePrefab = ObjectDB.instance.GetItemPrefab(
-                "Softtissue");
+            GameObject softTissuePrefab = ObjectDB.instance.GetItemPrefab("Softtissue");
 
             if (softTissuePrefab)
             {
-                trader.m_items.Add(new Trader.TradeItem
-                {
-                    m_prefab = softTissuePrefab.GetComponent<ItemDrop>(),
-                    m_stack = 20,
-                    m_price = 2000,
-                    m_tooltip = "",
-                    m_buyPlayerEffects = new EffectList()
-                });
+                trader.m_items.Add(new Trader.TradeItem { m_prefab = softTissuePrefab.GetComponent<ItemDrop>(), m_stack = 20, m_price = 2000, m_tooltip = "", m_buyPlayerEffects = new EffectList() });
             }
             else
             {
-                Plugin.Log.LogWarning(
-                    "[Dvergr Trader] Softtissue prefab not found.");
+                Plugin.Log.LogWarning("[Dvergr Trader] Softtissue prefab not found.");
             }
         }
 

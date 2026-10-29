@@ -24,8 +24,7 @@ namespace HexDvergrAllies.Assets
             {
                 if (stream == null)
                 {
-                    Plugin.Log.LogError(
-                        $"[AssetHelper] Embedded resource not found: {resourceName}");
+                    Plugin.Log.LogError($"[AssetHelper] Embedded resource not found: {resourceName}");
 
                     return null;
                 }
@@ -36,31 +35,21 @@ namespace HexDvergrAllies.Assets
 
                     Texture2D texture = new Texture2D(2, 2);
 
-                    Type imageConversionType = Type.GetType(
-                        "UnityEngine.ImageConversion, UnityEngine.ImageConversionModule");
+                    Type imageConversionType = Type.GetType("UnityEngine.ImageConversion, UnityEngine.ImageConversionModule");
 
                     if (imageConversionType == null)
                     {
-                        Plugin.Log.LogError(
-                            "[AssetHelper] Unity ImageConversion type not found.");
+                        Plugin.Log.LogError("[AssetHelper] Unity ImageConversion type not found.");
 
                         UnityEngine.Object.Destroy(texture);
                         return null;
                     }
 
-                    MethodInfo loadImage = AccessTools.Method(
-                        imageConversionType,
-                        "LoadImage",
-                        new[]
-                        {
-                            typeof(Texture2D),
-                            typeof(byte[])
-                        });
+                    MethodInfo loadImage = AccessTools.Method(imageConversionType, "LoadImage", new[] { typeof(Texture2D), typeof(byte[]) });
 
                     if (loadImage == null)
                     {
-                        Plugin.Log.LogError(
-                            "[AssetHelper] ImageConversion.LoadImage method not found.");
+                        Plugin.Log.LogError("[AssetHelper] ImageConversion.LoadImage method not found.");
 
                         UnityEngine.Object.Destroy(texture);
                         return null;
@@ -68,18 +57,11 @@ namespace HexDvergrAllies.Assets
 
                     try
                     {
-                        bool success = (bool)loadImage.Invoke(
-                            null,
-                            new object[]
-                            {
-                                texture,
-                                memoryStream.ToArray()
-                            });
+                        bool success = (bool)loadImage.Invoke(null, new object[] { texture, memoryStream.ToArray() });
 
                         if (!success)
                         {
-                            Plugin.Log.LogError(
-                                $"[AssetHelper] Failed to decode image: {resourceName}");
+                            Plugin.Log.LogError($"[AssetHelper] Failed to decode image: {resourceName}");
 
                             UnityEngine.Object.Destroy(texture);
                             return null;
@@ -87,8 +69,7 @@ namespace HexDvergrAllies.Assets
                     }
                     catch (Exception exception)
                     {
-                        Plugin.Log.LogError(
-                            $"[AssetHelper] Error loading image: {exception}");
+                        Plugin.Log.LogError($"[AssetHelper] Error loading image: {exception}");
 
                         UnityEngine.Object.Destroy(texture);
                         return null;
@@ -96,13 +77,9 @@ namespace HexDvergrAllies.Assets
 
                     texture.name = "HexDvergr_DvergrPortrait";
 
-                    Sprite sprite = Sprite.Create(
-                        texture,
-                        new Rect(0, 0, texture.width, texture.height),
-                        new Vector2(0.5f, 0.5f));
+                    Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
 
-                    Plugin.Log.LogInfo(
-                        $"[AssetHelper] Loaded sprite: {resourceName}");
+                    Plugin.Log.LogInfo($"[AssetHelper] Loaded sprite: {resourceName}");
 
                     return sprite;
                 }

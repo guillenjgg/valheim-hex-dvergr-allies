@@ -40,23 +40,16 @@ namespace HexDvergrAllies.Patches
                 return;
             }
 
-            float distance = Vector3.Distance(
-                __instance.transform.position,
-                trader.transform.position);
+            float distance = Vector3.Distance(__instance.transform.position, trader.transform.position);
 
             if (distance > DvergrTraderManager.InteractionDistance)
             {
                 return;
             }
 
-            Plugin.Log.LogInfo(
-                $"[Dvergr Companion] Configured shortcut triggered: " +
-                $"Shortcut={HexDvergrAlliesConfiguration.CompanionInteractionShortcut.Value}, " +
-                $"Dvergr={character.name}");
+            Plugin.Log.LogInfo($"[Dvergr Companion] Configured shortcut triggered: " + $"Shortcut={HexDvergrAlliesConfiguration.CompanionInteractionShortcut.Value}, " + $"Dvergr={character.name}");
 
-            PlayerInteractPatch.HandleCompanionInteraction(
-                __instance,
-                character);
+            PlayerInteractPatch.HandleCompanionInteraction(__instance, character);
         }
     }
 }

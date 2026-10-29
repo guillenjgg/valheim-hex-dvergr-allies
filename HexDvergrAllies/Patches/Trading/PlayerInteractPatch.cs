@@ -8,32 +8,22 @@ namespace HexDvergrAllies.Patches
     [HarmonyPatch(typeof(Player), nameof(Player.Interact))]
     internal static class PlayerInteractPatch
     {
-        internal static void HandleCompanionInteraction(
-            Player player,
-            Character character)
+        internal static void HandleCompanionInteraction(Player player, Character character)
         {
             if (!player || !character)
             {
                 return;
             }
 
-            if (!DvergrCompanionManager.IsHiredByPlayer(
-                character,
-                player))
+            if (!DvergrCompanionManager.IsHiredByPlayer(character, player))
             {
                 return;
             }
 
-            DvergrPactDialogController.ShowBreakPactConfirmation(
-                player,
-                character);
+            DvergrPactDialogController.ShowBreakPactConfirmation(player, character);
         }
 
-        private static bool Prefix(
-            Player __instance,
-            GameObject go,
-            bool hold,
-            bool alt)
+        private static bool Prefix(Player __instance, GameObject go, bool hold, bool alt)
         {
             if (hold || !go)
             {
@@ -54,17 +44,14 @@ namespace HexDvergrAllies.Patches
                 return false;
             }
 
-            float distance = Vector3.Distance(
-                __instance.transform.position,
-                trader.transform.position);
+            float distance = Vector3.Distance(__instance.transform.position, trader.transform.position);
 
             if (distance > DvergrTraderManager.InteractionDistance)
             {
                 return false;
             }
 
-            if (HexDvergrAlliesConfiguration
-                .CompanionInteractionShortcut.Value.IsPressed())
+            if (HexDvergrAlliesConfiguration .CompanionInteractionShortcut.Value.IsPressed())
             {
                 return false;
             }

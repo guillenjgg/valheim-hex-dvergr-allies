@@ -12,9 +12,7 @@ namespace HexDvergrAllies.Patches
                 return true;
             }
 
-            bool dvergerVsPlayer =
-                (a.GetFaction() == Character.Faction.Dverger && b.IsPlayer()) ||
-                (b.GetFaction() == Character.Faction.Dverger && a.IsPlayer());
+            bool dvergerVsPlayer = (a.GetFaction() == Character.Faction.Dverger && b.IsPlayer()) || (b.GetFaction() == Character.Faction.Dverger && a.IsPlayer());
 
             if (!dvergerVsPlayer)
             {

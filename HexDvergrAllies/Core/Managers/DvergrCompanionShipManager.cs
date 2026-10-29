@@ -29,11 +29,9 @@ namespace HexDvergrAllies.Core.Managers
             internal Vector3 LocalPosition;
         }
 
-        private static readonly Dictionary<Character, PassengerState> _passengers =
-            new Dictionary<Character, PassengerState>();
+        private static readonly Dictionary<Character, PassengerState> _passengers = new Dictionary<Character, PassengerState>();
 
-        private static readonly List<Character> _removalBuffer =
-            new List<Character>();
+        private static readonly List<Character> _removalBuffer = new List<Character>();
 
         private static Ship _currentShip;
         private static float _nextBoardingCheckTime;
@@ -77,11 +75,7 @@ namespace HexDvergrAllies.Core.Managers
                     _boardingPending = true;
                     _boardingReadyTime = Time.time + BoardingDelay;
 
-                    Plugin.Log.LogInfo(
-                        $"[Dvergr Ship] Player entered ship: " +
-                        $"Ship={_currentShip.name}, " +
-                        $"BoardingDelay={BoardingDelay:F2}s, " +
-                        $"InitialPlayerPosition={player.transform.position}");
+                    Plugin.Log.LogInfo($"[Dvergr Ship] Player entered ship: " + $"Ship={_currentShip.name}, " + $"BoardingDelay={BoardingDelay:F2}s, " + $"InitialPlayerPosition={player.transform.position}");
                 }
             }
 
@@ -103,22 +97,17 @@ namespace HexDvergrAllies.Core.Managers
 
                 _boardingPending = false;
 
-                Plugin.Log.LogInfo(
-                    $"[Dvergr Ship] Boarding delay completed: " +
-                    $"Ship={_currentShip.name}, " +
-                    $"PlayerPosition={player.transform.position}");
+                Plugin.Log.LogInfo($"[Dvergr Ship] Boarding delay completed: " + $"Ship={_currentShip.name}, " + $"PlayerPosition={player.transform.position}");
 
                 BoardCompanions(player, _currentShip);
 
-                _nextBoardingCheckTime =
-                    Time.time + BoardingCheckInterval;
+                _nextBoardingCheckTime = Time.time + BoardingCheckInterval;
             }
             else if (Time.time >= _nextBoardingCheckTime)
             {
                 BoardCompanions(player, _currentShip);
 
-                _nextBoardingCheckTime =
-                    Time.time + BoardingCheckInterval;
+                _nextBoardingCheckTime = Time.time + BoardingCheckInterval;
             }
 
             UpdatePassengers(player);
@@ -126,17 +115,11 @@ namespace HexDvergrAllies.Core.Managers
 
         private static void CaptureBoardingPosition(Player player, Ship ship)
         {
-            _boardingOriginLocalPosition =
-                ship.transform.InverseTransformPoint(
-                    player.transform.position);
+            _boardingOriginLocalPosition = ship.transform.InverseTransformPoint(player.transform.position);
 
-            _boardingForwardLocalDirection =
-                ship.transform.InverseTransformDirection(
-                    player.transform.forward);
+            _boardingForwardLocalDirection = ship.transform.InverseTransformDirection(player.transform.forward);
 
-            _boardingRightLocalDirection =
-                ship.transform.InverseTransformDirection(
-                    player.transform.right);
+            _boardingRightLocalDirection = ship.transform.InverseTransformDirection(player.transform.right);
 
             _boardingForwardLocalDirection.y = 0f;
             _boardingRightLocalDirection.y = 0f;
@@ -159,12 +142,7 @@ namespace HexDvergrAllies.Core.Managers
                 _boardingRightLocalDirection.Normalize();
             }
 
-            Plugin.Log.LogInfo(
-                $"[Dvergr Ship] Boarding reference captured: " +
-                $"Ship={ship.name}, " +
-                $"LocalPosition={_boardingOriginLocalPosition}, " +
-                $"LocalForward={_boardingForwardLocalDirection}, " +
-                $"LocalRight={_boardingRightLocalDirection}");
+            Plugin.Log.LogInfo($"[Dvergr Ship] Boarding reference captured: " + $"Ship={ship.name}, " + $"LocalPosition={_boardingOriginLocalPosition}, " + $"LocalForward={_boardingForwardLocalDirection}, " + $"LocalRight={_boardingRightLocalDirection}");
         }
 
         private static void BoardCompanions(Player player, Ship ship)
@@ -181,9 +159,7 @@ namespace HexDvergrAllies.Core.Managers
                     continue;
                 }
 
-                float distance = Vector3.Distance(
-                    character.transform.position,
-                    player.transform.position);
+                float distance = Vector3.Distance(character.transform.position, player.transform.position);
 
                 if (distance > BoardingRange)
                 {
@@ -192,14 +168,11 @@ namespace HexDvergrAllies.Core.Managers
 
                 int passengerIndex = _nextPassengerIndex;
 
-                Vector3 localPosition =
-                    GetPassengerLocalPosition(passengerIndex);
+                Vector3 localPosition = GetPassengerLocalPosition(passengerIndex);
 
-                Vector3 worldPosition =
-                    ship.transform.TransformPoint(localPosition);
+                Vector3 worldPosition = ship.transform.TransformPoint(localPosition);
 
-                MonsterAI monsterAI =
-                    character.GetComponent<MonsterAI>();
+                MonsterAI monsterAI = character.GetComponent<MonsterAI>();
 
                 if (monsterAI)
                 {
@@ -208,24 +181,13 @@ namespace HexDvergrAllies.Core.Managers
                     monsterAI.StopMoving();
                 }
 
-                _passengers.Add(character, new PassengerState
-                {
-                    Ship = ship,
-                    LocalPosition = localPosition
-                });
+                _passengers.Add(character, new PassengerState { Ship = ship, LocalPosition = localPosition });
 
                 MoveCharacter(character, worldPosition);
 
                 _nextPassengerIndex++;
 
-                Plugin.Log.LogInfo(
-                    $"[Dvergr Ship] Boarded: " +
-                    $"Dvergr={character.name}, " +
-                    $"Ship={ship.name}, " +
-                    $"Position={worldPosition}, " +
-                    $"LocalPosition={localPosition}, " +
-                    $"PassengerIndex={passengerIndex}, " +
-                    $"Distance={distance:F2}");
+                Plugin.Log.LogInfo($"[Dvergr Ship] Boarded: " + $"Dvergr={character.name}, " + $"Ship={ship.name}, " + $"Position={worldPosition}, " + $"LocalPosition={localPosition}, " + $"PassengerIndex={passengerIndex}, " + $"Distance={distance:F2}");
             }
         }
 
@@ -234,18 +196,13 @@ namespace HexDvergrAllies.Core.Managers
             int column = passengerIndex % 2;
             int row = passengerIndex / 2;
 
-            float sideOffset =
-                column == 0 ? -PassengerSpacing : PassengerSpacing;
+            float sideOffset = column == 0 ? -PassengerSpacing : PassengerSpacing;
 
             // PassengerBowOffset is an absolute ship-local Z coordinate.
             // Subsequent rows move toward the stern.
-            float forwardPosition =
-                PassengerBowOffset - PassengerRowSpacing * row;
+            float forwardPosition = PassengerBowOffset - PassengerRowSpacing * row;
 
-            Vector3 localPosition = new Vector3(
-                sideOffset,
-                _boardingOriginLocalPosition.y + BoardingHeightOffset,
-                forwardPosition);
+            Vector3 localPosition = new Vector3(sideOffset, _boardingOriginLocalPosition.y + BoardingHeightOffset, forwardPosition);
 
             return localPosition;
         }
@@ -259,21 +216,15 @@ namespace HexDvergrAllies.Core.Managers
                 Character character = entry.Key;
                 PassengerState state = entry.Value;
 
-                if (!character ||
-                    !state.Ship ||
-                    state.Ship != _currentShip ||
-                    !IsOwnedCompanion(character, player))
+                if (!character || !state.Ship || state.Ship != _currentShip || !IsOwnedCompanion(character, player))
                 {
                     _removalBuffer.Add(character);
                     continue;
                 }
 
-                Vector3 targetPosition =
-                    state.Ship.transform.TransformPoint(state.LocalPosition);
+                Vector3 targetPosition = state.Ship.transform.TransformPoint(state.LocalPosition);
 
-                float distance = Vector3.Distance(
-                    character.transform.position,
-                    targetPosition);
+                float distance = Vector3.Distance(character.transform.position, targetPosition);
 
                 if (distance > PositionCorrectionDistance)
                 {
@@ -281,8 +232,7 @@ namespace HexDvergrAllies.Core.Managers
                 }
                 else
                 {
-                    Rigidbody rigidbody =
-                        character.GetComponent<Rigidbody>();
+                    Rigidbody rigidbody = character.GetComponent<Rigidbody>();
 
                     if (rigidbody)
                     {
@@ -300,8 +250,7 @@ namespace HexDvergrAllies.Core.Managers
 
         private static void MoveCharacter(Character character, Vector3 position)
         {
-            Rigidbody rigidbody =
-                character.GetComponent<Rigidbody>();
+            Rigidbody rigidbody = character.GetComponent<Rigidbody>();
 
             if (rigidbody)
             {
@@ -322,12 +271,9 @@ namespace HexDvergrAllies.Core.Managers
                 return false;
             }
 
-            ZNetView netView =
-                character.GetComponent<ZNetView>();
+            ZNetView netView = character.GetComponent<ZNetView>();
 
-            if (!netView ||
-                !netView.IsValid() ||
-                !netView.IsOwner())
+            if (!netView || !netView.IsValid() || !netView.IsOwner())
             {
                 return false;
             }
@@ -339,8 +285,7 @@ namespace HexDvergrAllies.Core.Managers
                 return false;
             }
 
-            return zdo.GetBool(HiredKey, false) &&
-                   zdo.GetLong(OwnerKey, 0L) == player.GetPlayerID();
+            return zdo.GetBool(HiredKey, false) && zdo.GetLong(OwnerKey, 0L) == player.GetPlayerID();
         }
 
         private static void DisembarkAll()
@@ -358,11 +303,7 @@ namespace HexDvergrAllies.Core.Managers
 
             foreach (Character character in _removalBuffer)
             {
-                ReleasePassenger(
-                    character,
-                    player,
-                    true,
-                    passengerIndex);
+                ReleasePassenger(character, player, true, passengerIndex);
 
                 passengerIndex++;
             }
@@ -370,17 +311,11 @@ namespace HexDvergrAllies.Core.Managers
             _nextPassengerIndex = 0;
         }
 
-        private static void ReleasePassenger(
-            Character character,
-            Player player,
-            bool relocate,
-            int passengerIndex = 0)
+        private static void ReleasePassenger(Character character, Player player, bool relocate, int passengerIndex = 0)
         {
             _passengers.Remove(character);
 
-            if (!character ||
-                !player ||
-                !IsOwnedCompanion(character, player))
+            if (!character || !player || !IsOwnedCompanion(character, player))
             {
                 return;
             }
@@ -389,29 +324,19 @@ namespace HexDvergrAllies.Core.Managers
             {
                 Vector3 destination;
 
-                if (TryGetDisembarkPosition(
-                    player,
-                    passengerIndex,
-                    out destination))
+                if (TryGetDisembarkPosition(player, passengerIndex, out destination))
                 {
                     MoveCharacter(character, destination);
 
-                    Plugin.Log.LogInfo(
-                        $"[Dvergr Ship] Relocated on disembark: " +
-                        $"Dvergr={character.name}, " +
-                        $"Destination={destination}");
+                    Plugin.Log.LogInfo($"[Dvergr Ship] Relocated on disembark: " + $"Dvergr={character.name}, " + $"Destination={destination}");
                 }
                 else
                 {
-                    Plugin.Log.LogWarning(
-                        $"[Dvergr Ship] Disembark relocation skipped: " +
-                        $"Dvergr={character.name}, " +
-                        $"Reason=No safe ground found");
+                    Plugin.Log.LogWarning($"[Dvergr Ship] Disembark relocation skipped: " + $"Dvergr={character.name}, " + $"Reason=No safe ground found");
                 }
             }
 
-            MonsterAI monsterAI =
-                character.GetComponent<MonsterAI>();
+            MonsterAI monsterAI = character.GetComponent<MonsterAI>();
 
             if (monsterAI)
             {
@@ -419,32 +344,18 @@ namespace HexDvergrAllies.Core.Managers
                 monsterAI.SetFollowTarget(player.gameObject);
             }
 
-            Plugin.Log.LogInfo(
-                $"[Dvergr Ship] Disembarked: " +
-                $"Dvergr={character.name}");
+            Plugin.Log.LogInfo($"[Dvergr Ship] Disembarked: " + $"Dvergr={character.name}");
         }
 
-        private static bool TryGetDisembarkPosition(
-            Player player,
-            int passengerIndex,
-            out Vector3 destination)
+        private static bool TryGetDisembarkPosition(Player player, int passengerIndex, out Vector3 destination)
         {
             destination = Vector3.zero;
 
-            Vector3 offset =
-                -player.transform.forward * DisembarkDistance +
-                player.transform.right *
-                ((passengerIndex % 2 == 0 ? -1f : 1f) * PassengerSpacing);
+            Vector3 offset = -player.transform.forward * DisembarkDistance + player.transform.right * ((passengerIndex % 2 == 0 ? -1f : 1f) * PassengerSpacing);
 
-            Vector3 rayOrigin =
-                player.transform.position +
-                offset +
-                Vector3.up * DisembarkRaycastHeight;
+            Vector3 rayOrigin = player.transform.position + offset + Vector3.up * DisembarkRaycastHeight;
 
-            RaycastHit[] hits = Physics.RaycastAll(
-                rayOrigin,
-                Vector3.down,
-                DisembarkRaycastDistance);
+            RaycastHit[] hits = Physics.RaycastAll(rayOrigin, Vector3.down, DisembarkRaycastDistance);
 
             float highestSurface = float.NegativeInfinity;
             bool foundSurface = false;
@@ -453,8 +364,7 @@ namespace HexDvergrAllies.Core.Managers
             {
                 Collider collider = hit.collider;
 
-                if (!collider ||
-                    collider.isTrigger)
+                if (!collider || collider.isTrigger)
                 {
                     continue;
                 }
@@ -472,8 +382,7 @@ namespace HexDvergrAllies.Core.Managers
                 if (hit.point.y > highestSurface)
                 {
                     highestSurface = hit.point.y;
-                    destination =
-                        hit.point + Vector3.up * BoardingHeightOffset;
+                    destination = hit.point + Vector3.up * BoardingHeightOffset;
 
                     foundSurface = true;
                 }
