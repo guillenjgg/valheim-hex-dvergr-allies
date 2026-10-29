@@ -61,8 +61,11 @@ namespace HexDvergrAllies.Patches
                 trader.m_name +
                 "\n[<color=yellow><b>$KEY_Use</b></color>] $raven_interact");
 
-            __result +=
-                "\n" + companionPrompt + "Forge Pact";
+            if (!DvergrCompanionManager.HasHiredCompanion(player))
+            {
+                __result +=
+                    "\n" + companionPrompt + "Forge Pact";
+            }
 
             return false;
         }

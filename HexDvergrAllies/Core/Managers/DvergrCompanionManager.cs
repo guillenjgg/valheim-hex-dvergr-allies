@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace HexDvergrAllies.Core.Managers
@@ -14,6 +15,9 @@ namespace HexDvergrAllies.Core.Managers
 
         private const float FollowLogInterval = 5f;
         private const float FollowOwnerGracePeriod = 10f;
+
+        private static readonly Dictionary<long, ZDOID> _hiredCompanions =
+            new Dictionary<long, ZDOID>();
 
         private static readonly Dictionary<ZDOID, float> _lastFollowLogTimes =
             new Dictionary<ZDOID, float>();
@@ -47,8 +51,34 @@ namespace HexDvergrAllies.Core.Managers
                 Unhire(character, sender, playerId);
             });
 
+            ZDO zdo = nview.GetZDO();
+
+            if (zdo.GetBool(HiredKey, false))
+            {
+                long ownerPlayerId = zdo.GetLong(OwnerKey, 0L);
+
+                if (ownerPlayerId != 0L)
+                {
+                    ZDOID existingCompanion;
+
+                    if (!_hiredCompanions.TryGetValue(
+                        ownerPlayerId, out existingCompanion))
+                    {
+                        _hiredCompanions[ownerPlayerId] = zdo.m_uid;
+
+                        Plugin.Log.LogInfo(
+                            $"[Dvergr Companion] Existing hire cached: PlayerID={ownerPlayerId}, DvergrZDO={zdo.m_uid}");
+                    }
+                    else if (existingCompanion != zdo.m_uid)
+                    {
+                        Plugin.Log.LogWarning(
+                            $"[Dvergr Companion] Multiple existing hires detected: PlayerID={ownerPlayerId}, Cached={existingCompanion}, Additional={zdo.m_uid}");
+                    }
+                }
+            }
+
             Plugin.Log.LogInfo(
-                $"[Dvergr Companion] Initialized: Dvergr={character.name}, ZDO={nview.GetZDO().m_uid}, IsOwner={nview.IsOwner()}, IsHired={IsHired(character)}");
+                $"[Dvergr Companion] Initialized: Dvergr={character.name}, ZDO={zdo.m_uid}, IsOwner={nview.IsOwner()}, IsHired={IsHired(character)}");
         }
 
         internal static bool IsHired(Character character)
@@ -81,18 +111,52 @@ namespace HexDvergrAllies.Core.Managers
 
             ZDO zdo = nview.GetZDO();
 
-            return zdo.GetBool("HexDvergr_IsHired", false) &&
-                   zdo.GetLong("HexDvergr_HiredBy", 0L) == player.GetPlayerID();
+            return zdo.GetBool(HiredKey, false) &&
+                   zdo.GetLong(OwnerKey, 0L) == player.GetPlayerID();
+        }
+
+        internal static bool HasHiredCompanion(Player player)
+        {
+            if (!player)
+            {
+                return false;
+            }
+
+            ZDOID companionId;
+
+            return TryGetHiredCompanion(
+                player.GetPlayerID(),
+                out companionId);
         }
 
         internal static void RequestHire(Player player, Character character)
         {
+            if (!player || !character)
+            {
+                return;
+            }
+
             ZNetView nview = character.GetComponent<ZNetView>();
 
             if (!nview || !nview.IsValid())
             {
                 Plugin.Log.LogWarning(
                     "[Dvergr Companion] Hire request rejected: Reason=Invalid ZNetView");
+                return;
+            }
+
+            ZDOID existingCompanion;
+
+            if (TryGetHiredCompanion(
+                player.GetPlayerID(), out existingCompanion))
+            {
+                Plugin.Log.LogWarning(
+                    $"[Dvergr Companion] Hire request rejected: Player={player.GetPlayerName()}, ExistingCompanion={existingCompanion}, Reason=Already has companion");
+
+                player.Message(
+                    MessageHud.MessageType.Center,
+                    "You already have a Dvergr companion.");
+
                 return;
             }
 
@@ -104,6 +168,11 @@ namespace HexDvergrAllies.Core.Managers
 
         internal static void RequestUnhire(Player player, Character character)
         {
+            if (!player || !character)
+            {
+                return;
+            }
+
             ZNetView nview = character.GetComponent<ZNetView>();
 
             if (!nview || !nview.IsValid())
@@ -119,7 +188,47 @@ namespace HexDvergrAllies.Core.Managers
             nview.InvokeRPC(UnhireRpc, player.GetZDOID());
         }
 
-        private static void Hire(Character character, long sender, ZDOID playerId)
+        private static bool TryGetHiredCompanion(
+            long playerId, out ZDOID companionId)
+        {
+            if (!_hiredCompanions.TryGetValue(
+                playerId, out companionId))
+            {
+                return false;
+            }
+
+            if (ZDOMan.instance == null)
+            {
+                return true;
+            }
+
+            ZDO companionZdo = ZDOMan.instance.GetZDO(companionId);
+
+            if (companionZdo == null)
+            {
+                // Do not clear the cache merely because the
+                // companion's zone is currently unloaded.
+                return true;
+            }
+
+            bool isHired = companionZdo.GetBool(HiredKey, false);
+            long ownerPlayerId = companionZdo.GetLong(OwnerKey, 0L);
+
+            if (isHired && ownerPlayerId == playerId)
+            {
+                return true;
+            }
+
+            _hiredCompanions.Remove(playerId);
+
+            Plugin.Log.LogInfo(
+                $"[Dvergr Companion] Stale hire cache removed: PlayerID={playerId}, DvergrZDO={companionId}");
+
+            return false;
+        }
+
+        private static void Hire(
+            Character character, long sender, ZDOID playerId)
         {
             ZNetView nview = character.GetComponent<ZNetView>();
 
@@ -146,6 +255,17 @@ namespace HexDvergrAllies.Core.Managers
                 return;
             }
 
+            long ownerPlayerId = player.GetPlayerID();
+            ZDOID existingCompanion;
+
+            if (TryGetHiredCompanion(
+                ownerPlayerId, out existingCompanion))
+            {
+                Plugin.Log.LogWarning(
+                    $"[Dvergr Companion] Hire rejected: Player={player.GetPlayerName()}, PlayerID={ownerPlayerId}, ExistingCompanion={existingCompanion}, Reason=Already has companion");
+                return;
+            }
+
             MonsterAI monsterAI = character.GetComponent<MonsterAI>();
 
             if (!monsterAI)
@@ -155,7 +275,8 @@ namespace HexDvergrAllies.Core.Managers
                 return;
             }
 
-            DvergrCompanionBehaviorManager.CaptureState(character, monsterAI);
+            DvergrCompanionBehaviorManager.CaptureState(
+                character, monsterAI);
 
             if (!zdo.GetBool(HomeSavedKey, false))
             {
@@ -166,17 +287,23 @@ namespace HexDvergrAllies.Core.Managers
                     $"[Dvergr Companion] Home saved: Dvergr={character.name}, Position={character.transform.position}");
             }
 
-            zdo.Set(OwnerKey, player.GetPlayerID());
+            zdo.Set(OwnerKey, ownerPlayerId);
             zdo.Set(HiredKey, true);
+
+            _hiredCompanions[ownerPlayerId] = zdo.m_uid;
+
+            Plugin.Log.LogInfo(
+                $"[Dvergr Companion] Hire cached: PlayerID={ownerPlayerId}, DvergrZDO={zdo.m_uid}");
 
             monsterAI.ResetPatrolPoint();
             monsterAI.SetFollowTarget(player.gameObject);
 
             Plugin.Log.LogInfo(
-                $"[Dvergr Companion] Hired successfully: Dvergr={character.name}, Player={player.GetPlayerName()}, PlayerID={player.GetPlayerID()}");
+                $"[Dvergr Companion] Hired successfully: Dvergr={character.name}, Player={player.GetPlayerName()}, PlayerID={ownerPlayerId}");
         }
 
-        private static void Unhire(Character character, long sender, ZDOID playerId)
+        private static void Unhire(
+            Character character, long sender, ZDOID playerId)
         {
             ZNetView nview = character.GetComponent<ZNetView>();
 
@@ -228,15 +355,29 @@ namespace HexDvergrAllies.Core.Managers
                 return;
             }
 
-            Vector3 homePosition = zdo.GetVec3(HomeKey, character.transform.position);
+            Vector3 homePosition = zdo.GetVec3(
+                HomeKey, character.transform.position);
 
             monsterAI.SetFollowTarget(null);
             monsterAI.ResetPatrolPoint();
 
-            DvergrCompanionBehaviorManager.ResetBehavior(character, monsterAI);
+            DvergrCompanionBehaviorManager.ResetBehavior(
+                character, monsterAI);
 
             zdo.Set(HiredKey, false);
             zdo.Set(OwnerKey, 0L);
+
+            ZDOID cachedCompanion;
+
+            if (_hiredCompanions.TryGetValue(
+                ownerPlayerId, out cachedCompanion) &&
+                cachedCompanion == zdo.m_uid)
+            {
+                _hiredCompanions.Remove(ownerPlayerId);
+
+                Plugin.Log.LogInfo(
+                    $"[Dvergr Companion] Hire cache removed: PlayerID={ownerPlayerId}, DvergrZDO={zdo.m_uid}");
+            }
 
             _lastFollowLogTimes.Remove(zdo.m_uid);
             _followOwnerMissingSince.Remove(zdo.m_uid);
@@ -247,10 +388,12 @@ namespace HexDvergrAllies.Core.Managers
                 $"[Dvergr Companion] Unhired successfully: Dvergr={character.name}, Player={player.GetPlayerName()}, Home={homePosition}");
         }
 
-        private static void ReturnHome(Character character, ZDO zdo, Vector3 homePosition)
+        private static void ReturnHome(
+            Character character, ZDO zdo, Vector3 homePosition)
         {
             Vector3 previousPosition = character.transform.position;
-            float distance = Vector3.Distance(previousPosition, homePosition);
+            float distance = Vector3.Distance(
+                previousPosition, homePosition);
 
             Rigidbody rigidbody = character.GetComponent<Rigidbody>();
 
@@ -275,18 +418,23 @@ namespace HexDvergrAllies.Core.Managers
                 return null;
             }
 
-            GameObject playerObject = ZNetScene.instance.FindInstance(playerId);
+            GameObject playerObject =
+                ZNetScene.instance.FindInstance(playerId);
 
-            return playerObject ? playerObject.GetComponent<Player>() : null;
+            return playerObject
+                ? playerObject.GetComponent<Player>()
+                : null;
         }
 
-        private static bool IsWithinInteractionDistance(Player player, Character character)
+        private static bool IsWithinInteractionDistance(
+            Player player, Character character)
         {
             float distance = Vector3.Distance(
                 player.transform.position,
                 character.transform.position);
 
-            return distance <= DvergrTraderManager.InteractionDistance;
+            return distance <=
+                   DvergrTraderManager.InteractionDistance;
         }
 
         internal static void UpdateFollow(MonsterAI monsterAI)
@@ -325,7 +473,8 @@ namespace HexDvergrAllies.Core.Managers
 
                 float missingSince;
 
-                if (_followOwnerMissingSince.TryGetValue(zdo.m_uid, out missingSince))
+                if (_followOwnerMissingSince.TryGetValue(
+                    zdo.m_uid, out missingSince))
                 {
                     Plugin.Log.LogInfo(
                         $"[Dvergr Companion] Follow owner resolved: Dvergr={character.name}, OwnerPlayerID={playerId}, Waited={Time.time - missingSince:F2}s");
@@ -357,7 +506,8 @@ namespace HexDvergrAllies.Core.Managers
 
             float firstMissingTime;
 
-            if (!_followOwnerMissingSince.TryGetValue(zdo.m_uid, out firstMissingTime))
+            if (!_followOwnerMissingSince.TryGetValue(
+                zdo.m_uid, out firstMissingTime))
             {
                 firstMissingTime = Time.time;
                 _followOwnerMissingSince[zdo.m_uid] = firstMissingTime;
@@ -386,7 +536,8 @@ namespace HexDvergrAllies.Core.Managers
         {
             float lastLogTime;
 
-            if (_lastFollowLogTimes.TryGetValue(zdoId, out lastLogTime) &&
+            if (_lastFollowLogTimes.TryGetValue(
+                zdoId, out lastLogTime) &&
                 Time.time - lastLogTime < FollowLogInterval)
             {
                 return false;
