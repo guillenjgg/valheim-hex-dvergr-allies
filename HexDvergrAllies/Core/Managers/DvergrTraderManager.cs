@@ -1,4 +1,6 @@
-﻿namespace HexDvergrAllies.Core.Managers
+﻿using UnityEngine;
+
+namespace HexDvergrAllies.Core.Managers
 {
     internal static class DvergrTraderManager
     {
@@ -20,14 +22,16 @@
                 return;
             }
 
-            var biome = Heightmap.FindBiome(dvergr.transform.position);
+            Heightmap.Biome biome = Heightmap.FindBiome(
+                dvergr.transform.position);
 
             if (biome == Heightmap.Biome.None)
             {
                 return;
             }
 
-            var trader = dvergr.gameObject.AddComponent<Trader>();
+            Trader trader = dvergr.gameObject.AddComponent<Trader>();
+
             trader.m_name = dvergr.m_name;
             trader.m_standRange = 0f;
             trader.m_greetRange = 0f;
@@ -51,7 +55,8 @@
 
         internal static bool IsDvergrTrader(Trader trader)
         {
-            return trader.GetComponent<Humanoid>()?.GetFaction() ==
+            return trader &&
+                   trader.GetComponent<Humanoid>()?.GetFaction() ==
                    Character.Faction.Dverger;
         }
 
@@ -62,33 +67,63 @@
                    item.m_prefab.gameObject.name == ForgePactPrefab;
         }
 
-        internal static bool CanAffordForgePact(Player player, Character character)
+        internal static string GetForgePactPaymentName()
         {
-            if (!player || !character ||
-                DvergrCompanionManager.IsHired(character) ||
+            GameObject prefab = ObjectDB.instance.GetItemPrefab(
+                ForgePactPrefab);
+
+            if (!prefab)
+            {
+                return null;
+            }
+
+            ItemDrop itemDrop = prefab.GetComponent<ItemDrop>();
+
+            return itemDrop
+                ? itemDrop.m_itemData.m_shared.m_name
+                : null;
+        }
+
+        internal static bool CanAffordForgePact(
+            Player player,
+            Character character)
+        {
+            if (!player || !character)
+            {
+                return false;
+            }
+
+            if (DvergrCompanionManager.IsHired(character) ||
                 DvergrCompanionManager.HasHiredCompanion(player))
             {
                 return false;
             }
 
-            var prefab = ObjectDB.instance.GetItemPrefab(ForgePactPrefab);
+            string paymentName = GetForgePactPaymentName();
 
-            if (!prefab)
+            if (string.IsNullOrEmpty(paymentName))
             {
                 return false;
             }
 
-            var itemName = prefab.GetComponent<ItemDrop>().m_itemData.m_shared.m_name;
-
-            return player.GetInventory().CountItems(itemName) >= ForgePactCost;
+            return player.GetInventory().CountItems(paymentName) >=
+                   ForgePactCost;
         }
 
         internal static string GetPaymentTrophy(Inventory inventory)
         {
-            foreach (var prefabName in MistlandsTrophyPrefabs)
+            foreach (string prefabName in MistlandsTrophyPrefabs)
             {
-                var prefab = ObjectDB.instance.GetItemPrefab(prefabName);
-                var itemName = prefab.GetComponent<ItemDrop>().m_itemData.m_shared.m_name;
+                GameObject prefab = ObjectDB.instance.GetItemPrefab(
+                    prefabName);
+
+                if (!prefab)
+                {
+                    continue;
+                }
+
+                string itemName = prefab.GetComponent<ItemDrop>()
+                    .m_itemData.m_shared.m_name;
 
                 if (inventory.CountItems(itemName) > 0)
                 {
@@ -101,11 +136,14 @@
 
         private static void AddForgePact(Trader trader)
         {
-            var prefab = ObjectDB.instance.GetItemPrefab(ForgePactPrefab);
+            GameObject prefab = ObjectDB.instance.GetItemPrefab(
+                ForgePactPrefab);
 
             if (!prefab)
             {
-                Plugin.Log.LogWarning("[Dvergr Trader] MeadTasty prefab not found.");
+                Plugin.Log.LogWarning(
+                    "[Dvergr Trader] MeadTasty prefab not found.");
+
                 return;
             }
 
@@ -114,46 +152,52 @@
                 m_prefab = prefab.GetComponent<ItemDrop>(),
                 m_stack = 1,
                 m_price = 0,
-                m_tooltip = "Hire this Dvergr as your companion.",
+                m_tooltip = "Forge Pact: Hire this Dvergr for 2 Tasty Mead.",
                 m_buyPlayerEffects = new EffectList()
             });
         }
 
         private static void AddMistlandsItems(Trader trader)
         {
-            var needlePrefab = ObjectDB.instance.GetItemPrefab("DvergrNeedle");
+            GameObject needlePrefab = ObjectDB.instance.GetItemPrefab(
+                "DvergrNeedle");
 
-            if (!needlePrefab)
+            if (needlePrefab)
             {
-                Plugin.Log.LogWarning("[Dvergr Trader] DvergrNeedle prefab not found.");
-                return;
+                trader.m_items.Add(new Trader.TradeItem
+                {
+                    m_prefab = needlePrefab.GetComponent<ItemDrop>(),
+                    m_stack = 1,
+                    m_price = 0,
+                    m_tooltip = "",
+                    m_buyPlayerEffects = new EffectList()
+                });
+            }
+            else
+            {
+                Plugin.Log.LogWarning(
+                    "[Dvergr Trader] DvergrNeedle prefab not found.");
             }
 
-            trader.m_items.Add(new Trader.TradeItem
-            {
-                m_prefab = needlePrefab.GetComponent<ItemDrop>(),
-                m_stack = 1,
-                m_price = 0,
-                m_tooltip = "",
-                m_buyPlayerEffects = new EffectList()
-            });
+            GameObject softTissuePrefab = ObjectDB.instance.GetItemPrefab(
+                "Softtissue");
 
-            var softTissuePrefab = ObjectDB.instance.GetItemPrefab("Softtissue");
-
-            if (!softTissuePrefab)
+            if (softTissuePrefab)
             {
-                Plugin.Log.LogWarning("[Dvergr Trader] Softtissue prefab not found.");
-                return;
+                trader.m_items.Add(new Trader.TradeItem
+                {
+                    m_prefab = softTissuePrefab.GetComponent<ItemDrop>(),
+                    m_stack = 20,
+                    m_price = 2000,
+                    m_tooltip = "",
+                    m_buyPlayerEffects = new EffectList()
+                });
             }
-
-            trader.m_items.Add(new Trader.TradeItem
+            else
             {
-                m_prefab = softTissuePrefab.GetComponent<ItemDrop>(),
-                m_stack = 20,
-                m_price = 2000,
-                m_tooltip = "",
-                m_buyPlayerEffects = new EffectList()
-            });
+                Plugin.Log.LogWarning(
+                    "[Dvergr Trader] Softtissue prefab not found.");
+            }
         }
 
         private static void AddAshlandsItems(Trader trader)
