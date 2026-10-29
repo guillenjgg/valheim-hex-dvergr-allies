@@ -161,6 +161,19 @@ namespace HexDvergrAllies.Core.Managers
             nview.InvokeRPC(UnhireRpc, player.GetZDOID());
         }
 
+        internal static void ResetSessionState()
+        {
+            int hiredCount = _hiredCompanions.Count;
+            int followLogCount = _lastFollowLogTimes.Count;
+            int missingOwnerCount = _followOwnerMissingSince.Count;
+
+            _hiredCompanions.Clear();
+            _lastFollowLogTimes.Clear();
+            _followOwnerMissingSince.Clear();
+
+            Plugin.Log.LogInfo($"[Dvergr Companion] Session state reset: CachedHires={hiredCount}, FollowLogs={followLogCount}, MissingOwners={missingOwnerCount}");
+        }
+
         private static bool TryGetHiredCompanion(long playerId, out ZDOID companionId)
         {
             if (!_hiredCompanions.TryGetValue(playerId, out companionId))
@@ -453,9 +466,19 @@ namespace HexDvergrAllies.Core.Managers
                 return;
             }
 
-            if (ShouldLogFollow(zdo.m_uid))
+            Player localPlayer = Player.m_localPlayer;
+            bool isLocalOwner = localPlayer && localPlayer.GetPlayerID() == playerId;
+
+            if (isLocalOwner)
             {
-                Plugin.Log.LogWarning($"[Dvergr Companion] Follow owner not found: Dvergr={character.name}, OwnerPlayerID={playerId}, MissingFor={missingDuration:F2}s, LocalPlayerReady={Player.m_localPlayer != null}");
+                if (ShouldLogFollow(zdo.m_uid))
+                {
+                    Plugin.Log.LogWarning($"[Dvergr Companion] Local follow owner not found: Dvergr={character.name}, ZDO={zdo.m_uid}, OwnerPlayerID={playerId}, LocalPlayerID={localPlayer.GetPlayerID()}, MissingFor={missingDuration:F2}s");
+                }
+            }
+            else if (ShouldLogFollow(zdo.m_uid))
+            {
+                Plugin.Log.LogInfo($"[Dvergr Companion] Remote follow owner unavailable: Dvergr={character.name}, ZDO={zdo.m_uid}, OwnerPlayerID={playerId}, LocalPlayerID={(localPlayer ? localPlayer.GetPlayerID() : 0L)}, MissingFor={missingDuration:F2}s");
             }
 
             if (followTarget)

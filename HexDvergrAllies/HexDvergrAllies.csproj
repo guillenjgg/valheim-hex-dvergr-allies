@@ -124,6 +124,7 @@
     <Compile Include="Patches\Debug\HudHoverDebugPatch.cs" />
     <Compile Include="Patches\Debug\MonsterAICompanionDiagnosticsPatch.cs" />
     <Compile Include="Patches\Homestead\TeleportWorldInteractPatch.cs" />
+    <Compile Include="Patches\Networking\ZNetSceneCompanionSessionPatch.cs" />
     <Compile Include="Patches\Trading\BaseAIIdleMovementPatch.cs" />
     <Compile Include="Patches\Combat\BaseAIIsEnemyPatch.cs" />
     <Compile Include="Patches\Dvergr\CharacterAwakePatch.cs" />
