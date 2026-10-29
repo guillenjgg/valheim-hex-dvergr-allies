@@ -131,6 +131,7 @@
     <Compile Include="Patches\Trading\DvergrTraderUpdatePatch.cs" />
     <Compile Include="Patches\Combat\MineRock5RPCDamagePatch.cs" />
     <Compile Include="Patches\Companions\MonsterAICompanionFollowPatch.cs" />
+    <Compile Include="Patches\Trading\PlayerCompanionShortcutPatch.cs" />
     <Compile Include="Patches\Trading\PlayerInteractPatch.cs" />
     <Compile Include="Patches\Homestead\PlayerRemovePiecePatch.cs" />
     <Compile Include="Patches\Homestead\PlayerUpdatePlacementGhostPatch.cs" />

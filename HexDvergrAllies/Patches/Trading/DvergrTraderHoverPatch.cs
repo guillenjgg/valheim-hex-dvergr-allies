@@ -32,6 +32,15 @@ namespace HexDvergrAllies.Patches
                 return false;
             }
 
+            string shortcutText =
+                HexDvergrAlliesConfiguration
+                    .CompanionInteractionShortcut.Value.ToString();
+
+            string companionPrompt =
+                "[<color=yellow><b>" +
+                shortcutText +
+                "</b></color>] ";
+
             if (DvergrCompanionManager.IsHired(__instance))
             {
                 __result = Localization.instance.Localize(
@@ -42,7 +51,7 @@ namespace HexDvergrAllies.Patches
                     player))
                 {
                     __result +=
-                        "\n[<color=yellow><b>Shift + E</b></color>] Break Pact";
+                        "\n" + companionPrompt + "Break Pact";
                 }
 
                 return false;
@@ -53,7 +62,7 @@ namespace HexDvergrAllies.Patches
                 "\n[<color=yellow><b>$KEY_Use</b></color>] $raven_interact");
 
             __result +=
-                "\n[<color=yellow><b>Shift + E</b></color>] Forge Pact";
+                "\n" + companionPrompt + "Forge Pact";
 
             return false;
         }

@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿
+using HarmonyLib;
 using HexDvergrAllies.Core.Managers;
 using HexDvergrAllies.Core.UI;
 using UnityEngine;
@@ -8,6 +9,42 @@ namespace HexDvergrAllies.Patches
     [HarmonyPatch(typeof(Player), nameof(Player.Interact))]
     internal static class PlayerInteractPatch
     {
+        internal static void HandleCompanionInteraction(
+            Player player,
+            Character character)
+        {
+            if (!player || !character)
+            {
+                return;
+            }
+
+            if (DvergrCompanionManager.IsHired(character))
+            {
+                if (!DvergrCompanionManager.IsHiredByPlayer(
+                    character,
+                    player))
+                {
+                    Plugin.Log.LogWarning(
+                        "[Dvergr Companion] Break Pact rejected: Player does not own companion.");
+
+                    return;
+                }
+
+                DvergrPactDialogController.ShowBreakPactConfirmation(
+                    player,
+                    character);
+
+                return;
+            }
+
+            Plugin.Log.LogInfo(
+                $"[Dvergr Companion] Forge Pact interaction: Player={player.GetPlayerName()}, Dvergr={character.name}");
+
+            DvergrCompanionManager.RequestHire(
+                player,
+                character);
+        }
+
         private static bool Prefix(
             Player __instance,
             GameObject go,
@@ -48,49 +85,20 @@ namespace HexDvergrAllies.Patches
                 return false;
             }
 
-            bool shiftPressed =
-                ZInput.GetKey(KeyCode.LeftShift) ||
-                ZInput.GetKey(KeyCode.RightShift);
-
-            bool isHired = DvergrCompanionManager.IsHired(character);
+            // The configured companion shortcut is handled by Player.Update.
+            // Do not allow the same keypress to open the trader.
+            if (HexDvergrAlliesConfiguration
+                .CompanionInteractionShortcut.Value.IsPressed())
+            {
+                return false;
+            }
 
             if (alt)
             {
                 return false;
             }
 
-            if (shiftPressed)
-            {
-                if (isHired)
-                {
-                    if (!DvergrCompanionManager.IsHiredByPlayer(
-                        character,
-                        __instance))
-                    {
-                        Plugin.Log.LogWarning(
-                            "[Dvergr Companion] Break Pact rejected: Player does not own companion.");
-
-                        return false;
-                    }
-
-                    DvergrPactDialogController.ShowBreakPactConfirmation(
-                        __instance,
-                        character);
-                }
-                else
-                {
-                    Plugin.Log.LogInfo(
-                        $"[Dvergr Companion] Forge Pact interaction: Player={__instance.GetPlayerName()}, Dvergr={character.name}");
-
-                    DvergrCompanionManager.RequestHire(
-                        __instance,
-                        character);
-                }
-
-                return false;
-            }
-
-            if (isHired)
+            if (DvergrCompanionManager.IsHired(character))
             {
                 return false;
             }
