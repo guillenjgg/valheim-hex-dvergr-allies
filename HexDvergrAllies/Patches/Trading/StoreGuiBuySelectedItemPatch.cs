@@ -63,7 +63,7 @@ namespace HexDvergrAllies.Patches
 
                 _hirePending = true;
 
-                Plugin.Log.LogInfo($"[Dvergr Companion] Forge Pact requested: " + $"Player={player.GetPlayerName()}, " + $"Dvergr={character.name}, " + $"ZDO={companionId}, " + $"Cost={DvergrTraderManager.ForgePactCost} MeadTasty");
+                Plugin.Log.LogInfo($"[Dvergr Companion] Forge Pact requested: " + $"Player={player.GetPlayerName()}, " + $"Dvergr={character.name}, " + $"ZDO={companionId}, " + $"Cost={DvergrPricingConfig.ForgePactCost} MeadTasty");
 
                 __instance.StartCoroutine(CompleteForgePact(player, companionId));
 
@@ -142,16 +142,16 @@ namespace HexDvergrAllies.Patches
 
                     Inventory inventory = player.GetInventory();
 
-                    if (inventory.CountItems(paymentName) < DvergrTraderManager.ForgePactCost)
+                    if (inventory.CountItems(paymentName) < DvergrPricingConfig.ForgePactCost)
                     {
                         Plugin.Log.LogError("[Dvergr Companion] Forge Pact payment failed: MeadTasty no longer available.");
 
                         break;
                     }
 
-                    inventory.RemoveItem(paymentName, DvergrTraderManager.ForgePactCost);
+                    inventory.RemoveItem(paymentName, DvergrPricingConfig.ForgePactCost);
 
-                    Plugin.Log.LogInfo($"[Dvergr Companion] Forge Pact completed: " + $"Player={player.GetPlayerName()}, " + $"Dvergr={character.name}, " + $"Cost={DvergrTraderManager.ForgePactCost} MeadTasty");
+                    Plugin.Log.LogInfo($"[Dvergr Companion] Forge Pact completed: " + $"Player={player.GetPlayerName()}, " + $"Dvergr={character.name}, " + $"Cost={DvergrPricingConfig.ForgePactCost} MeadTasty");
 
                     player.Message(MessageHud.MessageType.Center, "Forge Pact established.");
 

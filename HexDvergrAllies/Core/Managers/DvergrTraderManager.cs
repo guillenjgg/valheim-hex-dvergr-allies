@@ -6,7 +6,6 @@ namespace HexDvergrAllies.Core.Managers
     {
         internal const float InteractionDistance = 2f;
         internal const string ForgePactPrefab = "MeadTasty";
-        internal const int ForgePactCost = 2;
 
         private static readonly string[] MistlandsTrophyPrefabs = {
             "TrophySeeker",
@@ -94,7 +93,7 @@ namespace HexDvergrAllies.Core.Managers
                 return false;
             }
 
-            return player.GetInventory().CountItems(paymentName) >= ForgePactCost;
+            return player.GetInventory().CountItems(paymentName) >= DvergrPricingConfig.ForgePactCost;
         }
 
         internal static string GetPaymentTrophy(Inventory inventory)
@@ -131,7 +130,7 @@ namespace HexDvergrAllies.Core.Managers
                 return;
             }
 
-            trader.m_items.Add(new Trader.TradeItem { m_prefab = prefab.GetComponent<ItemDrop>(), m_stack = 1, m_price = 0, m_tooltip = "Forge Pact: Hire this Dvergr for 2 Tasty Mead.", m_buyPlayerEffects = new EffectList() });
+            trader.m_items.Add(new Trader.TradeItem { m_prefab = prefab.GetComponent<ItemDrop>(), m_stack = 1, m_price = 0, m_tooltip = $"Forge Pact: Hire this Dvergr for {DvergrPricingConfig.ForgePactCostDisplay}.", m_buyPlayerEffects = new EffectList() });
         }
 
         private static void AddMistlandsItems(Trader trader)

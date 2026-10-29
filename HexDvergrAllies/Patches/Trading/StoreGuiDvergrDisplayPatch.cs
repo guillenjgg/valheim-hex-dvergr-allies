@@ -155,7 +155,7 @@ namespace HexDvergrAllies.Patches
                     SetForgePactIcon(item);
 
                     TMP_Text priceText = ConfigureCustomPrice(item);
-                    priceText.text = "2 Tasty Mead";
+                    priceText.text = DvergrPricingConfig.ForgePactCostDisplay;
 
                     continue;
                 }

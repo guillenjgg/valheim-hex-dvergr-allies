@@ -143,7 +143,7 @@ namespace HexDvergrAllies.Core.Managers
             InitializePurchaseCount();
 
             var purchaseNumber = _purchaseCount + 1;
-            var sapCost = _purchaseCount >= 2 ? 20 : 0;
+            var sapCost = _purchaseCount >= DvergrPricingConfig.FreeExtractorPurchases ? DvergrPricingConfig.ExtractorSapCost : 0;
 
             Plugin.Log.LogInfo($"[Dvergr Trade] Price request: Peer={sender}, Trader={traderZdoId}, Purchase={purchaseNumber}, Trophy=1, Sap={sapCost}");
 
@@ -271,7 +271,7 @@ namespace HexDvergrAllies.Core.Managers
                 }
 
                 var purchaseNumber = _purchaseCount + 1;
-                var sapCost = _purchaseCount >= 2 ? 20 : 0;
+                var sapCost = _purchaseCount >= DvergrPricingConfig.FreeExtractorPurchases ? DvergrPricingConfig.ExtractorSapCost : 0;
 
                 _pendingPeer = sender;
                 _pendingTrader = traderZdoId;
@@ -417,7 +417,7 @@ namespace HexDvergrAllies.Core.Managers
                 Plugin.Log.LogInfo($"[Dvergr Trade] PURCHASE COMPLETE: Purchase={purchaseNumber}, WorldPurchaseCount={_purchaseCount}");
 
                 var nextPurchaseNumber = _purchaseCount + 1;
-                var nextSapCost = _purchaseCount >= 2 ? 20 : 0;
+                var nextSapCost = _purchaseCount >= DvergrPricingConfig.FreeExtractorPurchases ? DvergrPricingConfig.ExtractorSapCost : 0;
 
                 ZRoutedRpc.instance.InvokeRoutedRPC(sender, PriceResponseRpc, nextPurchaseNumber, nextSapCost);
             }

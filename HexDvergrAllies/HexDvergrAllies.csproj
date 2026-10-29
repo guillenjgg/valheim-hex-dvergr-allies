@@ -94,6 +94,7 @@
     <Compile Include="Core\Managers\DvergrCompanionManager.cs" />
     <Compile Include="Core\Managers\DvergrCompanionPortalRelocationManager.cs" />
     <Compile Include="Core\Managers\DvergrCompanionShipManager.cs" />
+    <Compile Include="DvergrPricingConfig.cs" />
     <Compile Include="Core\Managers\DvergrTraderManager.cs" />
     <Compile Include="Core\Managers\DvergrTradeRpcManager.cs" />
     <Compile Include="Core\Managers\DvergrTradeSessionManager.cs" />
