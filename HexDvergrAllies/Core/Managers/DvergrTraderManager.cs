@@ -69,8 +69,7 @@ namespace HexDvergrAllies.Core.Managers
 
         internal static string GetForgePactPaymentName()
         {
-            GameObject prefab = ObjectDB.instance.GetItemPrefab(
-                ForgePactPrefab);
+            GameObject prefab = ObjectDB.instance.GetItemPrefab(ForgePactPrefab);
 
             if (!prefab)
             {
@@ -84,9 +83,7 @@ namespace HexDvergrAllies.Core.Managers
                 : null;
         }
 
-        internal static bool CanAffordForgePact(
-            Player player,
-            Character character)
+        internal static bool CanAffordForgePact(Player player, Character character)
         {
             if (!player || !character)
             {
@@ -106,8 +103,7 @@ namespace HexDvergrAllies.Core.Managers
                 return false;
             }
 
-            return player.GetInventory().CountItems(paymentName) >=
-                   ForgePactCost;
+            return player.GetInventory().CountItems(paymentName) >= ForgePactCost;
         }
 
         internal static string GetPaymentTrophy(Inventory inventory)

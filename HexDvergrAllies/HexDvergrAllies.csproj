@@ -89,6 +89,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\AssetHelper.cs" />
     <Compile Include="Core\Managers\DvergrCompanionBehaviorManager.cs" />
     <Compile Include="Core\Managers\DvergrCompanionManager.cs" />
     <Compile Include="Core\Managers\DvergrCompanionPortalRelocationManager.cs" />
@@ -158,6 +159,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\DvergrPortrait.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

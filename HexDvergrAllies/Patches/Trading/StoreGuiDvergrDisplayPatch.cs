@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
-using HarmonyLib;
+﻿using HarmonyLib;
+using HexDvergrAllies.Assets;
 using HexDvergrAllies.Core.Managers;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,11 +11,9 @@ namespace HexDvergrAllies.Patches
     [HarmonyPatch]
     internal static class StoreGuiDvergrDisplayPatch
     {
-        private static readonly AccessTools.FieldRef<StoreGui, Trader> TraderField =
-            AccessTools.FieldRefAccess<StoreGui, Trader>("m_trader");
+        private static readonly AccessTools.FieldRef<StoreGui, Trader> TraderField = AccessTools.FieldRefAccess<StoreGui, Trader>("m_trader");
 
-        private static readonly AccessTools.FieldRef<StoreGui, List<GameObject>> ItemListField =
-            AccessTools.FieldRefAccess<StoreGui, List<GameObject>>("m_itemList");
+        private static readonly AccessTools.FieldRef<StoreGui, List<GameObject>> ItemListField = AccessTools.FieldRefAccess<StoreGui, List<GameObject>>("m_itemList");
 
         private static GameObject _paymentPanel;
         private static TMP_Text _paymentText;
@@ -48,11 +47,9 @@ namespace HexDvergrAllies.Patches
 
             Trader trader = TraderField(__instance);
 
-            bool isDvergrTrader =
-                trader && DvergrTraderManager.IsDvergrTrader(trader);
+            bool isDvergrTrader = trader && DvergrTraderManager.IsDvergrTrader(trader);
 
-            __instance.m_coinText.transform.parent.gameObject.SetActive(
-                !isDvergrTrader);
+            __instance.m_coinText.transform.parent.gameObject.SetActive(!isDvergrTrader);
 
             if (_paymentPanel)
             {
@@ -87,23 +84,15 @@ namespace HexDvergrAllies.Patches
                 return;
             }
 
-            RectTransform buyButton =
-                storeGui.m_buyButton.GetComponent<RectTransform>();
+            RectTransform buyButton = storeGui.m_buyButton.GetComponent<RectTransform>();
 
-            TMP_Text sourceText =
-                storeGui.m_buyButton.GetComponentInChildren<TMP_Text>();
+            TMP_Text sourceText = storeGui.m_buyButton.GetComponentInChildren<TMP_Text>();
 
-            _paymentPanel = new GameObject(
-                "HexDvergrPaymentPanel",
-                typeof(RectTransform),
-                typeof(Image));
+            _paymentPanel = new GameObject("HexDvergrPaymentPanel", typeof(RectTransform), typeof(Image));
 
-            _paymentPanel.transform.SetParent(
-                buyButton.parent,
-                false);
+            _paymentPanel.transform.SetParent(buyButton.parent, false);
 
-            RectTransform panelRect =
-                _paymentPanel.GetComponent<RectTransform>();
+            RectTransform panelRect = _paymentPanel.GetComponent<RectTransform>();
 
             panelRect.anchorMin = new Vector2(0.5f, 0.5f);
             panelRect.anchorMax = new Vector2(0.5f, 0.5f);
@@ -114,22 +103,18 @@ namespace HexDvergrAllies.Patches
 
             Image background = _paymentPanel.GetComponent<Image>();
 
-            background.color =
-                new Color(0.12f, 0.10f, 0.08f, 0.92f);
+            background.color = new Color(0.12f, 0.10f, 0.08f, 0.92f);
 
             background.raycastTarget = false;
 
             Outline outline = _paymentPanel.AddComponent<Outline>();
 
-            outline.effectColor =
-                new Color(0.55f, 0.42f, 0.25f, 1f);
+            outline.effectColor = new Color(0.55f, 0.42f, 0.25f, 1f);
 
             outline.effectDistance = new Vector2(1f, -1f);
             outline.useGraphicAlpha = false;
 
-            GameObject paymentObject = Object.Instantiate(
-                sourceText.gameObject,
-                _paymentPanel.transform);
+            GameObject paymentObject = Object.Instantiate(sourceText.gameObject, _paymentPanel.transform);
 
             paymentObject.name = "PaymentText";
 
@@ -140,8 +125,7 @@ namespace HexDvergrAllies.Patches
             _paymentText.fontSize = 15f;
             _paymentText.raycastTarget = false;
 
-            RectTransform textRect =
-                paymentObject.GetComponent<RectTransform>();
+            RectTransform textRect = paymentObject.GetComponent<RectTransform>();
 
             textRect.anchorMin = Vector2.zero;
             textRect.anchorMax = Vector2.one;
@@ -156,19 +140,14 @@ namespace HexDvergrAllies.Patches
             _lastHasPrice = false;
         }
 
-        private static void UpdateItemPrices(
-            Trader trader,
-            List<GameObject> itemList)
+        private static void UpdateItemPrices(Trader trader, List<GameObject> itemList)
         {
             _lastSapCost = DvergrTradeRpcManager.CurrentSapCost;
             _lastHasPrice = DvergrTradeRpcManager.HasCurrentPrice;
 
-            List<Trader.TradeItem> tradeItems =
-                trader.GetAvailableItems();
+            List<Trader.TradeItem> tradeItems = trader.GetAvailableItems();
 
-            for (int i = 0;
-                 i < tradeItems.Count && i < itemList.Count;
-                 i++)
+            for (int i = 0; i < tradeItems.Count && i < itemList.Count; i++)
             {
                 Trader.TradeItem tradeItem = tradeItems[i];
                 Transform item = itemList[i].transform;
@@ -176,6 +155,7 @@ namespace HexDvergrAllies.Patches
                 if (DvergrTraderManager.IsForgePact(tradeItem))
                 {
                     SetForgePactName(item, tradeItem);
+                    SetForgePactIcon(item);
 
                     TMP_Text priceText = ConfigureCustomPrice(item);
                     priceText.text = "2 Tasty Mead";
@@ -188,8 +168,7 @@ namespace HexDvergrAllies.Patches
                     continue;
                 }
 
-                TMP_Text extractorPriceText =
-                    ConfigureCustomPrice(item);
+                TMP_Text extractorPriceText = ConfigureCustomPrice(item);
 
                 extractorPriceText.text = !_lastHasPrice
                     ? "Loading..."
@@ -199,18 +178,13 @@ namespace HexDvergrAllies.Patches
             }
         }
 
-        private static void SetForgePactName(
-            Transform item,
-            Trader.TradeItem tradeItem)
+        private static void SetForgePactName(Transform item, Trader.TradeItem tradeItem)
         {
-            string sharedName =
-                tradeItem.m_prefab.m_itemData.m_shared.m_name;
+            string sharedName = tradeItem.m_prefab.m_itemData.m_shared.m_name;
 
-            string localizedName =
-                Localization.instance.Localize(sharedName);
+            string localizedName = Localization.instance.Localize(sharedName);
 
-            TMP_Text[] textComponents =
-                item.GetComponentsInChildren<TMP_Text>(true);
+            TMP_Text[] textComponents = item.GetComponentsInChildren<TMP_Text>(true);
 
             foreach (TMP_Text textComponent in textComponents)
             {
@@ -230,8 +204,7 @@ namespace HexDvergrAllies.Patches
 
             foreach (TMP_Text textComponent in textComponents)
             {
-                string objectName =
-                    textComponent.gameObject.name.ToLowerInvariant();
+                string objectName = textComponent.gameObject.name.ToLowerInvariant();
 
                 if (objectName == "name" ||
                     objectName == "itemname" ||
@@ -254,16 +227,14 @@ namespace HexDvergrAllies.Patches
             {
                 coinBackground.gameObject.SetActive(true);
 
-                Image backgroundImage =
-                    coinBackground.GetComponent<Image>();
+                Image backgroundImage = coinBackground.GetComponent<Image>();
 
                 if (backgroundImage)
                 {
                     backgroundImage.enabled = false;
                 }
 
-                Transform coinIcon =
-                    coinBackground.Find("coin icon");
+                Transform coinIcon = coinBackground.Find("coin icon");
 
                 if (coinIcon)
                 {
@@ -271,20 +242,15 @@ namespace HexDvergrAllies.Patches
                 }
             }
 
-            Transform priceTransform = Utils.FindChild(
-                item,
-                "price",
-                Utils.IterativeSearchType.DepthFirst);
+            Transform priceTransform = Utils.FindChild(item, "price", Utils.IterativeSearchType.DepthFirst);
 
-            TMP_Text priceText =
-                priceTransform.GetComponent<TMP_Text>();
+            TMP_Text priceText = priceTransform.GetComponent<TMP_Text>();
 
             priceText.color = Color.white;
             priceText.enableAutoSizing = false;
             priceText.fontSizeMin = 15f;
 
-            RectTransform priceRect =
-                priceText.GetComponent<RectTransform>();
+            RectTransform priceRect = priceText.GetComponent<RectTransform>();
 
             priceRect.anchorMin = Vector2.zero;
             priceRect.anchorMax = Vector2.one;
@@ -294,27 +260,17 @@ namespace HexDvergrAllies.Patches
             return priceText;
         }
 
-        private static void UpdateAffordability(
-            Trader trader,
-            List<GameObject> itemList)
+        private static void UpdateAffordability(Trader trader, List<GameObject> itemList)
         {
-            List<Trader.TradeItem> tradeItems =
-                trader.GetAvailableItems();
+            List<Trader.TradeItem> tradeItems = trader.GetAvailableItems();
 
-            bool canAffordExtractor =
-                StoreGuiCanAffordPatch.CanAffordExtractor();
+            bool canAffordExtractor = StoreGuiCanAffordPatch.CanAffordExtractor();
 
-            Character character =
-                trader.GetComponent<Character>();
+            Character character = trader.GetComponent<Character>();
 
-            bool canAffordForgePact =
-                DvergrTraderManager.CanAffordForgePact(
-                    Player.m_localPlayer,
-                    character);
+            bool canAffordForgePact = DvergrTraderManager.CanAffordForgePact(Player.m_localPlayer, character);
 
-            for (int i = 0;
-                 i < tradeItems.Count && i < itemList.Count;
-                 i++)
+            for (int i = 0; i < tradeItems.Count && i < itemList.Count; i++)
             {
                 Trader.TradeItem tradeItem = tradeItems[i];
 
@@ -323,15 +279,11 @@ namespace HexDvergrAllies.Patches
                     continue;
                 }
 
-                bool canAfford =
-                    DvergrTraderManager.IsForgePact(tradeItem)
-                        ? canAffordForgePact
-                        : canAffordExtractor;
+                bool canAfford = DvergrTraderManager.IsForgePact(tradeItem) ? canAffordForgePact : canAffordExtractor;
 
                 GameObject item = itemList[i];
 
-                CanvasGroup canvasGroup =
-                    item.GetComponent<CanvasGroup>();
+                CanvasGroup canvasGroup = item.GetComponent<CanvasGroup>();
 
                 if (!canvasGroup)
                 {
@@ -339,6 +291,31 @@ namespace HexDvergrAllies.Patches
                 }
 
                 canvasGroup.alpha = canAfford ? 1f : 0.5f;
+            }
+        }
+
+        private static void SetForgePactIcon(Transform item)
+        {
+            if (!AssetHelper.DvergrPortrait)
+            {
+                return;
+            }
+
+            Transform iconTransform = Utils.FindChild(item, "icon", Utils.IterativeSearchType.DepthFirst);
+
+            if (!iconTransform)
+            {
+                Plugin.Log.LogWarning("[Dvergr Trader] Forge Pact icon not found.");
+
+                return;
+            }
+
+            Image iconImage = iconTransform.GetComponent<Image>();
+
+            if (iconImage)
+            {
+                iconImage.sprite = AssetHelper.DvergrPortrait;
+                iconImage.preserveAspect = true;
             }
         }
     }
