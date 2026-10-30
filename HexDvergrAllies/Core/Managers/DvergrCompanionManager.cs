@@ -110,6 +110,14 @@ namespace HexDvergrAllies.Core.Managers
             return TryGetHiredCompanion(player.GetPlayerID(), out companionId);
         }
 
+        internal static bool TryGetHiredCompanionId(Player player, out ZDOID companionId)
+        {
+            companionId = ZDOID.None;
+
+            return player && TryGetHiredCompanion(player.GetPlayerID(), out companionId);
+        }
+
+
         internal static void RequestHire(Player player, Character character)
         {
             if (!player || !character)

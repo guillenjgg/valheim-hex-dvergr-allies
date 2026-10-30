@@ -51,6 +51,10 @@
       <HintPath>..\..\..\bepinex_mod_libs\BepInEx.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Splatform_publicized">
+      <HintPath>..\..\..\publicized_assemblies\v1.0.21\Splatform_publicized.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -92,6 +96,7 @@
     <Compile Include="Assets\AssetHelper.cs" />
     <Compile Include="Core\Managers\DvergrCompanionBehaviorManager.cs" />
     <Compile Include="Core\Managers\DvergrCompanionManager.cs" />
+    <Compile Include="Core\Managers\DvergrCompanionPinManager.cs" />
     <Compile Include="Core\Managers\DvergrCompanionPortalRelocationManager.cs" />
     <Compile Include="Core\Managers\DvergrCompanionShipManager.cs" />
     <Compile Include="DvergrPricingConfig.cs" />
@@ -120,6 +125,7 @@
     <Compile Include="Patches\Companions\MonsterAIAttackSpeedPatch.cs" />
     <Compile Include="Patches\Companions\MonsterAICompanionBehaviorPatch.cs" />
     <Compile Include="Patches\Companions\MonsterAICompanionShipPatch.cs" />
+    <Compile Include="Patches\Companions\PlayerCompanionPinPatch.cs" />
     <Compile Include="Patches\Companions\ShipCompanionBoardingPatch.cs" />
     <Compile Include="Patches\Debug\DvergrHoverDebugPatch.cs" />
     <Compile Include="Patches\Debug\HudHoverDebugPatch.cs" />
