@@ -36,12 +36,10 @@ namespace HexDvergrAllies.Patches.Companions
 
             if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
             {
-                Plugin.Log.LogInfo(
-                    $"[Dvergr Companion] Flee suppressed: " +
-                    $"Dvergr={character.name}, " +
-                    $"Health={character.GetHealth():F1}, " +
-                    $"MaxHealth={character.GetMaxHealth():F1}, " +
-                    $"Target={monsterAI.GetTargetCreature()?.name ?? "None"}");
+                var target = monsterAI.GetTargetCreature();
+                var targetName = target ? target.name : "None";
+
+                Plugin.Log.LogInfo($"[Dvergr Companion] Flee suppressed: Dvergr={character.name}, Health={character.GetHealth():F1}, MaxHealth={character.GetMaxHealth():F1}, Target={targetName}");
             }
 
             return false;

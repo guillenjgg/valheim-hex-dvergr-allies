@@ -1,5 +1,4 @@
-﻿
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using HarmonyLib;
 using HexDvergrAllies.Core.Managers;
 using UnityEngine;
@@ -59,23 +58,23 @@ namespace HexDvergrAllies.Patches.Companions
                 return;
             }
 
+            var distance = Vector3.Distance(character.transform.position, followTarget.transform.position);
+
+            if (distance >= ImmediateRecoveryDistance)
+            {
+                Recover(character, followTarget, distance, "Distance limit");
+                States.Remove(__instance);
+                return;
+            }
+
             if (__instance.GetTargetCreature() != null || __instance.GetStaticTarget() != null)
             {
                 States.Remove(__instance);
                 return;
             }
 
-            var distance = Vector3.Distance(character.transform.position, followTarget.transform.position);
-
             if (distance < RecoveryDistance)
             {
-                States.Remove(__instance);
-                return;
-            }
-
-            if (distance >= ImmediateRecoveryDistance)
-            {
-                Recover(character, followTarget, distance, "Distance limit");
                 States.Remove(__instance);
                 return;
             }
@@ -127,10 +126,9 @@ namespace HexDvergrAllies.Patches.Companions
 
         private static void Recover(Character character, GameObject followTarget, float distance, string reason)
         {
-            var destination = followTarget.transform.position +
-                followTarget.transform.right * RecoveryOffset;
+            var destination = followTarget.transform.position + followTarget.transform.right * RecoveryOffset;
 
-            Plugin.Log.LogInfo($"[Dvergr Terrain Recovery] " + $"Dvergr={character.name}, " + $"Reason={reason}, " + $"Distance={distance:F1}, " + $"From={character.transform.position}, " + $"To={destination}");
+            Plugin.Log.LogInfo($"[Dvergr Terrain Recovery] Dvergr={character.name}, Reason={reason}, Distance={distance:F1}, From={character.transform.position}, To={destination}");
 
             character.transform.position = destination;
         }

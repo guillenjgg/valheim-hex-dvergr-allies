@@ -14,7 +14,6 @@ namespace HexDvergrAllies
         internal static ConfigEntry<KeyboardShortcut> CompanionRenameShortcut;
         internal static ConfigEntry<float> CompanionMovementSpeedMultiplier;
         internal static ConfigEntry<float> CompanionFollowDistance;
-        internal static ConfigEntry<bool> CompanionEnableJumping;
         internal static ConfigEntry<float> CompanionHealthMultiplier;
         internal static ConfigEntry<float> CompanionDamageTakenMultiplier;
         internal static ConfigEntry<float> CompanionDamageDealtMultiplier;
@@ -37,8 +36,6 @@ namespace HexDvergrAllies
 
             CompanionFollowDistance = config.Bind("Dvergr Companion", "FollowDistance", 5f, new ConfigDescription("Desired following distance in meters. Not implemented yet.", new AcceptableValueRange<float>(1f, 30f), new ConfigurationManagerAttributes { Order = 890, IsAdvanced = true }));
 
-            CompanionEnableJumping = config.Bind("Dvergr Companion", "EnableJumping", true, new ConfigDescription("Reserved for a future companion obstacle navigation feature.", null, new ConfigurationManagerAttributes { Order = 880, IsAdvanced = true }));
-
             CompanionHealthMultiplier = config.Bind("Dvergr Companion", "HealthMultiplier", 2f, new ConfigDescription("Maximum health multiplier for hired Dvergr companions.", new AcceptableValueRange<float>(1f, 10f), new ConfigurationManagerAttributes { Order = 800 }));
 
             CompanionDamageTakenMultiplier = config.Bind("Dvergr Companion", "DamageTakenMultiplier", 0.5f, new ConfigDescription("Incoming damage multiplier. 0.5 means 50% less damage.", new AcceptableValueRange<float>(0f, 1f), new ConfigurationManagerAttributes { Order = 790 }));
@@ -53,7 +50,7 @@ namespace HexDvergrAllies
 
             CompanionAutoHealCooldown = config.Bind("Dvergr Companion", "AutoHealCooldown", 60f, new ConfigDescription("Minimum number of seconds between automatic heals for each companion.", new AcceptableValueRange<float>(0f, 3600f), new ConfigurationManagerAttributes { Order = 680 }));
 
-            EnableDebugLogs = config.Bind("Debug", "EnableDebugLogs", true, new ConfigDescription("Logs Dvergr damage events, status effects, and AI states.", null, new ConfigurationManagerAttributes { Order = 100, IsAdvanced = true }));
+            EnableDebugLogs = config.Bind("Debug", "EnableDebugLogs", false, new ConfigDescription("Logs Dvergr damage events, status effects, and AI states.", null, new ConfigurationManagerAttributes { Order = 100, IsAdvanced = true }));
         }
     }
 
