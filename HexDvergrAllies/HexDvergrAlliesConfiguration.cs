@@ -43,7 +43,7 @@ namespace HexDvergrAllies
 
             CompanionDamageDealtMultiplier = config.Bind("Dvergr Companion", "DamageDealtMultiplier", 1.5f, new ConfigDescription("Outgoing damage multiplier for hired Dvergr companions. 1.5 means 50% more damage.", new AcceptableValueRange<float>(0f, 10f), new ConfigurationManagerAttributes { Order = 780 }));
 
-            CompanionAttackSpeedMultiplier = config.Bind("Dvergr Companion", "AttackSpeedMultiplier", 1.25f, new ConfigDescription("Attack cooldown speed multiplier. 1.25 means 25% faster cooldown recovery.", new AcceptableValueRange<float>(1f, 5f), new ConfigurationManagerAttributes { Order = 770 }));
+            CompanionAttackSpeedMultiplier = config.Bind("Dvergr Companion", "AttackSpeedMultiplier", 2.0f, new ConfigDescription("Attack cooldown speed multiplier. 2.0 means 100% faster cooldown recovery.", new AcceptableValueRange<float>(1f, 5f), new ConfigurationManagerAttributes { Order = 770 }));
 
             CompanionEnableAutoHealing = config.Bind("Dvergr Companion", "EnableAutoHealing", true, new ConfigDescription("Automatically heals hired Dvergr companions when their health reaches the configured threshold.", null, new ConfigurationManagerAttributes { Order = 700 }));
 

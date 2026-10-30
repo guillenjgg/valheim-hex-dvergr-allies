@@ -1,5 +1,4 @@
-﻿
-using HarmonyLib;
+﻿using HarmonyLib;
 using HexDvergrAllies.Assets;
 using HexDvergrAllies.Core.Managers;
 using System.Collections.Generic;
