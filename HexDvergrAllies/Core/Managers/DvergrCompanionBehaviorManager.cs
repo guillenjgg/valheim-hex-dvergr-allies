@@ -201,6 +201,11 @@ namespace HexDvergrAllies.Core.Managers
             {
                 state.OriginalAnimationSpeed = animator.speed;
                 state.AnimationSpeedCaptured = true;
+
+                if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
+                {
+                    Plugin.Log.LogInfo($"[Dvergr Companion] Animation initialized: Dvergr={character.name}, OriginalSpeed={state.OriginalAnimationSpeed:F2}");
+                }
             }
 
             var multiplier = HexDvergrAlliesConfiguration.CompanionAttackSpeedMultiplier.Value;
@@ -210,20 +215,24 @@ namespace HexDvergrAllies.Core.Managers
                 multiplier = 1f;
             }
 
-            var targetMultiplier = humanoid.InAttack() ? multiplier : 1f;
+            var inAttack = humanoid.InAttack();
+            var targetMultiplier = inAttack ? multiplier : 1f;
 
             if (Mathf.Approximately(state.AppliedAnimationMultiplier, targetMultiplier))
             {
                 return;
             }
 
-            syncAnimation.SetSpeed(state.OriginalAnimationSpeed * targetMultiplier);
+            var previousSpeed = animator.speed;
+            var targetSpeed = state.OriginalAnimationSpeed * targetMultiplier;
+
+            syncAnimation.SetSpeed(targetSpeed);
 
             state.AppliedAnimationMultiplier = targetMultiplier;
 
             if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
             {
-                Plugin.Log.LogInfo($"[Dvergr Companion] Animation speed changed: Dvergr={character.name}, InAttack={humanoid.InAttack()}, Multiplier={targetMultiplier:F2}, Speed={animator.speed:F2}");
+                Plugin.Log.LogInfo($"[Dvergr Companion] Animation speed changed: Dvergr={character.name}, InAttack={inAttack}, Multiplier={targetMultiplier:F2}, OriginalSpeed={state.OriginalAnimationSpeed:F2}, PreviousSpeed={previousSpeed:F2}, TargetSpeed={targetSpeed:F2}, ActualSpeed={animator.speed:F2}");
             }
         }
 
@@ -347,6 +356,11 @@ namespace HexDvergrAllies.Core.Managers
             character.m_runSpeed = state.OriginalRunSpeed * multiplier;
 
             state.AppliedMovementMultiplier = multiplier;
+
+            if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
+            {
+                Plugin.Log.LogInfo($"[Dvergr Companion] Movement speed applied: Dvergr={character.name}, Multiplier={multiplier:F2}, OriginalSpeed={state.OriginalSpeed:F2}, AppliedSpeed={character.m_speed:F2}, OriginalWalkSpeed={state.OriginalWalkSpeed:F2}, AppliedWalkSpeed={character.m_walkSpeed:F2}, OriginalRunSpeed={state.OriginalRunSpeed:F2}, AppliedRunSpeed={character.m_runSpeed:F2}");
+            }
         }
 
         private static void ApplyAttackSpeed(MonsterAI monsterAI, CompanionBehaviorState state)
@@ -361,6 +375,11 @@ namespace HexDvergrAllies.Core.Managers
             monsterAI.m_minAttackInterval = state.OriginalMinAttackInterval / multiplier;
 
             state.AppliedAttackSpeedMultiplier = multiplier;
+
+            if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
+            {
+                Plugin.Log.LogInfo($"[Dvergr Companion] Attack interval applied: Dvergr={monsterAI.name}, OriginalInterval={state.OriginalMinAttackInterval:F2}, Multiplier={multiplier:F2}, AppliedInterval={monsterAI.m_minAttackInterval:F2}");
+            }
         }
 
         private static void ApplyMaximumHealth(Character character, CompanionBehaviorState state)

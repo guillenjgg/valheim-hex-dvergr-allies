@@ -109,6 +109,7 @@
     <Compile Include="Patches\Companions\BaseAICompanionCombatLeashPatch.cs" />
     <Compile Include="Patches\Companions\BaseAICompanionFindEnemyPatch.cs" />
     <Compile Include="Patches\Companions\BaseAICompanionFleePatch.cs" />
+    <Compile Include="Patches\Companions\CharacterAshlandsCompanionDamagePatch.cs" />
     <Compile Include="Patches\Companions\CharacterCompanionCollisionPatch.cs" />
     <Compile Include="Patches\Companions\CharacterCompanionDamagePatch.cs" />
     <Compile Include="Patches\Companions\CharacterCompanionOwnerDefensePatch.cs" />

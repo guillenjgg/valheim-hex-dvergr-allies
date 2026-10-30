@@ -22,17 +22,14 @@ namespace HexDvergrAllies.Patches.Companions
 
             Character character = monsterAI.GetComponent<Character>();
 
-            if (character == null ||
-                !DvergrCompanionManager.IsHired(character))
+            if (character == null || !DvergrCompanionManager.IsHired(character))
             {
                 return true;
             }
 
             ZNetView netView = character.GetComponent<ZNetView>();
 
-            if (netView == null ||
-                !netView.IsValid() ||
-                !netView.IsOwner())
+            if (netView == null || !netView.IsValid() || !netView.IsOwner())
             {
                 return true;
             }
