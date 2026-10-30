@@ -156,6 +156,7 @@
     <Compile Include="Patches\Trading\StoreGuiCanAffordPatch.cs" />
     <Compile Include="Patches\Trading\StoreGuiDvergrDisplayPatch.cs" />
     <Compile Include="Patches\Trading\StoreGuiDvergrTransactionPatch.cs" />
+    <Compile Include="Patches\Trading\StoreGuiForgePactBuyButtonPatch.cs" />
     <Compile Include="Patches\Trading\StoreGuiTradeSessionPatch.cs" />
     <Compile Include="Patches\Combat\WearNTearRPCDamagePatch.cs" />
     <Compile Include="Patches\Networking\ZRoutedRpcConstructorPatch.cs" />
