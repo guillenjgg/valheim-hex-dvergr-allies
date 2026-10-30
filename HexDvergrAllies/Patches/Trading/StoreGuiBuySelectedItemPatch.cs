@@ -100,7 +100,9 @@ namespace HexDvergrAllies.Patches
                 return false;
             }
 
-            DvergrTradeRpcManager.RequestPurchase(traderNview.GetZDO().m_uid);
+            DvergrPurchaseType purchaseType = DvergrTraderManager.IsAshlandsFlametal(___m_selectedItem) ? DvergrPurchaseType.Flametal : DvergrPurchaseType.Extractor;
+
+            DvergrTradeRpcManager.RequestPurchase(traderNview.GetZDO().m_uid, purchaseType);
 
             return false;
         }

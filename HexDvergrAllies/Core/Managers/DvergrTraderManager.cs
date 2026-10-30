@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿
+using UnityEngine;
 
 namespace HexDvergrAllies.Core.Managers
 {
@@ -6,6 +7,8 @@ namespace HexDvergrAllies.Core.Managers
     {
         internal const float InteractionDistance = 2f;
         internal const string ForgePactPrefab = "MeadTasty";
+        internal const string AshlandsFlametalPrefab = "FlametalNew";
+        internal const string AshlandsPaymentPrefab = "MoltenCore";
 
         private static readonly string[] MistlandsTrophyPrefabs = {
             "TrophySeeker",
@@ -40,11 +43,17 @@ namespace HexDvergrAllies.Core.Managers
 
             switch (biome)
             {
-                case Heightmap.Biome.Mistlands: AddMistlandsItems(trader);
-                    break;
+                case Heightmap.Biome.Mistlands:
+                    {
+                        AddMistlandsItems(trader);
+                        break;
+                    }
 
-                case Heightmap.Biome.AshLands: AddAshlandsItems(trader);
-                    break;
+                case Heightmap.Biome.AshLands:
+                    {
+                        AddAshlandsItems(trader);
+                        break;
+                    }
             }
         }
 
@@ -58,6 +67,11 @@ namespace HexDvergrAllies.Core.Managers
             return item != null && item.m_prefab && item.m_prefab.gameObject.name == ForgePactPrefab;
         }
 
+        internal static bool IsAshlandsFlametal(Trader.TradeItem item)
+        {
+            return item != null && item.m_prefab && item.m_prefab.gameObject.name == AshlandsFlametalPrefab;
+        }
+
         internal static string GetForgePactPaymentName()
         {
             GameObject prefab = ObjectDB.instance.GetItemPrefab(ForgePactPrefab);
@@ -69,9 +83,21 @@ namespace HexDvergrAllies.Core.Managers
 
             ItemDrop itemDrop = prefab.GetComponent<ItemDrop>();
 
-            return itemDrop
-                ? itemDrop.m_itemData.m_shared.m_name
-                : null;
+            return itemDrop ? itemDrop.m_itemData.m_shared.m_name : null;
+        }
+
+        internal static string GetAshlandsPaymentName()
+        {
+            GameObject prefab = ObjectDB.instance.GetItemPrefab(AshlandsPaymentPrefab);
+
+            if (!prefab)
+            {
+                return null;
+            }
+
+            ItemDrop itemDrop = prefab.GetComponent<ItemDrop>();
+
+            return itemDrop ? itemDrop.m_itemData.m_shared.m_name : null;
         }
 
         internal static bool CanAffordForgePact(Player player, Character character)
@@ -96,6 +122,23 @@ namespace HexDvergrAllies.Core.Managers
             return player.GetInventory().CountItems(paymentName) >= DvergrPricingConfig.ForgePactCost;
         }
 
+        internal static bool CanAffordAshlandsFlametal(Player player)
+        {
+            if (!player)
+            {
+                return false;
+            }
+
+            string paymentName = GetAshlandsPaymentName();
+
+            if (string.IsNullOrEmpty(paymentName))
+            {
+                return false;
+            }
+
+            return player.GetInventory().CountItems(paymentName) >= DvergrPricingConfig.AshlandsMoltenCoreCost;
+        }
+
         internal static string GetPaymentTrophy(Inventory inventory)
         {
             foreach (string prefabName in MistlandsTrophyPrefabs)
@@ -107,8 +150,7 @@ namespace HexDvergrAllies.Core.Managers
                     continue;
                 }
 
-                string itemName = prefab.GetComponent<ItemDrop>()
-                    .m_itemData.m_shared.m_name;
+                string itemName = prefab.GetComponent<ItemDrop>().m_itemData.m_shared.m_name;
 
                 if (inventory.CountItems(itemName) > 0)
                 {
@@ -126,7 +168,6 @@ namespace HexDvergrAllies.Core.Managers
             if (!prefab)
             {
                 Plugin.Log.LogWarning("[Dvergr Trader] MeadTasty prefab not found.");
-
                 return;
             }
 
@@ -160,7 +201,25 @@ namespace HexDvergrAllies.Core.Managers
 
         private static void AddAshlandsItems(Trader trader)
         {
-            // Ashlands inventory will be added later.
+            GameObject flametalPrefab = ObjectDB.instance.GetItemPrefab(AshlandsFlametalPrefab);
+
+            if (!flametalPrefab)
+            {
+                Plugin.Log.LogWarning("[Dvergr Trader] FlametalNew prefab not found.");
+                return;
+            }
+
+            ItemDrop itemDrop = flametalPrefab.GetComponent<ItemDrop>();
+
+            if (!itemDrop)
+            {
+                Plugin.Log.LogWarning("[Dvergr Trader] FlametalNew ItemDrop component not found.");
+                return;
+            }
+
+            trader.m_items.Add(new Trader.TradeItem { m_prefab = itemDrop, m_stack = DvergrPricingConfig.AshlandsFlametalQuantity, m_price = 0, m_tooltip = $"Trade {DvergrPricingConfig.AshlandsMoltenCoreCost} Molten Core for {DvergrPricingConfig.AshlandsFlametalQuantity} Flametal.", m_buyPlayerEffects = new EffectList() });
+
+            Plugin.Log.LogInfo($"[Dvergr Trader] Ashlands inventory initialized: FlametalNew={DvergrPricingConfig.AshlandsFlametalQuantity}, MoltenCore={DvergrPricingConfig.AshlandsMoltenCoreCost}");
         }
     }
 }

@@ -6,23 +6,32 @@ namespace HexDvergrAllies
     internal static class DvergrPricingConfig
     {
         /// <summary>
-        /// Number of extractor purchases a player can make before Sap is required in addition to the Trophy.
+        /// Number of extractor purchases before Sap is required.
         /// </summary>
         internal const int FreeExtractorPurchases = 2;
 
         /// <summary>
-        /// Amount of Sap required per extractor purchase once <see cref="FreeExtractorPurchases"/> has been exceeded.
+        /// Sap required after the initial extractor purchases.
         /// </summary>
         internal const int ExtractorSapCost = 10;
 
         /// <summary>
-        /// Amount of Tasty Mead required to forge a pact (hire) with a Dvergr companion.
+        /// Tasty Mead required to hire a Dvergr companion.
         /// </summary>
         internal const int ForgePactCost = 2;
 
-        /// <summary>
-        /// Human-readable description of the Forge Pact cost, kept in sync with <see cref="ForgePactCost"/>.
-        /// </summary>
         internal const string ForgePactCostDisplay = "2 Tasty Mead";
+
+        /// <summary>
+        /// Flametal received per Ashlands purchase.
+        /// </summary>
+        internal const int AshlandsFlametalQuantity = 10;
+
+        /// <summary>
+        /// Molten Cores required per Ashlands purchase.
+        /// </summary>
+        internal const int AshlandsMoltenCoreCost = 1;
+
+        internal const string AshlandsFlametalCostDisplay = "1 Molten Core";
     }
 }

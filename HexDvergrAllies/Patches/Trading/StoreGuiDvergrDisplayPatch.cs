@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿
+using HarmonyLib;
 using HexDvergrAllies.Assets;
 using HexDvergrAllies.Core.Managers;
 using System.Collections.Generic;
@@ -12,13 +13,13 @@ namespace HexDvergrAllies.Patches
     internal static class StoreGuiDvergrDisplayPatch
     {
         private static readonly AccessTools.FieldRef<StoreGui, Trader> TraderField = AccessTools.FieldRefAccess<StoreGui, Trader>("m_trader");
-
         private static readonly AccessTools.FieldRef<StoreGui, List<GameObject>> ItemListField = AccessTools.FieldRefAccess<StoreGui, List<GameObject>>("m_itemList");
 
         private static GameObject _paymentPanel;
         private static TMP_Text _paymentText;
         private static int _lastSapCost = -1;
         private static bool _lastHasPrice;
+        private static Heightmap.Biome _lastBiome = Heightmap.Biome.None;
 
         [HarmonyPatch(typeof(StoreGui), "FillList")]
         [HarmonyPostfix]
@@ -32,6 +33,7 @@ namespace HexDvergrAllies.Patches
             }
 
             CreatePaymentPanel(__instance);
+            UpdatePaymentPanel(trader);
             UpdateItemPrices(trader, ItemListField(__instance));
             UpdateAffordability(trader, ItemListField(__instance));
         }
@@ -46,7 +48,6 @@ namespace HexDvergrAllies.Patches
             }
 
             Trader trader = TraderField(__instance);
-
             bool isDvergrTrader = trader && DvergrTraderManager.IsDvergrTrader(trader);
 
             __instance.m_coinText.transform.parent.gameObject.SetActive(!isDvergrTrader);
@@ -66,9 +67,17 @@ namespace HexDvergrAllies.Patches
                 CreatePaymentPanel(__instance);
             }
 
+            Heightmap.Biome biome = Heightmap.FindBiome(trader.transform.position);
+            bool biomeChanged = biome != _lastBiome;
+
+            if (biomeChanged)
+            {
+                UpdatePaymentPanel(trader);
+            }
+
             List<GameObject> itemList = ItemListField(__instance);
 
-            if (_lastSapCost != DvergrTradeRpcManager.CurrentSapCost || _lastHasPrice != DvergrTradeRpcManager.HasCurrentPrice)
+            if (biomeChanged || _lastSapCost != DvergrTradeRpcManager.CurrentSapCost || _lastHasPrice != DvergrTradeRpcManager.HasCurrentPrice)
             {
                 UpdateItemPrices(trader, itemList);
             }
@@ -84,11 +93,9 @@ namespace HexDvergrAllies.Patches
             }
 
             RectTransform buyButton = storeGui.m_buyButton.GetComponent<RectTransform>();
-
             TMP_Text sourceText = storeGui.m_buyButton.GetComponentInChildren<TMP_Text>();
 
             _paymentPanel = new GameObject("HexDvergrPaymentPanel", typeof(RectTransform), typeof(Image));
-
             _paymentPanel.transform.SetParent(buyButton.parent, false);
 
             RectTransform panelRect = _paymentPanel.GetComponent<RectTransform>();
@@ -101,24 +108,18 @@ namespace HexDvergrAllies.Patches
             panelRect.anchoredPosition += new Vector2(0f, 48f);
 
             Image background = _paymentPanel.GetComponent<Image>();
-
             background.color = new Color(0.12f, 0.10f, 0.08f, 0.92f);
-
             background.raycastTarget = false;
 
             Outline outline = _paymentPanel.AddComponent<Outline>();
-
             outline.effectColor = new Color(0.55f, 0.42f, 0.25f, 1f);
-
             outline.effectDistance = new Vector2(1f, -1f);
             outline.useGraphicAlpha = false;
 
             GameObject paymentObject = Object.Instantiate(sourceText.gameObject, _paymentPanel.transform);
-
             paymentObject.name = "PaymentText";
 
             _paymentText = paymentObject.GetComponent<TMP_Text>();
-
             _paymentText.alignment = TextAlignmentOptions.Center;
             _paymentText.textWrappingMode = TextWrappingModes.Normal;
             _paymentText.fontSize = 15f;
@@ -131,10 +132,29 @@ namespace HexDvergrAllies.Patches
             textRect.offsetMin = new Vector2(10f, 8f);
             textRect.offsetMax = new Vector2(-10f, -8f);
 
-            _paymentText.text = "<color=#D9A75D><b>ACCEPTED CURRENCY</b></color>\n" + "<size=85%>1 Trophy = Seeker, Seeker Soldier, or Gjall</size>";
-
             _lastSapCost = -1;
             _lastHasPrice = false;
+            _lastBiome = Heightmap.Biome.None;
+        }
+
+        private static void UpdatePaymentPanel(Trader trader)
+        {
+            if (!_paymentText)
+            {
+                return;
+            }
+
+            Heightmap.Biome biome = Heightmap.FindBiome(trader.transform.position);
+            _lastBiome = biome;
+
+            if (biome == Heightmap.Biome.AshLands)
+            {
+                _paymentText.text = "<color=#D9A75D><b>ACCEPTED CURRENCY</b></color>\n" + $"<size=85%>{DvergrPricingConfig.AshlandsFlametalCostDisplay} = {DvergrPricingConfig.AshlandsFlametalQuantity} Flametal</size>";
+            }
+            else
+            {
+                _paymentText.text = "<color=#D9A75D><b>ACCEPTED CURRENCY</b></color>\n" + "<size=85%>1 Trophy = Seeker, Seeker Soldier, or Gjall</size>";
+            }
         }
 
         private static void UpdateItemPrices(Trader trader, List<GameObject> itemList)
@@ -147,6 +167,12 @@ namespace HexDvergrAllies.Patches
             for (int i = 0; i < tradeItems.Count && i < itemList.Count; i++)
             {
                 Trader.TradeItem tradeItem = tradeItems[i];
+
+                if (tradeItem == null || !tradeItem.m_prefab || !itemList[i])
+                {
+                    continue;
+                }
+
                 Transform item = itemList[i].transform;
 
                 if (DvergrTraderManager.IsForgePact(tradeItem))
@@ -156,7 +182,13 @@ namespace HexDvergrAllies.Patches
 
                     TMP_Text priceText = ConfigureCustomPrice(item);
                     priceText.text = DvergrPricingConfig.ForgePactCostDisplay;
+                    continue;
+                }
 
+                if (DvergrTraderManager.IsAshlandsFlametal(tradeItem))
+                {
+                    TMP_Text priceText = ConfigureCustomPrice(item);
+                    priceText.text = DvergrPricingConfig.AshlandsFlametalCostDisplay;
                     continue;
                 }
 
@@ -165,20 +197,22 @@ namespace HexDvergrAllies.Patches
                     continue;
                 }
 
-                TMP_Text extractorPriceText = ConfigureCustomPrice(item);
+                if (tradeItem.m_prefab.gameObject.name == "DvergrNeedle")
+                {
+                    TMP_Text priceText = ConfigureCustomPrice(item);
 
-                extractorPriceText.text = !_lastHasPrice
-                    ? "Loading..."
-                    : _lastSapCost > 0
-                        ? $"1 Trophy + {_lastSapCost} Sap"
-                        : "1 Trophy";
+                    priceText.text = !_lastHasPrice
+                        ? "Loading..."
+                        : _lastSapCost > 0
+                            ? $"1 Trophy + {_lastSapCost} Sap"
+                            : "1 Trophy";
+                }
             }
         }
 
         private static void SetForgePactName(Transform item, Trader.TradeItem tradeItem)
         {
             string sharedName = tradeItem.m_prefab.m_itemData.m_shared.m_name;
-
             string localizedName = Localization.instance.Localize(sharedName);
 
             TMP_Text[] textComponents = item.GetComponentsInChildren<TMP_Text>(true);
@@ -235,7 +269,6 @@ namespace HexDvergrAllies.Patches
             }
 
             Transform priceTransform = Utils.FindChild(item, "price", Utils.IterativeSearchType.DepthFirst);
-
             TMP_Text priceText = priceTransform.GetComponent<TMP_Text>();
 
             priceText.color = Color.white;
@@ -257,24 +290,41 @@ namespace HexDvergrAllies.Patches
             List<Trader.TradeItem> tradeItems = trader.GetAvailableItems();
 
             bool canAffordExtractor = StoreGuiCanAffordPatch.CanAffordExtractor();
+            bool canAffordFlametal = DvergrTraderManager.CanAffordAshlandsFlametal(Player.m_localPlayer);
 
             Character character = trader.GetComponent<Character>();
-
             bool canAffordForgePact = DvergrTraderManager.CanAffordForgePact(Player.m_localPlayer, character);
 
             for (int i = 0; i < tradeItems.Count && i < itemList.Count; i++)
             {
                 Trader.TradeItem tradeItem = tradeItems[i];
 
+                if (tradeItem == null || !tradeItem.m_prefab || !itemList[i])
+                {
+                    continue;
+                }
+
                 if (tradeItem.m_prefab.gameObject.name == "Softtissue")
                 {
                     continue;
                 }
 
-                bool canAfford = DvergrTraderManager.IsForgePact(tradeItem) ? canAffordForgePact : canAffordExtractor;
+                bool canAfford;
+
+                if (DvergrTraderManager.IsForgePact(tradeItem))
+                {
+                    canAfford = canAffordForgePact;
+                }
+                else if (DvergrTraderManager.IsAshlandsFlametal(tradeItem))
+                {
+                    canAfford = canAffordFlametal;
+                }
+                else
+                {
+                    canAfford = canAffordExtractor;
+                }
 
                 GameObject item = itemList[i];
-
                 CanvasGroup canvasGroup = item.GetComponent<CanvasGroup>();
 
                 if (!canvasGroup)
@@ -298,7 +348,6 @@ namespace HexDvergrAllies.Patches
             if (!iconTransform)
             {
                 Plugin.Log.LogWarning("[Dvergr Trader] Forge Pact icon not found.");
-
                 return;
             }
 

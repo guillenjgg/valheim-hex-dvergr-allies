@@ -1,5 +1,7 @@
-﻿using HarmonyLib;
+﻿
+using HarmonyLib;
 using HexDvergrAllies.Core.Managers;
+using UnityEngine;
 
 namespace HexDvergrAllies.Patches
 {
@@ -22,7 +24,12 @@ namespace HexDvergrAllies.Patches
             if (DvergrTraderManager.IsForgePact(___m_selectedItem))
             {
                 __result = DvergrTraderManager.CanAffordForgePact(Player.m_localPlayer, ___m_trader.GetComponent<Character>());
+                return;
+            }
 
+            if (DvergrTraderManager.IsAshlandsFlametal(___m_selectedItem))
+            {
+                __result = DvergrTraderManager.CanAffordAshlandsFlametal(Player.m_localPlayer);
                 return;
             }
 
@@ -36,16 +43,28 @@ namespace HexDvergrAllies.Patches
 
         internal static bool CanAffordExtractor()
         {
-            if (!DvergrTradeRpcManager.HasCurrentPrice)
+            if (!DvergrTradeRpcManager.HasCurrentPrice || !Player.m_localPlayer)
             {
                 return false;
             }
 
-            var inventory = Player.m_localPlayer.GetInventory();
-            var trophy = DvergrTraderManager.GetPaymentTrophy(inventory);
-            var sapPrefab = ObjectDB.instance.GetItemPrefab("Sap");
-            var sapName = sapPrefab.GetComponent<ItemDrop>()
-                .m_itemData.m_shared.m_name;
+            Inventory inventory = Player.m_localPlayer.GetInventory();
+            string trophy = DvergrTraderManager.GetPaymentTrophy(inventory);
+            GameObject sapPrefab = ObjectDB.instance.GetItemPrefab("Sap");
+
+            if (!sapPrefab)
+            {
+                return false;
+            }
+
+            ItemDrop sapItem = sapPrefab.GetComponent<ItemDrop>();
+
+            if (!sapItem)
+            {
+                return false;
+            }
+
+            string sapName = sapItem.m_itemData.m_shared.m_name;
 
             return trophy != null && inventory.CountItems(sapName) >= DvergrTradeRpcManager.CurrentSapCost;
         }
