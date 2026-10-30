@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿
+using HarmonyLib;
 using HexDvergrAllies.Core.Managers;
 using UnityEngine;
 
@@ -14,40 +15,66 @@ namespace HexDvergrAllies.Patches
                 return;
             }
 
-            if (!HexDvergrAlliesConfiguration.CompanionInteractionShortcut.Value.IsDown())
+            var renamePressed = HexDvergrAlliesConfiguration.CompanionRenameShortcut.Value.IsDown();
+            var interactionPressed = HexDvergrAlliesConfiguration.CompanionInteractionShortcut.Value.IsDown();
+
+            if (!renamePressed && !interactionPressed)
             {
                 return;
             }
 
-            GameObject hoveringObject = __instance.GetHoverObject();
+            if (TextInput.IsVisible())
+            {
+                return;
+            }
+
+            var hoveringObject = __instance.GetHoverObject();
 
             if (!hoveringObject)
             {
                 return;
             }
 
-            Trader trader = hoveringObject.GetComponentInParent<Trader>();
+            var trader = hoveringObject.GetComponentInParent<Trader>();
 
             if (!trader || !DvergrTraderManager.IsDvergrTrader(trader))
             {
                 return;
             }
 
-            Character character = trader.GetComponent<Character>();
+            var character = trader.GetComponent<Character>();
 
             if (!character)
             {
                 return;
             }
 
-            float distance = Vector3.Distance(__instance.transform.position, trader.transform.position);
+            var distance = Vector3.Distance(__instance.transform.position, trader.transform.position);
 
             if (distance > DvergrTraderManager.InteractionDistance)
             {
                 return;
             }
 
-            Plugin.Log.LogInfo($"[Dvergr Companion] Configured shortcut triggered: " + $"Shortcut={HexDvergrAlliesConfiguration.CompanionInteractionShortcut.Value}, " + $"Dvergr={character.name}");
+            if (renamePressed)
+            {
+                if (!DvergrCompanionManager.IsHiredByPlayer(character, __instance))
+                {
+                    return;
+                }
+
+                var receiver = character.GetComponent<DvergrCompanionNameReceiver>();
+
+                if (!receiver)
+                {
+                    receiver = character.gameObject.AddComponent<DvergrCompanionNameReceiver>();
+                }
+
+                receiver.Initialize(character);
+
+                TextInput.instance.RequestText(receiver, "Rename Companion", 24);
+                return;
+            }
 
             PlayerInteractPatch.HandleCompanionInteraction(__instance, character);
         }

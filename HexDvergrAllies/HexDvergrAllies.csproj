@@ -96,6 +96,7 @@
     <Compile Include="Assets\AssetHelper.cs" />
     <Compile Include="Core\Managers\DvergrCompanionBehaviorManager.cs" />
     <Compile Include="Core\Managers\DvergrCompanionManager.cs" />
+    <Compile Include="Core\Managers\DvergrCompanionNameReceiver.cs" />
     <Compile Include="Core\Managers\DvergrCompanionPinManager.cs" />
     <Compile Include="Core\Managers\DvergrCompanionPortalRelocationManager.cs" />
     <Compile Include="Core\Managers\DvergrCompanionShipManager.cs" />
@@ -118,6 +119,7 @@
     <Compile Include="Patches\Companions\CharacterCompanionCollisionPatch.cs" />
     <Compile Include="Patches\Companions\CharacterCompanionDamagePatch.cs" />
     <Compile Include="Patches\Companions\CharacterCompanionOwnerDefensePatch.cs" />
+    <Compile Include="Patches\Companions\DvergrCompanionHoverNamePatch.cs" />
     <Compile Include="Patches\Companions\DvergrCompanionLedgeFollowPatch.cs" />
     <Compile Include="Patches\Companions\DvergrCompanionPortalTeleportPatch.cs" />
     <Compile Include="Patches\Companions\DvergrCompanionTerrainRecoveryPatch.cs" />

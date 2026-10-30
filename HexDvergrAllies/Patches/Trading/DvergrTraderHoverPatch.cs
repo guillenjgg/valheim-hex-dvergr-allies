@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿
+using HarmonyLib;
 using HexDvergrAllies.Core.Managers;
 using UnityEngine;
 
@@ -9,14 +10,14 @@ namespace HexDvergrAllies.Patches
     {
         private static bool Prefix(Character __instance, ref string __result)
         {
-            Trader trader = __instance.GetComponent<Trader>();
+            var trader = __instance.GetComponent<Trader>();
 
             if (!trader || !DvergrTraderManager.IsDvergrTrader(trader))
             {
                 return true;
             }
 
-            Player player = Player.m_localPlayer;
+            var player = Player.m_localPlayer;
 
             if (!player || Vector3.Distance(player.transform.position, __instance.transform.position) > DvergrTraderManager.InteractionDistance)
             {
@@ -26,13 +27,17 @@ namespace HexDvergrAllies.Patches
 
             if (DvergrCompanionManager.IsHired(__instance))
             {
-                __result = Localization.instance.Localize(trader.m_name + "\nCompanion");
+                var companionName = DvergrCompanionManager.GetCompanionName(__instance);
+
+                __result = companionName + "\nCompanion";
 
                 if (DvergrCompanionManager.IsHiredByPlayer(__instance, player))
                 {
-                    string shortcutText = HexDvergrAlliesConfiguration .CompanionInteractionShortcut.Value.ToString();
+                    var interactionShortcut = HexDvergrAlliesConfiguration.CompanionInteractionShortcut.Value.ToString();
+                    var renameShortcut = HexDvergrAlliesConfiguration.CompanionRenameShortcut.Value.ToString();
 
-                    __result += "\n[<color=yellow><b>" + shortcutText + "</b></color>] Break Pact";
+                    __result += "\n[<color=yellow><b>" + interactionShortcut + "</b></color>] Break Pact";
+                    __result += "\n[<color=yellow><b>" + renameShortcut + "</b></color>] Rename";
                 }
 
                 return false;

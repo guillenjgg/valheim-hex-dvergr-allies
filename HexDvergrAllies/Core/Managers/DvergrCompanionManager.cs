@@ -12,6 +12,9 @@ namespace HexDvergrAllies.Core.Managers
         private const string OwnerKey = "HexDvergr_HiredBy";
         private const string HomeKey = "HexDvergr_HomePosition";
         private const string HomeSavedKey = "HexDvergr_HomeSaved";
+        private const string RenameRpc = "HexDvergrRename";
+        private const string NameKey = "HexDvergr_Name";
+        private const int MaxNameLength = 24;
 
         private const float FollowLogInterval = 5f;
         private const float FollowOwnerGracePeriod = 10f;
@@ -40,6 +43,8 @@ namespace HexDvergrAllies.Core.Managers
             nview.Register<ZDOID>(HireRpc, (sender, playerId) => { Hire(character, sender, playerId); });
 
             nview.Register<ZDOID>(UnhireRpc, (sender, playerId) => { Unhire(character, sender, playerId); });
+
+            nview.Register<ZDOID, string>(RenameRpc, (sender, playerId, name) => Rename(character, sender, playerId, name));
 
             ZDO zdo = nview.GetZDO();
 
@@ -117,7 +122,6 @@ namespace HexDvergrAllies.Core.Managers
             return player && TryGetHiredCompanion(player.GetPlayerID(), out companionId);
         }
 
-
         internal static void RequestHire(Player player, Character character)
         {
             if (!player || !character)
@@ -180,6 +184,73 @@ namespace HexDvergrAllies.Core.Managers
             _followOwnerMissingSince.Clear();
 
             Plugin.Log.LogInfo($"[Dvergr Companion] Session state reset: CachedHires={hiredCount}, FollowLogs={followLogCount}, MissingOwners={missingOwnerCount}");
+        }
+
+        internal static string GetCompanionName(Character character)
+        {
+            var nview = character.GetComponent<ZNetView>();
+
+            if (!nview || !nview.IsValid())
+            {
+                return Localization.instance.Localize(character.m_name);
+            }
+
+            var name = nview.GetZDO().GetString(NameKey, "");
+
+            return string.IsNullOrEmpty(name) ? Localization.instance.Localize(character.m_name) : name;
+        }
+
+        internal static void RequestRename(Player player, Character character, string name)
+        {
+            if (!player || !character || !IsHiredByPlayer(character, player))
+            {
+                return;
+            }
+
+            name = name.Trim();
+
+            if (name.Length == 0 || name.Length > MaxNameLength || name.Contains("<") || name.Contains(">"))
+            {
+                player.Message(MessageHud.MessageType.Center, "Invalid companion name.");
+                return;
+            }
+
+            var nview = character.GetComponent<ZNetView>();
+
+            if (!nview || !nview.IsValid())
+            {
+                return;
+            }
+
+            nview.InvokeRPC(RenameRpc, player.GetZDOID(), name);
+        }
+
+        private static void Rename(Character character, long sender, ZDOID playerId, string name)
+        {
+            var nview = character.GetComponent<ZNetView>();
+
+            if (!nview || !nview.IsValid() || !nview.IsOwner())
+            {
+                return;
+            }
+
+            var player = ResolvePlayer(playerId);
+
+            if (!player || !IsHiredByPlayer(character, player) || !IsWithinInteractionDistance(player, character))
+            {
+                return;
+            }
+
+            name = name.Trim();
+
+            if (name.Length == 0 || name.Length > MaxNameLength || name.Contains("<") || name.Contains(">"))
+            {
+                return;
+            }
+
+            nview.GetZDO().Set(NameKey, name);
+
+            Plugin.Log.LogInfo($"[Dvergr Companion] Renamed: Dvergr={character.name}, Name={name}, Player={player.GetPlayerName()}");
         }
 
         private static bool TryGetHiredCompanion(long playerId, out ZDOID companionId)

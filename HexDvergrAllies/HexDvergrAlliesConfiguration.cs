@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using BepInEx.Configuration;
 using UnityEngine;
 
@@ -12,6 +11,7 @@ namespace HexDvergrAllies
         internal static ConfigEntry<bool> AllowTemporaryHomestead;
 
         internal static ConfigEntry<KeyboardShortcut> CompanionInteractionShortcut;
+        internal static ConfigEntry<KeyboardShortcut> CompanionRenameShortcut;
         internal static ConfigEntry<float> CompanionMovementSpeedMultiplier;
         internal static ConfigEntry<float> CompanionFollowDistance;
         internal static ConfigEntry<bool> CompanionEnableJumping;
@@ -30,6 +30,8 @@ namespace HexDvergrAllies
             AllowTemporaryHomestead = config.Bind("Dvergr Wards", "AllowTemporaryHomestead", true, new ConfigDescription("Allows players to place a workbench, stonecutter, wood portal, and stone portal inside Dvergr ward-protected areas. All other structures remain restricted.", null, new ConfigurationManagerAttributes { Order = 100 }));
 
             CompanionInteractionShortcut = config.Bind("Dvergr Companion", "InteractionShortcut", new KeyboardShortcut(KeyCode.E, KeyCode.LeftShift), new ConfigDescription("Keyboard shortcut to forge or break a pact with a Dvergr companion.", null, new ConfigurationManagerAttributes { Order = 1000 }));
+
+            CompanionRenameShortcut = config.Bind("Dvergr Companion", "RenameShortcut", new KeyboardShortcut(KeyCode.R, KeyCode.LeftShift), new ConfigDescription("Keyboard shortcut to rename your hired Dvergr companion.", null, new ConfigurationManagerAttributes { Order = 990 }));
 
             CompanionMovementSpeedMultiplier = config.Bind("Dvergr Companion", "MovementSpeedMultiplier", 2.5f, new ConfigDescription("Movement speed multiplier for hired Dvergr companions.", new AcceptableValueRange<float>(1f, 5f), new ConfigurationManagerAttributes { Order = 900 }));
 
@@ -64,7 +66,6 @@ namespace HexDvergrAllies
         public string Category;
         public object DefaultValue;
         public bool? HideDefaultButton;
-        public bool? HideSettingName;
         public string Description;
         public string DispName;
         public int? Order;
