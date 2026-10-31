@@ -3,6 +3,9 @@ using HexDvergrAllies.Core.Trading;
 
 namespace HexDvergrAllies.Patches
 {
+    /// <summary>
+    /// Prevents Dvergr from moving
+    /// </summary>
     [HarmonyPatch(typeof(BaseAI), "IdleMovement")]
     internal static class BaseAIIdleMovementPatch
     {
@@ -21,6 +24,7 @@ namespace HexDvergrAllies.Patches
             }
 
             __instance.StopMoving();
+
             return false;
         }
     }

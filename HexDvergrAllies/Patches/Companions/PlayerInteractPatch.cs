@@ -52,7 +52,7 @@ namespace HexDvergrAllies.Patches
                 return false;
             }
 
-            if (HexDvergrAlliesConfiguration .CompanionInteractionShortcut.Value.IsPressed())
+            if (HexDvergrAlliesConfiguration.CompanionInteractionShortcut.Value.IsPressed())
             {
                 return false;
             }

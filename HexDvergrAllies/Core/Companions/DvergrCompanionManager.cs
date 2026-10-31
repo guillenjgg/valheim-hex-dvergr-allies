@@ -221,7 +221,10 @@ namespace HexDvergrAllies.Core.Companions
             _lastFollowLogTimes.Clear();
             _followOwnerMissingSince.Clear();
 
-            Plugin.Log.LogInfo($"[Dvergr Companion] Session state reset: CachedHires={hiredCount}, FollowLogs={followLogCount}, MissingOwners={missingOwnerCount}");
+            if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
+            {
+                Plugin.Log.LogInfo($"[Dvergr Companion] Session state reset: CachedHires={hiredCount}, FollowLogs={followLogCount}, MissingOwners={missingOwnerCount}");
+            }
         }
 
         internal static string GetCompanionName(Character character)
