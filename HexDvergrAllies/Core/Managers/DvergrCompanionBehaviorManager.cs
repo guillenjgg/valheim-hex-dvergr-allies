@@ -281,13 +281,7 @@ namespace HexDvergrAllies.Core.Managers
 
         internal static void RemoveCharacter(Character character)
         {
-            CompanionBehaviorState state;
-
-            if (CompanionStates.TryGetValue(character, out state))
-            {
-                RestoreAttackAnimation(character, state);
-                CompanionStates.Remove(character);
-            }
+            CompanionStates.Remove(character);
         }
 
         private static void RestoreAttackAnimation(Character character, CompanionBehaviorState state)
