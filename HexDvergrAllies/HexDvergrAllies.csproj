@@ -101,6 +101,7 @@
     <Compile Include="Core\Companions\DvergrCompanionPinManager.cs" />
     <Compile Include="Core\Companions\DvergrCompanionPortalRelocationManager.cs" />
     <Compile Include="Core\Companions\DvergrCompanionShipManager.cs" />
+    <Compile Include="Core\PrefabHelper.cs" />
     <Compile Include="DvergrPricingConfig.cs" />
     <Compile Include="Core\Trading\DvergrTraderManager.cs" />
     <Compile Include="Core\Trading\DvergrTradeRpcManager.cs" />

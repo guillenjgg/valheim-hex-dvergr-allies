@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace HexDvergrAllies.Patches
 {
+    /// <summary>
+    /// Prevents dvergrs hitting the player
+    /// </summary>
     [HarmonyPatch(typeof(Attack), nameof(Attack.AddHitPoint))]
     internal static class AttackAddHitPointPatch
     {

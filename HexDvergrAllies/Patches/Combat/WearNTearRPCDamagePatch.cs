@@ -2,6 +2,9 @@
 
 namespace HexDvergrAllies.Patches
 {
+    /// <summary>
+    /// Prevents players from damaging dvergr structures
+    /// </summary>
     [HarmonyPatch(typeof(WearNTear), "RPC_Damage")]
     internal static class WearNTearRPCDamagePatch
     {
@@ -13,6 +16,7 @@ namespace HexDvergrAllies.Patches
             }
 
             var attacker = hit.GetAttacker();
+
             if (attacker == null || !attacker.IsPlayer())
             {
                 return true;

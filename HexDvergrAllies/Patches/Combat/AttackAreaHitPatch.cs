@@ -4,9 +4,11 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using UnityEngine;
-
 namespace HexDvergrAllies.Patches
 {
+    /// <summary>
+    /// Prevents player area attacks from hitting dvergrs
+    /// </summary>
     [HarmonyPatch]
     internal static class AttackAreaHitPatch
     {
@@ -71,20 +73,15 @@ namespace HexDvergrAllies.Patches
             }
 
             var attacker = CharacterField.GetValue(attack) as Humanoid;
+
             if (!attacker.IsPlayer())
             {
                 return false;
             }
 
             var character = target.GetComponent<Character>();
-            return character != null && character.GetFaction() == Character.Faction.Dverger;
-        }
 
-        private static bool Prepare()
-        {
-            var method = TargetMethod();
-            UnityEngine.Debug.Log($"[HexDvergrAllies] AttackAreaHitPatch TargetMethod: {method}");
-            return method != null;
+            return character != null && character.GetFaction() == Character.Faction.Dverger;
         }
     }
 }

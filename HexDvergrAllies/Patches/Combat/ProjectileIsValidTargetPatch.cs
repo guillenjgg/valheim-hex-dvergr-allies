@@ -2,6 +2,9 @@
 
 namespace HexDvergrAllies.Patches
 {
+    /// <summary>
+    /// Prevents players from damaging Dvergrs
+    /// </summary>
     [HarmonyPatch(typeof(Projectile), nameof(Projectile.IsValidTarget))]
     internal static class ProjectileIsValidTargetPatch
     {
@@ -18,6 +21,7 @@ namespace HexDvergrAllies.Patches
             }
 
             var character = destr as Character;
+
             if (character == null || character.GetFaction() != Character.Faction.Dverger)
             {
                 return true;
