@@ -12,6 +12,7 @@ namespace HexDvergrAllies
 
         internal static ConfigEntry<KeyboardShortcut> CompanionInteractionShortcut;
         internal static ConfigEntry<KeyboardShortcut> CompanionRenameShortcut;
+        internal static ConfigEntry<KeyboardShortcut> CompanionModeShortcut;
         internal static ConfigEntry<float> CompanionMovementSpeedMultiplier;
         internal static ConfigEntry<float> CompanionFollowDistance;
         internal static ConfigEntry<float> CompanionHealthMultiplier;
@@ -31,6 +32,8 @@ namespace HexDvergrAllies
             CompanionInteractionShortcut = config.Bind("Dvergr Companion", "InteractionShortcut", new KeyboardShortcut(KeyCode.E, KeyCode.LeftShift), new ConfigDescription("Keyboard shortcut to forge or break a pact with a Dvergr companion.", null, new ConfigurationManagerAttributes { Order = 1000 }));
 
             CompanionRenameShortcut = config.Bind("Dvergr Companion", "RenameShortcut", new KeyboardShortcut(KeyCode.R, KeyCode.LeftShift), new ConfigDescription("Keyboard shortcut to rename your hired Dvergr companion.", null, new ConfigurationManagerAttributes { Order = 990 }));
+
+            CompanionModeShortcut = config.Bind("Dvergr Companion", "ModeShortcut", new KeyboardShortcut(KeyCode.H, KeyCode.LeftShift), new ConfigDescription("Keyboard shortcut to switch your hired Dvergr between Companion Mode and Sentry Mode.", null, new ConfigurationManagerAttributes { Order = 980 }));
 
             CompanionMovementSpeedMultiplier = config.Bind("Dvergr Companion", "MovementSpeedMultiplier", 2.5f, new ConfigDescription("Movement speed multiplier for hired Dvergr companions.", new AcceptableValueRange<float>(1f, 5f), new ConfigurationManagerAttributes { Order = 900 }));
 

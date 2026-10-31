@@ -1,5 +1,4 @@
-﻿
-using HarmonyLib;
+﻿using HarmonyLib;
 using HexDvergrAllies.Core.Managers;
 using UnityEngine;
 
@@ -17,8 +16,9 @@ namespace HexDvergrAllies.Patches
 
             var renamePressed = HexDvergrAlliesConfiguration.CompanionRenameShortcut.Value.IsDown();
             var interactionPressed = HexDvergrAlliesConfiguration.CompanionInteractionShortcut.Value.IsDown();
+            var modePressed = HexDvergrAlliesConfiguration.CompanionModeShortcut.Value.IsDown();
 
-            if (!renamePressed && !interactionPressed)
+            if (!renamePressed && !interactionPressed && !modePressed)
             {
                 return;
             }
@@ -53,6 +53,12 @@ namespace HexDvergrAllies.Patches
 
             if (distance > DvergrTraderManager.InteractionDistance)
             {
+                return;
+            }
+
+            if (modePressed)
+            {
+                DvergrCompanionManager.RequestToggleMode(__instance, character);
                 return;
             }
 

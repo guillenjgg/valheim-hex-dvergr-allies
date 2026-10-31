@@ -1,5 +1,4 @@
-﻿
-using HarmonyLib;
+﻿using HarmonyLib;
 using HexDvergrAllies.Core.Managers;
 using UnityEngine;
 
@@ -28,16 +27,20 @@ namespace HexDvergrAllies.Patches
             if (DvergrCompanionManager.IsHired(__instance))
             {
                 var companionName = DvergrCompanionManager.GetCompanionName(__instance);
+                var mode = DvergrCompanionManager.GetMode(__instance);
 
-                __result = companionName + "\nCompanion";
+                __result = companionName + "\n" + (mode == DvergrCompanionManager.CompanionMode.Sentry ? "Sentry Mode" : "Companion Mode");
 
                 if (DvergrCompanionManager.IsHiredByPlayer(__instance, player))
                 {
                     var interactionShortcut = HexDvergrAlliesConfiguration.CompanionInteractionShortcut.Value.ToString();
                     var renameShortcut = HexDvergrAlliesConfiguration.CompanionRenameShortcut.Value.ToString();
+                    var modeShortcut = HexDvergrAlliesConfiguration.CompanionModeShortcut.Value.ToString();
+                    var modeAction = mode == DvergrCompanionManager.CompanionMode.Sentry ? "Enable Companion Mode" : "Enable Sentry Mode";
 
                     __result += "\n[<color=yellow><b>" + interactionShortcut + "</b></color>] Break Pact";
                     __result += "\n[<color=yellow><b>" + renameShortcut + "</b></color>] Rename";
+                    __result += "\n[<color=yellow><b>" + modeShortcut + "</b></color>] " + modeAction;
                 }
 
                 return false;
