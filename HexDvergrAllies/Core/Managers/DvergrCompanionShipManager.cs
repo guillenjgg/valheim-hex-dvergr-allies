@@ -113,6 +113,11 @@ namespace HexDvergrAllies.Core.Managers
             UpdatePassengers(player);
         }
 
+        internal static void RemoveCharacter(Character character)
+        {
+            _passengers.Remove(character);
+        }
+
         private static void CaptureBoardingPosition(Player player, Ship ship)
         {
             _boardingOriginLocalPosition = ship.transform.InverseTransformPoint(player.transform.position);

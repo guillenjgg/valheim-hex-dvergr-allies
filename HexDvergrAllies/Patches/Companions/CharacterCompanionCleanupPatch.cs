@@ -9,6 +9,7 @@ namespace HexDvergrAllies.Patches
         private static void Prefix(Character __instance)
         {
             DvergrCompanionBehaviorManager.RemoveCharacter(__instance);
+            DvergrCompanionShipManager.RemoveCharacter(__instance);
         }
     }
 }
