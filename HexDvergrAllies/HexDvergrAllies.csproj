@@ -102,7 +102,8 @@
     <Compile Include="Core\Companions\DvergrCompanionPinManager.cs" />
     <Compile Include="Core\Companions\DvergrCompanionPortalRelocationManager.cs" />
     <Compile Include="Core\Companions\DvergrCompanionShipManager.cs" />
-    <Compile Include="Core\Monoscripts\DvergrCompanion.cs" />
+    <Compile Include="Core\Constants\ValheimPrefabNames.cs" />
+    <Compile Include="Core\Monoscripts\DvergrCompanionComponent.cs" />
     <Compile Include="Core\PrefabHelper.cs" />
     <Compile Include="Core\UI\DvergrCompanionShortcutManager.cs" />
     <Compile Include="Core\UI\DvergrHoverTextManager.cs" />
@@ -122,9 +123,10 @@
     <Compile Include="Patches\Companions\BaseAICompanionCombatLeashPatch.cs" />
     <Compile Include="Patches\Companions\BaseAICompanionFindEnemyPatch.cs" />
     <Compile Include="Patches\Companions\BaseAICompanionFleePatch.cs" />
-    <Compile Include="Patches\Companions\CharacterAshlandsCompanionDamagePatch.cs" />
+    <Compile Include="Patches\Companions\CharacterCompanionDamageImmunityPatch.cs" />
     <Compile Include="Patches\Companions\CharacterCompanionCleanupPatch.cs" />
     <Compile Include="Patches\Companions\CharacterCompanionCollisionPatch.cs" />
+    <Compile Include="Patches\Companions\CharacterCompanionDamageModifiersPatch.cs" />
     <Compile Include="Patches\Companions\CharacterCompanionDamagePatch.cs" />
     <Compile Include="Patches\Companions\CharacterCompanionOwnerDefensePatch.cs" />
     <Compile Include="Patches\Companions\DvergrCompanionHoverNamePatch.cs" />
@@ -136,6 +138,8 @@
     <Compile Include="Patches\Companions\MonsterAICompanionBehaviorPatch.cs" />
     <Compile Include="Patches\Companions\MonsterAICompanionShipPatch.cs" />
     <Compile Include="Patches\Companions\PlayerCompanionPinPatch.cs" />
+    <Compile Include="Patches\Companions\SEManCompanionDirectStatusEffectPatch.cs" />
+    <Compile Include="Patches\Companions\SEManCompanionStatusEffectPatch.cs" />
     <Compile Include="Patches\Companions\ShipCompanionBoardingPatch.cs" />
     <Compile Include="Patches\Debug\DvergrHoverDebugPatch.cs" />
     <Compile Include="Patches\Debug\HudHoverDebugPatch.cs" />
