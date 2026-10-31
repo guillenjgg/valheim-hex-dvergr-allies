@@ -94,6 +94,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\AssetHelper.cs" />
+    <Compile Include="Core\Companions\DvergrCompanionAttributes.cs" />
     <Compile Include="Core\Companions\DvergrCompanionBehaviorManager.cs" />
     <Compile Include="Core\Companions\DvergrCompanionManager.cs" />
     <Compile Include="Core\Companions\DvergrCompanionModeManager.cs" />
@@ -101,6 +102,7 @@
     <Compile Include="Core\Companions\DvergrCompanionPinManager.cs" />
     <Compile Include="Core\Companions\DvergrCompanionPortalRelocationManager.cs" />
     <Compile Include="Core\Companions\DvergrCompanionShipManager.cs" />
+    <Compile Include="Core\Monoscripts\DvergrCompanion.cs" />
     <Compile Include="Core\PrefabHelper.cs" />
     <Compile Include="Core\UI\DvergrCompanionShortcutManager.cs" />
     <Compile Include="Core\UI\DvergrHoverTextManager.cs" />

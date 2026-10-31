@@ -1,4 +1,5 @@
-﻿using HexDvergrAllies.Core.Trading;
+﻿using HexDvergrAllies.Core.Monoscripts;
+using HexDvergrAllies.Core.Trading;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -52,13 +53,18 @@ namespace HexDvergrAllies.Core.Companions
             nview.Register<ZDOID>(UnhireRpc, (sender, playerId) => { Unhire(character, sender, playerId); });
 
             nview.Register<ZDOID, string>(RenameRpc, (sender, playerId, name) => Rename(character, sender, playerId, name));
-            
+
             nview.Register<ZDOID>(SetModeRpc, (sender, playerId) => SetMode(character, sender, playerId));
 
             ZDO zdo = nview.GetZDO();
 
             if (zdo.GetBool(HiredKey, false))
             {
+                if (!character.TryGetComponent<DvergrCompanion>(out _))
+                {
+                    character.gameObject.AddComponent<DvergrCompanion>();
+                }
+
                 long ownerPlayerId = zdo.GetLong(OwnerKey, 0L);
 
                 if (ownerPlayerId != 0L)
@@ -507,6 +513,11 @@ namespace HexDvergrAllies.Core.Companions
             zdo.Set(OwnerKey, ownerPlayerId);
             zdo.Set(HiredKey, true);
 
+            if (!character.TryGetComponent<DvergrCompanion>(out _))
+            {
+                character.gameObject.AddComponent<DvergrCompanion>();
+            }
+
             _hiredCompanions[ownerPlayerId] = zdo.m_uid;
 
             Plugin.Log.LogInfo($"[Dvergr Companion] Hire cached: PlayerID={ownerPlayerId}, DvergrZDO={zdo.m_uid}");
@@ -570,10 +581,15 @@ namespace HexDvergrAllies.Core.Companions
             monsterAI.ResetPatrolPoint();
 
             DvergrCompanionBehaviorManager.ResetBehavior(character, monsterAI);
-            
+
             zdo.Set(ModeKey, (int)CompanionMode.Companion);
             zdo.Set(HiredKey, false);
             zdo.Set(OwnerKey, 0L);
+
+            if (character.TryGetComponent<DvergrCompanion>(out var companion))
+            {
+                Object.Destroy(companion);
+            }
 
             ZDOID cachedCompanion;
 
