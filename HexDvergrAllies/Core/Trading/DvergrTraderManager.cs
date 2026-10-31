@@ -1,7 +1,7 @@
-﻿
+﻿using HexDvergrAllies.Core.Companions;
 using UnityEngine;
 
-namespace HexDvergrAllies.Core.Managers
+namespace HexDvergrAllies.Core.Trading
 {
     internal static class DvergrTraderManager
     {

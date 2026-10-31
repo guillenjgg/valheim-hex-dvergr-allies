@@ -2,7 +2,7 @@
 using HexDvergrAllies.Assets;
 using UnityEngine;
 
-namespace HexDvergrAllies.Core.Managers
+namespace HexDvergrAllies.Core.Companions
 {
     internal sealed class DvergrCompanionPinManager : MonoBehaviour
     {

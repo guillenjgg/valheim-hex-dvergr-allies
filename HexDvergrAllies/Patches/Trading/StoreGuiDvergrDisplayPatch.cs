@@ -1,6 +1,6 @@
 ﻿using HarmonyLib;
 using HexDvergrAllies.Assets;
-using HexDvergrAllies.Core.Managers;
+using HexDvergrAllies.Core.Trading;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;

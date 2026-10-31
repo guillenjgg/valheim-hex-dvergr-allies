@@ -2,7 +2,7 @@
 using HarmonyLib;
 using UnityEngine;
 
-namespace HexDvergrAllies.Core.Managers
+namespace HexDvergrAllies.Core.Companions
 {
     internal static class DvergrCompanionPortalRelocationManager
     {

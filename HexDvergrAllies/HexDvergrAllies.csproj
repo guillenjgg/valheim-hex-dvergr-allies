@@ -94,20 +94,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\AssetHelper.cs" />
-    <Compile Include="Core\Managers\DvergrCompanionBehaviorManager.cs" />
-    <Compile Include="Core\Managers\DvergrCompanionManager.cs" />
-    <Compile Include="Core\Managers\DvergrCompanionModeManager.cs" />
-    <Compile Include="Core\Managers\DvergrCompanionNameReceiver.cs" />
-    <Compile Include="Core\Managers\DvergrCompanionPinManager.cs" />
-    <Compile Include="Core\Managers\DvergrCompanionPortalRelocationManager.cs" />
-    <Compile Include="Core\Managers\DvergrCompanionShipManager.cs" />
+    <Compile Include="Core\Companions\DvergrCompanionBehaviorManager.cs" />
+    <Compile Include="Core\Companions\DvergrCompanionManager.cs" />
+    <Compile Include="Core\Companions\DvergrCompanionModeManager.cs" />
+    <Compile Include="Core\Companions\DvergrCompanionNameReceiver.cs" />
+    <Compile Include="Core\Companions\DvergrCompanionPinManager.cs" />
+    <Compile Include="Core\Companions\DvergrCompanionPortalRelocationManager.cs" />
+    <Compile Include="Core\Companions\DvergrCompanionShipManager.cs" />
     <Compile Include="DvergrPricingConfig.cs" />
-    <Compile Include="Core\Managers\DvergrTraderManager.cs" />
-    <Compile Include="Core\Managers\DvergrTradeRpcManager.cs" />
-    <Compile Include="Core\Managers\DvergrTradeSessionManager.cs" />
-    <Compile Include="Core\Managers\DvergrTradeTerminalCommands.cs" />
-    <Compile Include="Core\SE_Effects\SE_DvergrAlly.cs" />
-    <Compile Include="Core\Transactions\DvergrTradeTransaction.cs" />
+    <Compile Include="Core\Trading\DvergrTraderManager.cs" />
+    <Compile Include="Core\Trading\DvergrTradeRpcManager.cs" />
+    <Compile Include="Core\Trading\DvergrTradeSessionManager.cs" />
+    <Compile Include="Core\Trading\DvergrTradeTerminalCommands.cs" />
+    <Compile Include="Core\StatusEffects\SE_DvergrAlly.cs" />
+    <Compile Include="Core\Trading\DvergrTradeTransaction.cs" />
     <Compile Include="Core\UI\DvergrPactDialogController.cs" />
     <Compile Include="HexDvergrAlliesConfiguration.cs" />
     <Compile Include="Patches\Combat\AttackAddHitPointPatch.cs" />
@@ -181,5 +181,6 @@
   <ItemGroup>
     <EmbeddedResource Include="Assets\DvergrPortrait.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

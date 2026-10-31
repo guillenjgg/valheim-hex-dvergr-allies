@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
-using HexDvergrAllies.Core.Managers;
-using HexDvergrAllies.SE_Effects;
+using HexDvergrAllies.Core.Companions;
+using HexDvergrAllies.Core.StatusEffects;
+using HexDvergrAllies.Core.Trading;
 using UnityEngine;
 
 namespace HexDvergrAllies.Patches

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace HexDvergrAllies.Core.Managers
+namespace HexDvergrAllies.Core.Trading
 {
     internal static class DvergrTradeSessionManager
     {

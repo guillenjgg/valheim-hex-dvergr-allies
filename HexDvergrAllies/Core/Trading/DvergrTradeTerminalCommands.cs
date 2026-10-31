@@ -1,4 +1,4 @@
-﻿namespace HexDvergrAllies.Core.Managers
+﻿namespace HexDvergrAllies.Core.Trading
 {
     internal static class DvergrTradeTerminalCommands
     {

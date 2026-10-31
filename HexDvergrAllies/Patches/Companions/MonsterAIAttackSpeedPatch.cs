@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
-using HexDvergrAllies.Core.Managers;
+using HexDvergrAllies.Core.Companions;
 
 namespace HexDvergrAllies.Patches
 {

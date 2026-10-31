@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using HarmonyLib;
-using HexDvergrAllies.Core.Managers;
+using HexDvergrAllies.Core.Companions;
+using HexDvergrAllies.Core.Trading;
 using UnityEngine;
 
 namespace HexDvergrAllies.Patches

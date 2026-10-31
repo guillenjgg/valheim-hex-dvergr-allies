@@ -1,11 +1,9 @@
-﻿
-using HarmonyLib;
-using HexDvergrAllies.Core.Transactions;
+﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace HexDvergrAllies.Core.Managers
+namespace HexDvergrAllies.Core.Trading
 {
     internal enum DvergrPurchaseType
     {

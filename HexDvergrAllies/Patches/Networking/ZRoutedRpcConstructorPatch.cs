@@ -1,6 +1,6 @@
-﻿
-using HarmonyLib;
-using HexDvergrAllies.Core.Managers;
+﻿using HarmonyLib;
+using HexDvergrAllies.Core.Companions;
+using HexDvergrAllies.Core.Trading;
 
 namespace HexDvergrAllies.Patches
 {

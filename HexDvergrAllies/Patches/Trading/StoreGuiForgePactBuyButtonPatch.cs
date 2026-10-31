@@ -1,5 +1,5 @@
 ﻿using HarmonyLib;
-using HexDvergrAllies.Core.Managers;
+using HexDvergrAllies.Core.Trading;
 
 namespace HexDvergrAllies.Patches
 {

@@ -1,4 +1,4 @@
-﻿namespace HexDvergrAllies.SE_Effects
+﻿namespace HexDvergrAllies.Core.StatusEffects
 {
     internal class SE_DvergrAlly : StatusEffect
     {

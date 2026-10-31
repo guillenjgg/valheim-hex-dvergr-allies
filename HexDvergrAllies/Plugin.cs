@@ -2,7 +2,7 @@
 using BepInEx.Logging;
 using HarmonyLib;
 using HexDvergrAllies.Assets;
-using HexDvergrAllies.Core.Managers;
+using HexDvergrAllies.Core.Trading;
 using System.Reflection;
 
 namespace HexDvergrAllies

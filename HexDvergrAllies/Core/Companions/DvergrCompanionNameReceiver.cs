@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace HexDvergrAllies.Core.Managers
+namespace HexDvergrAllies.Core.Companions
 {
     internal class DvergrCompanionNameReceiver : MonoBehaviour, TextReceiver
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HexDvergrAllies.Core.Transactions
+namespace HexDvergrAllies.Core.Trading
 {
     internal enum PurchaseState
     {
