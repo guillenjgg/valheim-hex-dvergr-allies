@@ -79,7 +79,6 @@ namespace HexDvergrAllies.Core.Companions
             Plugin.Log.LogInfo($"[Dvergr Companion] Initialized: Dvergr={character.name}, ZDO={zdo.m_uid}, IsOwner={nview.IsOwner()}, IsHired={IsHired(character)}");
         }
 
-
         internal static bool IsHired(Character character)
         {
             if (!character)
@@ -359,6 +358,41 @@ namespace HexDvergrAllies.Core.Companions
             if (followTarget)
             {
                 monsterAI.SetFollowTarget(null);
+            }
+        }
+
+        internal static void OnCompanionDeath(Character character)
+        {
+            var nview = character.GetComponent<ZNetView>();
+
+            if (!nview || !nview.IsValid() || !nview.IsOwner())
+            {
+                return;
+            }
+
+            var zdo = nview.GetZDO();
+
+            if (!zdo.GetBool(HiredKey, false))
+            {
+                return;
+            }
+
+            var ownerPlayerId = zdo.GetLong(OwnerKey, 0L);
+
+            zdo.Set(HiredKey, false);
+            zdo.Set(OwnerKey, 0L);
+
+            if (_hiredCompanions.TryGetValue(ownerPlayerId, out var companionId) && companionId == zdo.m_uid)
+            {
+                _hiredCompanions.Remove(ownerPlayerId);
+            }
+
+            _lastFollowLogTimes.Remove(zdo.m_uid);
+            _followOwnerMissingSince.Remove(zdo.m_uid);
+
+            if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
+            {
+                Plugin.Log.LogInfo($"[Dvergr Companion] Companion died: PlayerID={ownerPlayerId}, DvergrZDO={zdo.m_uid}, Hire released");
             }
         }
 

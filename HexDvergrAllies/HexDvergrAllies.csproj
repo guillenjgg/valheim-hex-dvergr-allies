@@ -128,6 +128,7 @@
     <Compile Include="Patches\Companions\CharacterCompanionCollisionPatch.cs" />
     <Compile Include="Patches\Companions\CharacterCompanionDamageModifiersPatch.cs" />
     <Compile Include="Patches\Companions\CharacterCompanionDamagePatch.cs" />
+    <Compile Include="Patches\Companions\CharacterCompanionDeathPatch.cs" />
     <Compile Include="Patches\Companions\CharacterCompanionOwnerDefensePatch.cs" />
     <Compile Include="Patches\Companions\DvergrCompanionHoverNamePatch.cs" />
     <Compile Include="Patches\Companions\DvergrCompanionLedgeFollowPatch.cs" />
