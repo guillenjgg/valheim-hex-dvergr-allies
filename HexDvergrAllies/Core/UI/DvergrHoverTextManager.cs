@@ -1,7 +1,5 @@
-﻿using BepInEx.Configuration;
-using HexDvergrAllies.Core.Companions;
+﻿using HexDvergrAllies.Core.Companions;
 using HexDvergrAllies.Core.Trading;
-using UnityEngine;
 
 namespace HexDvergrAllies.Core.UI
 {
@@ -14,10 +12,6 @@ namespace HexDvergrAllies.Core.UI
         private const string BreakPactText = "Break Pact";
         private const string RenameText = "Rename";
         private const string TraderInteractionText = "\n[<color=yellow><b>$KEY_Use</b></color>] $raven_interact";
-
-        private static readonly ConfigEntry<KeyboardShortcut> InteractionShortcut = HexDvergrAlliesConfiguration.CompanionInteractionShortcut;
-        private static readonly ConfigEntry<KeyboardShortcut> RenameShortcut = HexDvergrAlliesConfiguration.CompanionRenameShortcut;
-        private static readonly ConfigEntry<KeyboardShortcut> ModeShortcut = HexDvergrAlliesConfiguration.CompanionModeShortcut;
 
         internal static bool Init(Character character, out string hoverText)
         {
@@ -32,7 +26,6 @@ namespace HexDvergrAllies.Core.UI
             }
 
             hoverText = null;
-
             return true;
         }
 
@@ -47,7 +40,7 @@ namespace HexDvergrAllies.Core.UI
 
             var player = Player.m_localPlayer;
 
-            if (!player || Vector3.Distance(player.transform.position, character.transform.position) > DvergrTraderManager.InteractionDistance)
+            if (!player || !DvergrInteractionSettings.IsWithinRange(player, character))
             {
                 hoverText = "";
                 return true;
@@ -63,9 +56,9 @@ namespace HexDvergrAllies.Core.UI
             {
                 var modeAction = isSentryMode ? EnableCompanionModeText : EnableSentryModeText;
 
-                hoverText += "\n[<color=yellow><b>" + InteractionShortcut.Value + "</b></color>] " + BreakPactText;
-                hoverText += "\n[<color=yellow><b>" + RenameShortcut.Value + "</b></color>] " + RenameText;
-                hoverText += "\n[<color=yellow><b>" + ModeShortcut.Value + "</b></color>] " + modeAction;
+                hoverText += "\n[<color=yellow><b>" + DvergrInteractionSettings.InteractionShortcut.Value + "</b></color>] " + BreakPactText;
+                hoverText += "\n[<color=yellow><b>" + DvergrInteractionSettings.RenameShortcut.Value + "</b></color>] " + RenameText;
+                hoverText += "\n[<color=yellow><b>" + DvergrInteractionSettings.ModeShortcut.Value + "</b></color>] " + modeAction;
             }
 
             return true;
@@ -84,7 +77,7 @@ namespace HexDvergrAllies.Core.UI
 
             var player = Player.m_localPlayer;
 
-            if (!player || Vector3.Distance(player.transform.position, character.transform.position) > DvergrTraderManager.InteractionDistance)
+            if (!player || !DvergrInteractionSettings.IsWithinRange(player, character))
             {
                 hoverText = "";
                 return true;
