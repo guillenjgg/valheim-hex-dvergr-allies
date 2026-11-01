@@ -16,6 +16,11 @@ namespace HexDvergrAllies.Core.Companions
                 return false;
             }
 
+            if (DvergrCompanionManager.GetMode(character) == DvergrCompanionManager.CompanionMode.Sentry)
+            {
+                return false;
+            }
+
             var nview = character.GetComponent<ZNetView>();
 
             return nview && nview.IsValid() && nview.IsOwner();
