@@ -108,7 +108,9 @@
     <Compile Include="Core\HexLocalization\HexLocalizationManager.cs" />
     <Compile Include="Core\Monoscripts\DvergrCompanionComponent.cs" />
     <Compile Include="Core\PrefabHelper.cs" />
+    <Compile Include="Core\UI\DvergrCompanionDragHandler.cs" />
     <Compile Include="Core\UI\DvergrCompanionShortcutManager.cs" />
+    <Compile Include="Core\UI\DvergrCompanionUIController.cs" />
     <Compile Include="Core\UI\DvergrHoverTextManager.cs" />
     <Compile Include="Core\UI\DvergrInteractionHelper.cs" />
     <Compile Include="DvergrPricingConfig.cs" />
@@ -149,6 +151,7 @@
     <Compile Include="Patches\Companions\ShipCompanionBoardingPatch.cs" />
     <Compile Include="Patches\Debug\DvergrHoverDebugPatch.cs" />
     <Compile Include="Patches\Debug\HudHoverDebugPatch.cs" />
+    <Compile Include="Patches\Debug\InventoryGuiHierarchyDebugPatch.cs" />
     <Compile Include="Patches\Debug\MonsterAICompanionDiagnosticsPatch.cs" />
     <Compile Include="Patches\Homestead\TeleportWorldInteractPatch.cs" />
     <Compile Include="Patches\Networking\ZNetSceneCompanionSessionPatch.cs" />
@@ -166,6 +169,7 @@
     <Compile Include="Patches\Trading\DvergrTraderUpdatePatch.cs" />
     <Compile Include="Patches\Combat\MineRock5RPCDamagePatch.cs" />
     <Compile Include="Patches\Companions\MonsterAICompanionFollowPatch.cs" />
+    <Compile Include="Patches\UI\GameCameraCompanionCursorPatch.cs" />
     <Compile Include="Patches\UI\PlayerCompanionShortcutPatch.cs" />
     <Compile Include="Patches\Companions\PlayerInteractPatch.cs" />
     <Compile Include="Patches\Homestead\PlayerRemovePiecePatch.cs" />
@@ -180,6 +184,7 @@
     <Compile Include="Patches\StoreGui\StoreGuiTradeSessionPatch.cs" />
     <Compile Include="Patches\Combat\WearNTearRPCDamagePatch.cs" />
     <Compile Include="Patches\Networking\ZRoutedRpcRegistrationPatch.cs" />
+    <Compile Include="Patches\UI\PlayerControllerCompanionUIPatch.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

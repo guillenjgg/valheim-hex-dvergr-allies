@@ -8,9 +8,21 @@ namespace HexDvergrAllies.Core.UI
         private const string RenameDialogTitle = "Rename Companion";
         private const int MaxCompanionNameLength = 24;
 
+
         internal static void Update(Player player)
         {
             if (player != Player.m_localPlayer || TextInput.IsVisible())
+            {
+                return;
+            }
+
+            if (HexDvergrAlliesConfiguration.CompanionUIShortcut.Value.IsDown())
+            {
+                DvergrCompanionUIController.Toggle();
+                return;
+            }
+
+            if (DvergrCompanionUIController.IsVisible)
             {
                 return;
             }
@@ -44,6 +56,7 @@ namespace HexDvergrAllies.Core.UI
                 DvergrPactDialogController.ShowBreakPactConfirmation(player, character);
             }
         }
+
 
         private static Character GetHoveredCompanion(Player player)
         {
