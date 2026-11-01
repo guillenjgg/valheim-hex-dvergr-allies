@@ -1,11 +1,12 @@
-﻿using System;
-using System.IO;
-using System.Reflection;
-using BepInEx;
+﻿using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
 using HexDvergrAllies.Assets;
+using HexDvergrAllies.Core.HexLocalization;
 using HexDvergrAllies.Core.Trading;
+using System;
+using System.IO;
+using System.Reflection;
 
 namespace HexDvergrAllies
 {
@@ -30,7 +31,10 @@ namespace HexDvergrAllies
             AssetHelper.Initialize();
 
             Config.SaveOnConfigSet = false;
+
             HexDvergrAlliesConfiguration.Init(Config);
+            HexLocalizationManager.Initialize();
+
             Config.Save();
             Config.SaveOnConfigSet = true;
 
@@ -91,6 +95,8 @@ namespace HexDvergrAllies
             _harmonyInstance = null;
 
             Log.LogInfo($"{PluginName} v{PluginVersion} unloaded.");
+
+            HexLocalizationManager.Shutdown();
 
             Instance = null;
             Log = null;

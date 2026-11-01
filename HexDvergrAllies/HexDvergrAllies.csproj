@@ -104,7 +104,7 @@
     <Compile Include="Core\Companions\DvergrCompanionPortalRelocationManager.cs" />
     <Compile Include="Core\Companions\DvergrCompanionShipManager.cs" />
     <Compile Include="Core\Constants\ValheimPrefabNames.cs" />
-    <Compile Include="Core\HexLocalization\LocalizationManager.cs" />
+    <Compile Include="Core\HexLocalization\HexLocalizationManager.cs" />
     <Compile Include="Core\Monoscripts\DvergrCompanionComponent.cs" />
     <Compile Include="Core\PrefabHelper.cs" />
     <Compile Include="Core\UI\DvergrCompanionShortcutManager.cs" />
@@ -185,6 +185,7 @@
     <None Include="CHANGELOG.md">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <EmbeddedResource Include="Core\HexLocalization\English.csv" />
     <None Include="manifest.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
