@@ -9,6 +9,7 @@ namespace HexDvergrAllies.Core.Companions
         private const string RelocateRpc = "HexDvergrRelocate";
         private const string HiredKey = "HexDvergr_IsHired";
         private const string OwnerKey = "HexDvergr_HiredBy";
+        private const string ModeKey = "HexDvergr_Mode";
 
         private const float MaximumSourceDistance = 30f;
         private const float MaximumDestinationDistance = 10f;
@@ -107,7 +108,9 @@ namespace HexDvergrAllies.Core.Companions
             var previousPosition = companionZdo.GetPosition();
 
             companionZdo.SetOwner(ZDOMan.GetSessionID());
+            companionZdo.Set(ModeKey, (int)DvergrCompanionManager.CompanionMode.Companion);
             companionZdo.SetPosition(destination);
+
             ZDOMan.instance.ForceSendZDO(companionId);
 
             Plugin.Log.LogInfo($"[Dvergr Portal] Relocated: Companion={companionId}, From={previousPosition}, To={destination}, HiredBy={hiredBy}");

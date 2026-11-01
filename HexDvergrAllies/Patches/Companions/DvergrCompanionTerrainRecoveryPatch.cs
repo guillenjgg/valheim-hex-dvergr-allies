@@ -42,6 +42,12 @@ namespace HexDvergrAllies.Patches.Companions
                 return;
             }
 
+            if (DvergrCompanionSentryMode.IsActive(character))
+            {
+                States.Remove(__instance);
+                return;
+            }
+
             var nview = character.GetComponent<ZNetView>();
 
             if (nview == null || !nview.IsValid() || !nview.IsOwner())

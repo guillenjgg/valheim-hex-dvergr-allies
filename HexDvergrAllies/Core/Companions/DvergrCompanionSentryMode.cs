@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using HarmonyLib;
+using UnityEngine;
 
 namespace HexDvergrAllies.Core.Companions
 {
@@ -8,6 +9,10 @@ namespace HexDvergrAllies.Core.Companions
 
         internal const float CombatRadius = 20f;
         internal const float ReturnTolerance = 2f;
+
+        private static readonly AccessTools.FieldRef<MonsterAI, Character> CombatTargetField = AccessTools.FieldRefAccess<MonsterAI, Character>("m_targetCreature");
+        private static readonly AccessTools.FieldRef<MonsterAI, Vector3> LastKnownTargetPositionField = AccessTools.FieldRefAccess<MonsterAI, Vector3>("m_lastKnownTargetPos");
+        private static readonly AccessTools.FieldRef<MonsterAI, bool> BeenAtLastPositionField = AccessTools.FieldRefAccess<MonsterAI, bool>("m_beenAtLastPos");
 
         internal static bool IsActive(Character character)
         {
@@ -29,6 +34,14 @@ namespace HexDvergrAllies.Core.Companions
             nview.GetZDO().Set(SentryPositionKey, character.transform.position);
         }
 
+        internal static bool IsWithinCombatRadius(Character character, Character target)
+        {
+            var offset = target.transform.position - GetAnchor(character);
+            offset.y = 0f;
+
+            return offset.sqrMagnitude <= CombatRadius * CombatRadius;
+        }
+
         internal static void Update(MonsterAI monsterAI)
         {
             var character = monsterAI.GetComponent<Character>();
@@ -45,9 +58,18 @@ namespace HexDvergrAllies.Core.Companions
                 return;
             }
 
-            if (monsterAI.GetTargetCreature())
+            var target = monsterAI.GetTargetCreature();
+
+            if (target)
             {
-                return;
+                if (IsWithinCombatRadius(character, target))
+                {
+                    return;
+                }
+
+                CombatTargetField(monsterAI) = null;
+                LastKnownTargetPositionField(monsterAI) = GetAnchor(character);
+                BeenAtLastPositionField(monsterAI) = true;
             }
 
             var anchor = GetAnchor(character);

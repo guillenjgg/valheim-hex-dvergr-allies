@@ -8,12 +8,29 @@ namespace HexDvergrAllies.Patches
     {
         private static void Postfix(BaseAI __instance, ref Character __result)
         {
-            if (!DvergrCompanionModeManager.ShouldSuppressAutomaticTargeting(__instance))
+            var monsterAI = __instance as MonsterAI;
+
+            if (!monsterAI)
             {
                 return;
             }
 
-            __result = null;
+            var character = monsterAI.GetComponent<Character>();
+
+            if (DvergrCompanionSentryMode.IsActive(character))
+            {
+                if (__result && !DvergrCompanionSentryMode.IsWithinCombatRadius(character, __result))
+                {
+                    __result = null;
+                }
+
+                return;
+            }
+
+            if (DvergrCompanionModeManager.ShouldSuppressAutomaticTargeting(__instance))
+            {
+                __result = null;
+            }
         }
     }
 }
