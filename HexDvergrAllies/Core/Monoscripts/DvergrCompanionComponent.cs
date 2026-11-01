@@ -1,5 +1,4 @@
 ﻿using HexDvergrAllies.Core.Companions;
-using HexDvergrAllies.Core.Constants;
 using UnityEngine;
 
 namespace HexDvergrAllies.Core.Monoscripts
@@ -11,7 +10,7 @@ namespace HexDvergrAllies.Core.Monoscripts
 
         internal void Initialize(Character character)
         {
-            var isAshlandsDvergr = character.name.StartsWith(ValheimPrefabNames.AshlandsDvergrPrefix);
+            var isAshlandsDvergr = character.name.StartsWith(PrefabHelper.AshlandsDvergrPrefix);
 
             FireImmune = isAshlandsDvergr ? DvergrCompanionAttributes.AshlandsFireImmunity : DvergrCompanionAttributes.MistlandsFireImmunity;
             LavaImmune = isAshlandsDvergr ? DvergrCompanionAttributes.AshlandsLavaImmunity : DvergrCompanionAttributes.MistlandsLavaImmunity;

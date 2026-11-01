@@ -143,6 +143,7 @@ namespace HexDvergrAllies.Patches.Companions
 
                 var arrivalPosition = destination + __instance.transform.right * ArrivalOffset;
 
+                zdo.Set("HexDvergr_Mode", (int)DvergrCompanionManager.CompanionMode.Companion);
                 character.transform.position = arrivalPosition;
                 zdo.SetPosition(arrivalPosition);
 

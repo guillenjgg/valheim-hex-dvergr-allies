@@ -12,6 +12,9 @@ namespace HexDvergrAllies.Core
         internal const string MoltenCore = "MoltenCore";
         internal const string DvergrNeedle = "DvergrNeedle";
         internal const string Sap = "Sap";
+        internal const string AshlandsDvergrPrefix = "DvergerAshlands";
+        internal const string CharredStoneSpawner = "Spawner_CharredStone";
+        internal const string CrossbowArbalest = "CrossbowArbalest";
 
         internal static readonly HashSet<string> AllowedHomesteadPieces = new HashSet<string>
         {

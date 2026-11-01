@@ -290,6 +290,17 @@ namespace HexDvergrAllies.Core.Companions
                 return;
             }
 
+            if (GetMode(character) == CompanionMode.Sentry)
+            {
+                if (monsterAI.GetFollowTarget())
+                {
+                    monsterAI.SetFollowTarget(null);
+                }
+
+                _followOwnerMissingSince.Remove(zdo.m_uid);
+                return;
+            }
+
             long playerId = zdo.GetLong(OwnerKey, 0L);
             GameObject followTarget = monsterAI.GetFollowTarget();
 
@@ -462,7 +473,14 @@ namespace HexDvergrAllies.Core.Companions
 
             var mode = GetMode(character) == CompanionMode.Companion ? CompanionMode.Sentry : CompanionMode.Companion;
 
-            nview.GetZDO().Set(ModeKey, (int)mode);
+            var zdo = nview.GetZDO();
+
+            if (mode == CompanionMode.Sentry)
+            {
+                DvergrCompanionSentryMode.Activate(character);
+            }
+
+            zdo.Set(ModeKey, (int)mode);
 
             Plugin.Log.LogInfo($"[Dvergr Companion] Mode changed: Dvergr={character.name}, Player={player.GetPlayerName()}, Mode={mode}");
         }

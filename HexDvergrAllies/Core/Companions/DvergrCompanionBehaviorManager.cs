@@ -284,6 +284,14 @@ namespace HexDvergrAllies.Core.Companions
             CompanionStates.Remove(character);
         }
 
+        internal static bool IsImmuneToDamage(Character character, HitData hit)
+        {
+            return DvergrCompanionManager.IsHired(character) &&
+                   character.name.StartsWith(PrefabHelper.AshlandsDvergrPrefix) &&
+                   (hit.m_hitType == HitData.HitType.AshlandsOcean ||
+                    hit.m_hitType == HitData.HitType.AshlandsLava);
+        }
+
         private static void RestoreAttackAnimation(Character character, CompanionBehaviorState state)
         {
             if (!state.AnimationSpeedCaptured || Mathf.Approximately(state.AppliedAnimationMultiplier, 1f))

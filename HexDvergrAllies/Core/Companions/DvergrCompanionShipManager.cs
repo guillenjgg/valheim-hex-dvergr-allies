@@ -159,6 +159,11 @@ namespace HexDvergrAllies.Core.Companions
                     continue;
                 }
 
+                if (DvergrCompanionSentryMode.IsActive(character))
+                {
+                    continue;
+                }
+
                 if (_passengers.ContainsKey(character))
                 {
                     continue;

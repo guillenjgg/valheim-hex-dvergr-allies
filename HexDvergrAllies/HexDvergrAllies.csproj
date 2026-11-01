@@ -102,8 +102,9 @@
     <Compile Include="Core\Companions\DvergrCompanionNameReceiver.cs" />
     <Compile Include="Core\Companions\DvergrCompanionPinManager.cs" />
     <Compile Include="Core\Companions\DvergrCompanionPortalRelocationManager.cs" />
+    <Compile Include="Core\Companions\DvergrCompanionSentryMode.cs" />
     <Compile Include="Core\Companions\DvergrCompanionShipManager.cs" />
-    <Compile Include="Core\Constants\ValheimPrefabNames.cs" />
+    <Compile Include="Core\Companions\DvergrCompanionSpawnerTargeting.cs" />
     <Compile Include="Core\HexLocalization\HexLocalizationManager.cs" />
     <Compile Include="Core\Monoscripts\DvergrCompanionComponent.cs" />
     <Compile Include="Core\PrefabHelper.cs" />
@@ -122,6 +123,7 @@
     <Compile Include="Patches\Combat\AttackAddHitPointPatch.cs" />
     <Compile Include="Patches\Combat\AttackAreaHitPatch.cs" />
     <Compile Include="Patches\Companions\AoeCompanionShieldPatch.cs" />
+    <Compile Include="Patches\Companions\AttackCompanionDoubleShotPatch.cs" />
     <Compile Include="Patches\Companions\BaseAICompanionBossTargetPatch.cs" />
     <Compile Include="Patches\Companions\BaseAICompanionCombatLeashPatch.cs" />
     <Compile Include="Patches\Companions\BaseAICompanionFindEnemyPatch.cs" />
