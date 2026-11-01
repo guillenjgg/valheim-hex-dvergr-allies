@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using HexDvergrAllies.Core.Companions;
 using HexDvergrAllies.Core.Trading;
 
 namespace HexDvergrAllies.Patches
@@ -18,12 +19,15 @@ namespace HexDvergrAllies.Patches
                 return;
             }
 
-            bool canHire = DvergrTraderManager.CanAffordForgePact(Player.m_localPlayer, ___m_trader.GetComponent<Character>());
+            var player = Player.m_localPlayer;
+            var character = ___m_trader.GetComponent<Character>();
+            var alreadyHired = DvergrCompanionManager.HasHiredCompanion(player);
+            var canHire = DvergrTraderManager.CanAffordForgePact(player, character);
 
             __instance.m_buyButton.interactable = canHire;
-            __instance.m_buyButton.GetComponent<UITooltip>().m_text = canHire
-                ? ""
-                : Localization.instance.Localize("$msg_missingrequirement");
+            __instance.m_buyButton.GetComponent<UITooltip>().m_text = alreadyHired
+                ? "You can only have one Dvergr companion at a time."
+                : canHire ? "" : Localization.instance.Localize("$msg_missingrequirement");
         }
     }
 }
