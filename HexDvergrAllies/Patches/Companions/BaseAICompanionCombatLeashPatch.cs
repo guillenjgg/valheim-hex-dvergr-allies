@@ -9,7 +9,6 @@ namespace HexDvergrAllies.Patches
     internal static class BaseAICompanionCombatLeashPatch
     {
         private const float CompanionLeashDistance = 15f;
-        private const float SentryLeashDistance = 10f;
         private const float BoundaryBuffer = 0.5f;
         private const float LogInterval = 2f;
 
@@ -28,9 +27,10 @@ namespace HexDvergrAllies.Patches
                 return;
             }
 
-            var leashDistance = DvergrCompanionManager.GetMode(character) == DvergrCompanionManager.CompanionMode.Sentry ? SentryLeashDistance : CompanionLeashDistance;
-
-            var offset = character.transform.position - owner.position;
+            var isSentry = DvergrCompanionSentryMode.IsActive(character);
+            var leashDistance = isSentry ? DvergrCompanionSentryMode.CombatRadius : CompanionLeashDistance;
+            var referencePosition = isSentry ? DvergrCompanionSentryMode.GetAnchor(character) : owner.position;
+            var offset = character.transform.position - referencePosition;
             offset.y = 0f;
 
             var distance = offset.magnitude;
@@ -51,8 +51,6 @@ namespace HexDvergrAllies.Patches
 
             var originalDirection = dir;
 
-            // Remove only movement directed away from the owner.
-            // Sideways and inward movement remain permitted.
             horizontalDirection -= outward * outwardMovement;
 
             dir = new Vector3(horizontalDirection.x, dir.y, horizontalDirection.z);
@@ -87,9 +85,11 @@ namespace HexDvergrAllies.Patches
                 return;
             }
 
-            var leashDistance = DvergrCompanionManager.GetMode(character) == DvergrCompanionManager.CompanionMode.Sentry ? SentryLeashDistance : CompanionLeashDistance;
+            var isSentry = DvergrCompanionSentryMode.IsActive(character);
+            var leashDistance = isSentry ? DvergrCompanionSentryMode.CombatRadius : CompanionLeashDistance;
+            var referencePosition = isSentry ? DvergrCompanionSentryMode.GetAnchor(character) : owner.position;
 
-            var toOwner = owner.position - character.transform.position;
+            var toOwner = referencePosition - character.transform.position;
             toOwner.y = 0f;
 
             var distance = toOwner.magnitude;
@@ -101,8 +101,6 @@ namespace HexDvergrAllies.Patches
 
             var returnDirection = toOwner.normalized;
 
-            // Preserve existing behavior: override vanilla movement
-            // without clearing the combat target or disabling attacks.
             __instance.MoveTowards(returnDirection, true);
         }
 
@@ -147,6 +145,12 @@ namespace HexDvergrAllies.Patches
             if (!netView || !netView.IsValid() || !netView.IsOwner())
             {
                 return false;
+            }
+
+            if (DvergrCompanionSentryMode.IsActive(character))
+            {
+                owner = character.transform;
+                return true;
             }
 
             var followTarget = monsterAI.GetFollowTarget();

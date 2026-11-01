@@ -102,6 +102,7 @@
     <Compile Include="Core\Companions\DvergrCompanionNameReceiver.cs" />
     <Compile Include="Core\Companions\DvergrCompanionPinManager.cs" />
     <Compile Include="Core\Companions\DvergrCompanionPortalRelocationManager.cs" />
+    <Compile Include="Core\Companions\DvergrCompanionSentryMode.cs" />
     <Compile Include="Core\Companions\DvergrCompanionShipManager.cs" />
     <Compile Include="Core\Constants\ValheimPrefabNames.cs" />
     <Compile Include="Core\HexLocalization\HexLocalizationManager.cs" />

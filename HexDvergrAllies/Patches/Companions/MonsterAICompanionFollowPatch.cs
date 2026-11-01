@@ -23,5 +23,10 @@ namespace HexDvergrAllies.Patches
             DvergrCompanionManager.UpdateFollow(__instance);
             DvergrCompanionBehaviorManager.UpdateCombatLeash(__instance);
         }
+
+        private static void Postfix(MonsterAI __instance)
+        {
+            DvergrCompanionSentryMode.Update(__instance);
+        }
     }
 }
