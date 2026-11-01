@@ -1,5 +1,5 @@
 ﻿using HexDvergrAllies.Core.Monoscripts;
-using HexDvergrAllies.Core.Trading;
+using HexDvergrAllies.Core.UI;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -211,18 +211,14 @@ namespace HexDvergrAllies.Core.Companions
 
         internal static void ResetSessionState()
         {
-            int hiredCount = _hiredCompanions.Count;
-            int followLogCount = _lastFollowLogTimes.Count;
-            int missingOwnerCount = _followOwnerMissingSince.Count;
+            if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
+            {
+                Plugin.Log.LogInfo($"[Dvergr Companion] Session state reset: CachedHires={_hiredCompanions.Count}, FollowLogs={_lastFollowLogTimes.Count}, MissingOwners={_followOwnerMissingSince.Count}");
+            }
 
             _hiredCompanions.Clear();
             _lastFollowLogTimes.Clear();
             _followOwnerMissingSince.Clear();
-
-            if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
-            {
-                Plugin.Log.LogInfo($"[Dvergr Companion] Session state reset: CachedHires={hiredCount}, FollowLogs={followLogCount}, MissingOwners={missingOwnerCount}");
-            }
         }
 
         internal static string GetCompanionName(Character character)
@@ -302,7 +298,10 @@ namespace HexDvergrAllies.Core.Companions
 
                 if (_followOwnerMissingSince.TryGetValue(zdo.m_uid, out missingSince))
                 {
-                    Plugin.Log.LogInfo($"[Dvergr Companion] Follow owner resolved: Dvergr={character.name}, OwnerPlayerID={playerId}, Waited={Time.time - missingSince:F2}s");
+                    if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
+                    {
+                        Plugin.Log.LogInfo($"[Dvergr Companion] Follow owner resolved: Dvergr={character.name}, OwnerPlayerID={playerId}, Waited={Time.time - missingSince:F2}s");
+                    }
 
                     _followOwnerMissingSince.Remove(zdo.m_uid);
                 }
@@ -312,7 +311,10 @@ namespace HexDvergrAllies.Core.Companions
                     monsterAI.ResetPatrolPoint();
                     monsterAI.SetFollowTarget(player.gameObject);
 
-                    Plugin.Log.LogInfo($"[Dvergr Companion] Follow target assigned: Dvergr={character.name}, Player={player.GetPlayerName()}");
+                    if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
+                    {
+                        Plugin.Log.LogInfo($"[Dvergr Companion] Follow target assigned: Dvergr={character.name}, Player={player.GetPlayerName()}");
+                    }
                 }
 
                 if (ShouldLogFollow(zdo.m_uid))
@@ -419,7 +421,7 @@ namespace HexDvergrAllies.Core.Companions
 
             var player = ResolvePlayer(playerId);
 
-            if (!player || !IsHiredByPlayer(character, player) || !IsWithinInteractionDistance(player, character))
+            if (!player || !IsHiredByPlayer(character, player) || !DvergrInteractionHelper.IsWithinRange(player, character))
             {
                 return;
             }
@@ -447,7 +449,7 @@ namespace HexDvergrAllies.Core.Companions
 
             var player = ResolvePlayer(playerId);
 
-            if (!player || !IsHiredByPlayer(character, player) || !IsWithinInteractionDistance(player, character))
+            if (!player || !IsHiredByPlayer(character, player) || !DvergrInteractionHelper.IsWithinRange(player, character))
             {
                 return;
             }
@@ -506,7 +508,7 @@ namespace HexDvergrAllies.Core.Companions
 
             var player = ResolvePlayer(playerId);
 
-            if (!player || !IsWithinInteractionDistance(player, character))
+            if (!player || !DvergrInteractionHelper.IsWithinRange(player, character))
             {
                 Plugin.Log.LogWarning($"[Dvergr Companion] Hire rejected: PlayerZDO={playerId}, Reason=Player missing or out of range");
                 return;
@@ -582,7 +584,7 @@ namespace HexDvergrAllies.Core.Companions
 
             var player = ResolvePlayer(playerId);
 
-            if (!player || !IsWithinInteractionDistance(player, character))
+            if (!player || !DvergrInteractionHelper.IsWithinRange(player, character))
             {
                 Plugin.Log.LogWarning($"[Dvergr Companion] Unhire rejected: PlayerZDO={playerId}, Reason=Player missing or out of range");
                 return;
@@ -672,18 +674,14 @@ namespace HexDvergrAllies.Core.Companions
                 : null;
         }
 
-        private static bool IsWithinInteractionDistance(Player player, Character character)
-        {
-            float distance = Vector3.Distance(player.transform.position, character.transform.position);
-
-            return distance <= DvergrTraderManager.InteractionDistance;
-        }
-
         private static bool ShouldLogFollow(ZDOID zdoId)
         {
-            float lastLogTime;
+            if (!HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
+            {
+                return false;
+            }
 
-            if (_lastFollowLogTimes.TryGetValue(zdoId, out lastLogTime) && Time.time - lastLogTime < FollowLogInterval)
+            if (_lastFollowLogTimes.TryGetValue(zdoId, out var lastLogTime) && Time.time - lastLogTime < FollowLogInterval)
             {
                 return false;
             }
@@ -699,6 +697,5 @@ namespace HexDvergrAllies.Core.Companions
                 Object.Destroy(companion);
             }
         }
-
     }
 }

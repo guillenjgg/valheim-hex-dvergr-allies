@@ -15,9 +15,9 @@ namespace HexDvergrAllies.Core.UI
                 return;
             }
 
-            var modePressed = DvergrInteractionSettings.ModeShortcut.Value.IsDown();
-            var renamePressed = DvergrInteractionSettings.RenameShortcut.Value.IsDown();
-            var interactionPressed = DvergrInteractionSettings.InteractionShortcut.Value.IsDown();
+            var modePressed = HexDvergrAlliesConfiguration.CompanionModeShortcut.Value.IsDown();
+            var renamePressed = HexDvergrAlliesConfiguration.CompanionRenameShortcut.Value.IsDown();
+            var interactionPressed = HexDvergrAlliesConfiguration.CompanionInteractionShortcut.Value.IsDown();
 
             if (!modePressed && !renamePressed && !interactionPressed)
             {
@@ -33,15 +33,15 @@ namespace HexDvergrAllies.Core.UI
 
             if (modePressed)
             {
-                ToggleMode(player, character);
+                DvergrCompanionManager.RequestToggleMode(player, character);
             }
             else if (renamePressed)
             {
                 RenameCompanion(player, character);
             }
-            else if (interactionPressed)
+            else if (interactionPressed && DvergrCompanionManager.IsHiredByPlayer(character, player))
             {
-                BreakPact(player, character);
+                DvergrPactDialogController.ShowBreakPactConfirmation(player, character);
             }
         }
 
@@ -68,17 +68,12 @@ namespace HexDvergrAllies.Core.UI
                 return null;
             }
 
-            if (!DvergrInteractionSettings.IsWithinRange(player, character))
+            if (!DvergrInteractionHelper.IsWithinRange(player, character))
             {
                 return null;
             }
 
             return character;
-        }
-
-        private static void ToggleMode(Player player, Character character)
-        {
-            DvergrCompanionManager.RequestToggleMode(player, character);
         }
 
         private static void RenameCompanion(Player player, Character character)
@@ -97,16 +92,6 @@ namespace HexDvergrAllies.Core.UI
 
             receiver.Initialize(character);
             TextInput.instance.RequestText(receiver, RenameDialogTitle, MaxCompanionNameLength);
-        }
-
-        private static void BreakPact(Player player, Character character)
-        {
-            if (!DvergrCompanionManager.IsHiredByPlayer(character, player))
-            {
-                return;
-            }
-
-            DvergrPactDialogController.ShowBreakPactConfirmation(player, character);
         }
     }
 }

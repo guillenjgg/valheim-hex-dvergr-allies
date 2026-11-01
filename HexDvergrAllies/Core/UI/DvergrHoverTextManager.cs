@@ -40,7 +40,7 @@ namespace HexDvergrAllies.Core.UI
 
             var player = Player.m_localPlayer;
 
-            if (!player || !DvergrInteractionSettings.IsWithinRange(player, character))
+            if (!player || !DvergrInteractionHelper.IsWithinRange(player, character))
             {
                 hoverText = "";
                 return true;
@@ -56,9 +56,9 @@ namespace HexDvergrAllies.Core.UI
             {
                 var modeAction = isSentryMode ? EnableCompanionModeText : EnableSentryModeText;
 
-                hoverText += "\n[<color=yellow><b>" + DvergrInteractionSettings.InteractionShortcut.Value + "</b></color>] " + BreakPactText;
-                hoverText += "\n[<color=yellow><b>" + DvergrInteractionSettings.RenameShortcut.Value + "</b></color>] " + RenameText;
-                hoverText += "\n[<color=yellow><b>" + DvergrInteractionSettings.ModeShortcut.Value + "</b></color>] " + modeAction;
+                hoverText += "\n[<color=yellow><b>" + HexDvergrAlliesConfiguration.CompanionInteractionShortcut.Value + "</b></color>] " + BreakPactText;
+                hoverText += "\n[<color=yellow><b>" + HexDvergrAlliesConfiguration.CompanionRenameShortcut.Value + "</b></color>] " + RenameText;
+                hoverText += "\n[<color=yellow><b>" + HexDvergrAlliesConfiguration.CompanionModeShortcut.Value + "</b></color>] " + modeAction;
             }
 
             return true;
@@ -77,7 +77,7 @@ namespace HexDvergrAllies.Core.UI
 
             var player = Player.m_localPlayer;
 
-            if (!player || !DvergrInteractionSettings.IsWithinRange(player, character))
+            if (!player || !DvergrInteractionHelper.IsWithinRange(player, character))
             {
                 hoverText = "";
                 return true;
