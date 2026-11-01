@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using HarmonyLib;
-using HexDvergrAllies.Core.Managers;
+using HexDvergrAllies.Core.Companions;
 using UnityEngine;
 
 namespace HexDvergrAllies.Patches
@@ -8,19 +8,18 @@ namespace HexDvergrAllies.Patches
     [HarmonyPatch]
     internal static class BaseAICompanionCombatLeashPatch
     {
-        private const float LeashDistance = 15f;
+        private const float CompanionLeashDistance = 15f;
+        private const float SentryLeashDistance = 10f;
         private const float BoundaryBuffer = 0.5f;
-        private const float ReturnDistance = 13.5f;
         private const float LogInterval = 2f;
 
         private static readonly Dictionary<MonsterAI, float> NextBlockedLogTimes = new Dictionary<MonsterAI, float>();
-        private static readonly Dictionary<MonsterAI, float> NextCorrectionLogTimes = new Dictionary<MonsterAI, float>();
 
         [HarmonyPatch(typeof(BaseAI), nameof(BaseAI.MoveTowards))]
         [HarmonyPrefix]
         private static void MoveTowardsPrefix(BaseAI __instance, ref Vector3 dir)
         {
-            MonsterAI monsterAI = __instance as MonsterAI;
+            var monsterAI = __instance as MonsterAI;
             Character character;
             Transform owner;
 
@@ -29,26 +28,28 @@ namespace HexDvergrAllies.Patches
                 return;
             }
 
-            Vector3 offset = character.transform.position - owner.position;
+            var leashDistance = DvergrCompanionManager.GetMode(character) == DvergrCompanionManager.CompanionMode.Sentry ? SentryLeashDistance : CompanionLeashDistance;
+
+            var offset = character.transform.position - owner.position;
             offset.y = 0f;
 
-            float distance = offset.magnitude;
+            var distance = offset.magnitude;
 
-            if (distance < LeashDistance - BoundaryBuffer)
+            if (distance < leashDistance - BoundaryBuffer)
             {
                 return;
             }
 
-            Vector3 outward = offset.normalized;
-            Vector3 horizontalDirection = new Vector3(dir.x, 0f, dir.z);
-            float outwardMovement = Vector3.Dot(horizontalDirection, outward);
+            var outward = offset.normalized;
+            var horizontalDirection = new Vector3(dir.x, 0f, dir.z);
+            var outwardMovement = Vector3.Dot(horizontalDirection, outward);
 
             if (outwardMovement <= 0f)
             {
                 return;
             }
 
-            Vector3 originalDirection = dir;
+            var originalDirection = dir;
 
             // Remove only movement directed away from the owner.
             // Sideways and inward movement remain permitted.
@@ -58,13 +59,14 @@ namespace HexDvergrAllies.Patches
 
             if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value && ShouldLog(NextBlockedLogTimes, monsterAI))
             {
-                Character target = monsterAI.GetTargetCreature();
-                float targetDistance = target ? Vector3.Distance(character.transform.position, target.transform.position) : -1f;
+                var target = monsterAI.GetTargetCreature();
+                var targetDistance = target ? Vector3.Distance(character.transform.position, target.transform.position) : -1f;
 
                 Plugin.Log.LogInfo(
                     $"[Dvergr Companion] Combat leash movement blocked: " +
                     $"Dvergr={character.name}, " +
                     $"OwnerDistance={distance:F1}, " +
+                    $"LeashDistance={leashDistance:F1}, " +
                     $"Target={GetTargetName(target)}, " +
                     $"TargetDistance={targetDistance:F1}, " +
                     $"OutwardMovement={outwardMovement:F2}, " +
@@ -85,36 +87,23 @@ namespace HexDvergrAllies.Patches
                 return;
             }
 
-            Vector3 toOwner = owner.position - character.transform.position;
+            var leashDistance = DvergrCompanionManager.GetMode(character) == DvergrCompanionManager.CompanionMode.Sentry ? SentryLeashDistance : CompanionLeashDistance;
+
+            var toOwner = owner.position - character.transform.position;
             toOwner.y = 0f;
 
-            float distance = toOwner.magnitude;
+            var distance = toOwner.magnitude;
 
-            if (distance <= LeashDistance)
+            if (distance <= leashDistance)
             {
                 return;
             }
 
-            Character target = __instance.GetTargetCreature();
-            float targetDistance = target ? Vector3.Distance(character.transform.position, target.transform.position) : -1f;
-            Vector3 returnDirection = toOwner.normalized;
+            var returnDirection = toOwner.normalized;
 
             // Preserve existing behavior: override vanilla movement
             // without clearing the combat target or disabling attacks.
             __instance.MoveTowards(returnDirection, true);
-
-            if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value && ShouldLog(NextCorrectionLogTimes, __instance))
-            {
-                Plugin.Log.LogInfo(
-                    $"[Dvergr Companion] Combat leash correction: " +
-                    $"Dvergr={character.name}, " +
-                    $"OwnerDistance={distance:F1}, " +
-                    $"Leash={LeashDistance:F1}, " +
-                    $"ReturnTarget={ReturnDistance:F1}, " +
-                    $"Target={GetTargetName(target)}, " +
-                    $"TargetDistance={targetDistance:F1}, " +
-                    $"ReturnDirection={returnDirection}");
-            }
         }
 
         private static bool ShouldLog(Dictionary<MonsterAI, float> nextLogTimes, MonsterAI monsterAI)
@@ -141,28 +130,28 @@ namespace HexDvergrAllies.Patches
             character = null;
             owner = null;
 
-            if (monsterAI == null)
+            if (!monsterAI)
             {
                 return false;
             }
 
             character = monsterAI.GetComponent<Character>();
 
-            if (character == null || !DvergrCompanionManager.IsHired(character))
+            if (!character || !DvergrCompanionManager.IsHired(character))
             {
                 return false;
             }
 
-            ZNetView netView = character.GetComponent<ZNetView>();
+            var netView = character.GetComponent<ZNetView>();
 
-            if (netView == null || !netView.IsValid() || !netView.IsOwner())
+            if (!netView || !netView.IsValid() || !netView.IsOwner())
             {
                 return false;
             }
 
-            GameObject followTarget = monsterAI.GetFollowTarget();
+            var followTarget = monsterAI.GetFollowTarget();
 
-            if (followTarget == null)
+            if (!followTarget)
             {
                 return false;
             }

@@ -1,5 +1,5 @@
 ﻿using HarmonyLib;
-using HexDvergrAllies.Core.Managers;
+using HexDvergrAllies.Core.Companions;
 
 namespace HexDvergrAllies.Patches
 {
@@ -8,7 +8,7 @@ namespace HexDvergrAllies.Patches
     {
         private static void Postfix(BaseAI __instance, ref Character __result)
         {
-            if (!DvergrCompanionBehaviorManager.ShouldSuppressAutomaticTargeting(__instance))
+            if (!DvergrCompanionModeManager.ShouldSuppressAutomaticTargeting(__instance))
             {
                 return;
             }

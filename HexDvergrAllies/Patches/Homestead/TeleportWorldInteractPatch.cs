@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using HexDvergrAllies.Core;
 
 namespace HexDvergrAllies.Patches
 {
@@ -27,7 +28,7 @@ namespace HexDvergrAllies.Patches
 
             var prefabName = Utils.GetPrefabName(__instance.gameObject);
 
-            if (prefabName != "portal_wood" && prefabName != "portal_stone")
+            if (!PrefabHelper.AllowedHomesteadPieces.Contains(prefabName))
             {
                 return true;
             }
@@ -38,9 +39,13 @@ namespace HexDvergrAllies.Patches
             }
 
             TextInput.instance.RequestText(__instance, "$piece_portal_tag", 10);
+            
             __result = true;
 
-            Plugin.Log.LogInfo($"[Dvergr Homestead] Portal interaction allowed: Portal={prefabName}, Position={position}");
+            if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
+            {
+                Plugin.Log.LogInfo($"[Dvergr Homestead] Portal interaction allowed: Portal={prefabName}, Position={position}");
+            }
 
             return false;
         }

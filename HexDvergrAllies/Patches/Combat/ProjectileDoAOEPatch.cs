@@ -7,6 +7,9 @@ using UnityEngine;
 
 namespace HexDvergrAllies.Patches
 {
+    /// <summary>
+    /// Prevents player projectiles from damaging dvergrs
+    /// </summary>
     [HarmonyPatch(typeof(Projectile), nameof(Projectile.DoAOE))]
     internal static class ProjectileDoAOEPatch
     {
@@ -93,12 +96,14 @@ namespace HexDvergrAllies.Patches
             }
 
             var owner = OwnerField.GetValue(projectile) as Character;
+
             if (owner == null || !owner.IsPlayer())
             {
                 return false;
             }
 
             var character = target.GetComponent<Character>();
+
             return character != null && character.GetFaction() == Character.Faction.Dverger;
         }
     }

@@ -1,35 +1,29 @@
 ﻿using HarmonyLib;
-using HexDvergrAllies.Core.Managers;
+using HexDvergrAllies.Core.Companions;
 
 namespace HexDvergrAllies.Patches.Companions
 {
     [HarmonyPatch(typeof(BaseAI), "Flee")]
     internal static class BaseAICompanionFleePatch
     {
+
         private static bool Prefix(BaseAI __instance)
         {
-            if (__instance == null)
+            if (!(__instance is MonsterAI monsterAI))
             {
                 return true;
             }
 
-            MonsterAI monsterAI = __instance as MonsterAI;
+            var character = monsterAI.GetComponent<Character>();
 
-            if (monsterAI == null)
+            if (!character || !DvergrCompanionManager.IsHired(character))
             {
                 return true;
             }
 
-            Character character = monsterAI.GetComponent<Character>();
+            var netView = character.GetComponent<ZNetView>();
 
-            if (character == null || !DvergrCompanionManager.IsHired(character))
-            {
-                return true;
-            }
-
-            ZNetView netView = character.GetComponent<ZNetView>();
-
-            if (netView == null || !netView.IsValid() || !netView.IsOwner())
+            if (!netView || !netView.IsValid() || !netView.IsOwner())
             {
                 return true;
             }
@@ -44,5 +38,6 @@ namespace HexDvergrAllies.Patches.Companions
 
             return false;
         }
+
     }
 }

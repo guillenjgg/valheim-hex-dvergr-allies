@@ -2,6 +2,9 @@
 
 namespace HexDvergrAllies.Patches
 {
+    /// <summary>
+    /// Prevents dvergrs and players from being considered enemies of each other.
+    /// </summary>
     [HarmonyPatch(typeof(BaseAI), nameof(BaseAI.IsEnemy), new[] { typeof(Character), typeof(Character) })]
     internal static class BaseAIIsEnemyPatch
     {

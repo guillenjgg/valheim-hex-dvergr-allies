@@ -1,5 +1,4 @@
-﻿
-using HexDvergrAllies.Core.Managers;
+﻿using HexDvergrAllies.Core.Companions;
 using UnityEngine;
 
 namespace HexDvergrAllies.Core.UI

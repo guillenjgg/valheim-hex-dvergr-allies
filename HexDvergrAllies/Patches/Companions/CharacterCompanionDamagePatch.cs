@@ -1,6 +1,5 @@
-﻿
-using HarmonyLib;
-using HexDvergrAllies.Core.Managers;
+﻿using HarmonyLib;
+using HexDvergrAllies.Core.Companions;
 
 namespace HexDvergrAllies.Patches.Companions
 {

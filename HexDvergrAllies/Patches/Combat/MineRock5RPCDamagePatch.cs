@@ -1,16 +1,17 @@
-﻿
-using HarmonyLib;
+﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace HexDvergrAllies.Patches
 {
+    /// <summary>
+    /// This is what allows players to damage giant skulls in Dvergr protected areas
+    /// </summary>
     [HarmonyPatch(typeof(MineRock5), "RPC_Damage")]
     internal static class MineRock5RPCDamagePatch
     {
-        private static ref List<PrivateArea> AllAreas =>
-            ref AccessTools.StaticFieldRefAccess<List<PrivateArea>>(typeof(PrivateArea), "m_allAreas");
+        private static ref List<PrivateArea> AllAreas => ref AccessTools.StaticFieldRefAccess<List<PrivateArea>>(typeof(PrivateArea), "m_allAreas");
 
         private static readonly Func<PrivateArea, bool> IsAreaEnabled = AccessTools.MethodDelegate<Func<PrivateArea, bool>>(AccessTools.Method(typeof(PrivateArea), "IsEnabled"));
 
