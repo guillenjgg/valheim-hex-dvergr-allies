@@ -15,6 +15,12 @@ namespace HexDvergrAllies.Patches.Companions
                 return;
             }
 
+            if (DvergrCompanionBehaviorManager.IsImmuneToDamage(__instance, hit))
+            {
+                hit.m_damage.m_damage = 0f;
+                return;
+            }
+
             if (DvergrCompanionManager.IsHired(__instance))
             {
                 var damageTakenMultiplier = HexDvergrAlliesConfiguration.CompanionDamageTakenMultiplier.Value;

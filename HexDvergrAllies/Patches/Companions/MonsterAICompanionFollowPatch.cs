@@ -26,6 +26,7 @@ namespace HexDvergrAllies.Patches
 
         private static void Postfix(MonsterAI __instance)
         {
+            DvergrCompanionSpawnerTargeting.Update(__instance);
             DvergrCompanionSentryMode.Update(__instance);
         }
     }
