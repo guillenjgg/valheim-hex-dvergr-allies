@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿using System;
 using HexDvergrAllies.Core.Trading;
 using UnityEngine;
 
@@ -6,25 +6,23 @@ namespace HexDvergrAllies.Core.Companions
 {
     internal static class DvergrCompanionHireManager
     {
-        private const float HireTimeout = 10f;
         private static bool _hirePending;
+        private static long _pendingRequestId;
+        private static ZDOID _pendingCompanionId;
+        private static ZDOID _pendingPlayerId;
+        private static Player _pendingPlayer;
+        private static Inventory _pendingInventory;
+        private static int _pendingCost;
 
         internal static void RequestForgePact(Player player, Character character)
         {
-            if (_hirePending)
+            if (_hirePending || !DvergrTraderManager.CanAffordForgePact(player, character))
             {
-                return;
-            }
-
-            if (!DvergrTraderManager.CanAffordForgePact(player, character))
-            {
-                Plugin.Log.LogWarning("[Dvergr Companion] Forge Pact rejected: Player ineligible or insufficient MeadTasty.");
                 return;
             }
 
             if (Vector3.Distance(player.transform.position, character.transform.position) > DvergrTraderManager.InteractionDistance)
             {
-                Plugin.Log.LogWarning("[Dvergr Companion] Forge Pact rejected: Out of range.");
                 return;
             }
 
@@ -38,7 +36,6 @@ namespace HexDvergrAllies.Core.Companions
             var paymentName = DvergrTraderManager.GetForgePactPaymentName();
             var inventory = player.GetInventory();
             var cost = DvergrPricingConfig.ForgePactCost;
-            var companionId = nview.GetZDO().m_uid;
 
             if (string.IsNullOrEmpty(paymentName) || inventory.CountItems(paymentName) < cost)
             {
@@ -46,68 +43,73 @@ namespace HexDvergrAllies.Core.Companions
             }
 
             _hirePending = true;
+            _pendingRequestId = DateTime.UtcNow.Ticks;
+            _pendingCompanionId = nview.GetZDO().m_uid;
+            _pendingPlayerId = player.GetZDOID();
+            _pendingPlayer = player;
+            _pendingInventory = inventory;
+            _pendingCost = cost;
+
             inventory.RemoveItem(paymentName, cost);
 
             if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
             {
-                Plugin.Log.LogInfo($"[Dvergr Companion] Forge Pact requested: Player={player.GetPlayerName()}, Dvergr={character.name}, ZDO={companionId}, Cost={cost} MeadTasty");
+                Plugin.Log.LogInfo($"[Dvergr Companion] Forge Pact requested: Player={player.GetPlayerName()}, Dvergr={character.name}, Request={_pendingRequestId}, Cost={cost} MeadTasty");
             }
 
-            player.StartCoroutine(CompleteForgePact(player, companionId, inventory, cost));
-
-            DvergrCompanionManager.RequestHire(player, character);
-
+            DvergrCompanionManager.RequestHire(player, character, _pendingRequestId);
+            
             StoreGui.instance.Hide();
         }
 
-        private static IEnumerator CompleteForgePact(Player player, ZDOID companionId, Inventory inventory, int cost)
+        internal static void OnHireResult(Character character, long sender, ZDOID playerId, long requestId, bool success)
         {
-            var startTime = Time.time;
-            var completed = false;
-
-            while (Time.time - startTime < HireTimeout)
+            if (!_hirePending || requestId != _pendingRequestId || playerId != _pendingPlayerId)
             {
-                if (!player || ZNetScene.instance == null)
-                {
-                    break;
-                }
-
-                var companionObject = ZNetScene.instance.FindInstance(companionId);
-                var character = companionObject ? companionObject.GetComponent<Character>() : null;
-
-                if (character && DvergrCompanionManager.IsHired(character))
-                {
-                    if (!DvergrCompanionManager.IsHiredByPlayer(character, player))
-                    {
-                        Plugin.Log.LogWarning("[Dvergr Companion] Forge Pact failed: Dvergr hired by another player.");
-                        break;
-                    }
-
-                    completed = true;
-
-                    Plugin.Log.LogInfo($"[Dvergr Companion] Forge Pact completed: Player={player.GetPlayerName()}, Dvergr={character.name}, Cost={cost} MeadTasty");
-
-                    player.Message(MessageHud.MessageType.Center, "Forge Pact established.");
-                    break;
-                }
-
-                yield return null;
+                return;
             }
 
-            if (!completed)
-            {
-                var paymentPrefab = DvergrTraderManager.GetForgePactPaymentName();
+            var nview = character.GetComponent<ZNetView>();
 
-                if (player && !string.IsNullOrEmpty(paymentPrefab))
+            if (!nview || !nview.IsValid() || nview.GetZDO().m_uid != _pendingCompanionId || sender != nview.GetZDO().GetOwner())
+            {
+                return;
+            }
+
+            var player = _pendingPlayer;
+            var inventory = _pendingInventory;
+            var cost = _pendingCost;
+
+            if (success)
+            {
+                if (player)
                 {
-                    inventory.AddItem("MeadTasty", cost, 1, 0, 0L, "", false, false);
+                    player.Message(MessageHud.MessageType.Center, "Forge Pact established.");
+                }
+
+                if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
+                {
+                    Plugin.Log.LogInfo($"[Dvergr Companion] Forge Pact completed: Request={requestId}, Cost={cost} MeadTasty");
+                }
+            }
+            else
+            {
+                if (player)
+                {
+                    inventory.AddItem(PrefabHelper.MeadTasty, cost, 1, 0, 0L, "", false, false);
                     player.Message(MessageHud.MessageType.Center, "Unable to complete Forge Pact. Payment refunded.");
                 }
 
-                Plugin.Log.LogWarning($"[Dvergr Companion] Forge Pact not completed: Companion={companionId}, Timeout={HireTimeout}s");
+                if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
+                {
+                    Plugin.Log.LogWarning($"[Dvergr Companion] Forge Pact rejected: Request={requestId}");
+                }
             }
 
             _hirePending = false;
+            _pendingRequestId = 0L;
+            _pendingPlayer = null;
+            _pendingInventory = null;
         }
     }
 }
