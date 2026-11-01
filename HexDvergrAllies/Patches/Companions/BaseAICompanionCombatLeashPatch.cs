@@ -28,6 +28,12 @@ namespace HexDvergrAllies.Patches
             }
 
             var isSentry = DvergrCompanionSentryMode.IsActive(character);
+
+            if (!isSentry && monsterAI.GetTargetCreature() == null && monsterAI.GetStaticTarget() == null)
+            {
+                return;
+            }
+
             var leashDistance = isSentry ? DvergrCompanionSentryMode.CombatRadius : CompanionLeashDistance;
             var referencePosition = isSentry ? DvergrCompanionSentryMode.GetAnchor(character) : owner.position;
             var offset = character.transform.position - referencePosition;
@@ -86,6 +92,12 @@ namespace HexDvergrAllies.Patches
             }
 
             var isSentry = DvergrCompanionSentryMode.IsActive(character);
+
+            if (!isSentry && __instance.GetTargetCreature() == null && __instance.GetStaticTarget() == null)
+            {
+                return;
+            }
+
             var leashDistance = isSentry ? DvergrCompanionSentryMode.CombatRadius : CompanionLeashDistance;
             var referencePosition = isSentry ? DvergrCompanionSentryMode.GetAnchor(character) : owner.position;
 

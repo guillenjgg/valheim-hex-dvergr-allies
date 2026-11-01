@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using System.Collections.Generic;
+using HarmonyLib;
 using UnityEngine;
 
 namespace HexDvergrAllies.Core.Companions
@@ -11,7 +12,7 @@ namespace HexDvergrAllies.Core.Companions
         private static readonly AccessTools.FieldRef<MonsterAI, StaticTarget> StaticTargetField = AccessTools.FieldRefAccess<MonsterAI, StaticTarget>("m_targetStatic");
         private static readonly AccessTools.FieldRef<MonsterAI, Character> CombatTargetField = AccessTools.FieldRefAccess<MonsterAI, Character>("m_targetCreature");
 
-        private static float _nextScanTime;
+        private static readonly Dictionary<MonsterAI, float> NextScanTimes = new Dictionary<MonsterAI, float>();
 
         internal static void Update(MonsterAI monsterAI)
         {
@@ -30,12 +31,12 @@ namespace HexDvergrAllies.Core.Companions
                 return;
             }
 
-            if (Time.time < _nextScanTime)
+            if (NextScanTimes.TryGetValue(monsterAI, out var nextScanTime) && Time.time < nextScanTime)
             {
                 return;
             }
 
-            _nextScanTime = Time.time + ScanInterval;
+            NextScanTimes[monsterAI] = Time.time + ScanInterval;
 
             var origin = DvergrCompanionSentryMode.IsActive(character)
                 ? DvergrCompanionSentryMode.GetAnchor(character)
@@ -79,6 +80,11 @@ namespace HexDvergrAllies.Core.Companions
 
             CombatTargetField(monsterAI) = null;
             StaticTargetField(monsterAI) = closestTarget;
+        }
+
+        internal static void RemoveCharacter(MonsterAI monsterAI)
+        {
+            NextScanTimes.Remove(monsterAI);
         }
     }
 }
