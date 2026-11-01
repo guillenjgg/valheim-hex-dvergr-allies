@@ -392,7 +392,7 @@ namespace HexDvergrAllies.Core.Trading
         private static bool ExecuteFlametalPurchase(Player player)
         {
             Inventory inventory = player.GetInventory();
-            GameObject flametalPrefab = ObjectDB.instance.GetItemPrefab(DvergrTraderManager.AshlandsFlametalPrefab);
+            GameObject flametalPrefab = ObjectDB.instance.GetItemPrefab(PrefabHelper.FlametalNew);
             string paymentName = DvergrTraderManager.GetAshlandsPaymentName();
 
             if (!flametalPrefab || string.IsNullOrEmpty(paymentName))
@@ -439,8 +439,8 @@ namespace HexDvergrAllies.Core.Trading
         {
             Inventory inventory = player.GetInventory();
             string trophyName = DvergrTraderManager.GetPaymentTrophy(inventory);
-            GameObject sapPrefab = ObjectDB.instance.GetItemPrefab("Sap");
-            GameObject needlePrefab = ObjectDB.instance.GetItemPrefab("DvergrNeedle");
+            GameObject sapPrefab = ObjectDB.instance.GetItemPrefab(PrefabHelper.Sap);
+            GameObject needlePrefab = ObjectDB.instance.GetItemPrefab(PrefabHelper.DvergrNeedle);
 
             if (trophyName == null || !sapPrefab || !needlePrefab)
             {

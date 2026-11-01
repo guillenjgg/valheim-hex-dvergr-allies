@@ -6,15 +6,6 @@ namespace HexDvergrAllies.Core.Trading
     internal static class DvergrTraderManager
     {
         internal const float InteractionDistance = 2f;
-        internal const string ForgePactPrefab = "MeadTasty";
-        internal const string AshlandsFlametalPrefab = "FlametalNew";
-        internal const string AshlandsPaymentPrefab = "MoltenCore";
-
-        private static readonly string[] MistlandsTrophyPrefabs = {
-            "TrophySeeker",
-            "TrophyGjall",
-            "TrophySeekerBrute"
-        };
 
         internal static void Initialize(Humanoid dvergr)
         {
@@ -64,17 +55,17 @@ namespace HexDvergrAllies.Core.Trading
 
         internal static bool IsForgePact(Trader.TradeItem item)
         {
-            return item != null && item.m_prefab && item.m_prefab.gameObject.name == ForgePactPrefab;
+            return item != null && item.m_prefab && item.m_prefab.gameObject.name == PrefabHelper.MeadTasty;
         }
 
         internal static bool IsAshlandsFlametal(Trader.TradeItem item)
         {
-            return item != null && item.m_prefab && item.m_prefab.gameObject.name == AshlandsFlametalPrefab;
+            return item != null && item.m_prefab && item.m_prefab.gameObject.name == PrefabHelper.FlametalNew;
         }
 
         internal static string GetForgePactPaymentName()
         {
-            GameObject prefab = ObjectDB.instance.GetItemPrefab(ForgePactPrefab);
+            GameObject prefab = ObjectDB.instance.GetItemPrefab(PrefabHelper.MeadTasty);
 
             if (!prefab)
             {
@@ -88,7 +79,7 @@ namespace HexDvergrAllies.Core.Trading
 
         internal static string GetAshlandsPaymentName()
         {
-            GameObject prefab = ObjectDB.instance.GetItemPrefab(AshlandsPaymentPrefab);
+            GameObject prefab = ObjectDB.instance.GetItemPrefab(PrefabHelper.MoltenCore);
 
             if (!prefab)
             {
@@ -141,7 +132,7 @@ namespace HexDvergrAllies.Core.Trading
 
         internal static string GetPaymentTrophy(Inventory inventory)
         {
-            foreach (string prefabName in MistlandsTrophyPrefabs)
+            foreach (string prefabName in PrefabHelper.MistlandsTrophyPrefabs)
             {
                 GameObject prefab = ObjectDB.instance.GetItemPrefab(prefabName);
 
@@ -163,7 +154,7 @@ namespace HexDvergrAllies.Core.Trading
 
         private static void AddForgePact(Trader trader)
         {
-            GameObject prefab = ObjectDB.instance.GetItemPrefab(ForgePactPrefab);
+            GameObject prefab = ObjectDB.instance.GetItemPrefab(PrefabHelper.MeadTasty);
 
             if (!prefab)
             {
@@ -176,7 +167,7 @@ namespace HexDvergrAllies.Core.Trading
 
         private static void AddMistlandsItems(Trader trader)
         {
-            GameObject needlePrefab = ObjectDB.instance.GetItemPrefab("DvergrNeedle");
+            GameObject needlePrefab = ObjectDB.instance.GetItemPrefab(PrefabHelper.DvergrNeedle);
 
             if (needlePrefab)
             {
@@ -187,7 +178,7 @@ namespace HexDvergrAllies.Core.Trading
                 Plugin.Log.LogWarning("[Dvergr Trader] DvergrNeedle prefab not found.");
             }
 
-            GameObject softTissuePrefab = ObjectDB.instance.GetItemPrefab("Softtissue");
+            GameObject softTissuePrefab = ObjectDB.instance.GetItemPrefab(PrefabHelper.Softtissue);
 
             if (softTissuePrefab)
             {
@@ -201,7 +192,7 @@ namespace HexDvergrAllies.Core.Trading
 
         private static void AddAshlandsItems(Trader trader)
         {
-            GameObject flametalPrefab = ObjectDB.instance.GetItemPrefab(AshlandsFlametalPrefab);
+            GameObject flametalPrefab = ObjectDB.instance.GetItemPrefab(PrefabHelper.FlametalNew);
 
             if (!flametalPrefab)
             {
