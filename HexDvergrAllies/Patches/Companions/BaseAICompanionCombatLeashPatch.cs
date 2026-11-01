@@ -8,13 +8,12 @@ namespace HexDvergrAllies.Patches
     [HarmonyPatch]
     internal static class BaseAICompanionCombatLeashPatch
     {
-        private const float LeashDistance = 15f;
+        private const float CompanionLeashDistance = 15f;
+        private const float SentryLeashDistance = 10f;
         private const float BoundaryBuffer = 0.5f;
         private const float LogInterval = 2f;
 
         private static readonly Dictionary<MonsterAI, float> NextBlockedLogTimes = new Dictionary<MonsterAI, float>();
-        private static readonly Dictionary<MonsterAI, float> NextCorrectionLogTimes = new Dictionary<MonsterAI, float>();
-
 
         [HarmonyPatch(typeof(BaseAI), nameof(BaseAI.MoveTowards))]
         [HarmonyPrefix]
@@ -29,12 +28,14 @@ namespace HexDvergrAllies.Patches
                 return;
             }
 
+            var leashDistance = DvergrCompanionManager.GetMode(character) == DvergrCompanionManager.CompanionMode.Sentry ? SentryLeashDistance : CompanionLeashDistance;
+
             var offset = character.transform.position - owner.position;
             offset.y = 0f;
 
             var distance = offset.magnitude;
 
-            if (distance < LeashDistance - BoundaryBuffer)
+            if (distance < leashDistance - BoundaryBuffer)
             {
                 return;
             }
@@ -65,6 +66,7 @@ namespace HexDvergrAllies.Patches
                     $"[Dvergr Companion] Combat leash movement blocked: " +
                     $"Dvergr={character.name}, " +
                     $"OwnerDistance={distance:F1}, " +
+                    $"LeashDistance={leashDistance:F1}, " +
                     $"Target={GetTargetName(target)}, " +
                     $"TargetDistance={targetDistance:F1}, " +
                     $"OutwardMovement={outwardMovement:F2}, " +
@@ -72,7 +74,6 @@ namespace HexDvergrAllies.Patches
                     $"AdjustedDirection={dir}");
             }
         }
-
 
         [HarmonyPatch(typeof(MonsterAI), nameof(MonsterAI.UpdateAI))]
         [HarmonyPostfix]
@@ -86,12 +87,14 @@ namespace HexDvergrAllies.Patches
                 return;
             }
 
-            Vector3 toOwner = owner.position - character.transform.position;
+            var leashDistance = DvergrCompanionManager.GetMode(character) == DvergrCompanionManager.CompanionMode.Sentry ? SentryLeashDistance : CompanionLeashDistance;
+
+            var toOwner = owner.position - character.transform.position;
             toOwner.y = 0f;
 
-            float distance = toOwner.magnitude;
+            var distance = toOwner.magnitude;
 
-            if (distance <= LeashDistance)
+            if (distance <= leashDistance)
             {
                 return;
             }
@@ -101,12 +104,6 @@ namespace HexDvergrAllies.Patches
             // Preserve existing behavior: override vanilla movement
             // without clearing the combat target or disabling attacks.
             __instance.MoveTowards(returnDirection, true);
-
-            if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value && ShouldLog(NextCorrectionLogTimes, __instance))
-            {
-                var target = __instance.GetTargetCreature();
-                var targetDistance = target ? Vector3.Distance(character.transform.position, target.transform.position) : -1f;
-            }
         }
 
         private static bool ShouldLog(Dictionary<MonsterAI, float> nextLogTimes, MonsterAI monsterAI)
@@ -127,7 +124,6 @@ namespace HexDvergrAllies.Patches
         {
             return target ? target.name : "None";
         }
-
 
         private static bool TryGetCompanion(MonsterAI monsterAI, out Character character, out Transform owner)
         {
@@ -164,6 +160,5 @@ namespace HexDvergrAllies.Patches
 
             return true;
         }
-
     }
 }
