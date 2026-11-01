@@ -5,14 +5,6 @@ namespace HexDvergrAllies.Core.UI
 {
     internal static class DvergrHoverTextManager
     {
-        private const string CompanionModeText = "Companion Mode";
-        private const string SentryModeText = "Sentry Mode";
-        private const string EnableCompanionModeText = "Enable Companion Mode";
-        private const string EnableSentryModeText = "Enable Sentry Mode";
-        private const string BreakPactText = "Break Pact";
-        private const string RenameText = "Rename";
-        private const string TraderInteractionText = "\n[<color=yellow><b>$KEY_Use</b></color>] $raven_interact";
-
         internal static bool Init(Character character, out string hoverText)
         {
             if (ShowCompanionText(character, out hoverText))
@@ -50,16 +42,18 @@ namespace HexDvergrAllies.Core.UI
             var mode = DvergrCompanionManager.GetMode(character);
             var isSentryMode = mode == DvergrCompanionManager.CompanionMode.Sentry;
 
-            hoverText = companionName + "\n" + (isSentryMode ? SentryModeText : CompanionModeText);
+            hoverText = companionName + "\n" + (isSentryMode ? "$hex_dvergr_sentry_mode" : "$hex_dvergr_companion_mode");
 
             if (DvergrCompanionManager.IsHiredByPlayer(character, player))
             {
-                var modeAction = isSentryMode ? EnableCompanionModeText : EnableSentryModeText;
+                var modeAction = isSentryMode ? "$hex_dvergr_enable_companion_mode" : "$hex_dvergr_enable_sentry_mode";
 
-                hoverText += "\n[<color=yellow><b>" + HexDvergrAlliesConfiguration.CompanionInteractionShortcut.Value + "</b></color>] " + BreakPactText;
-                hoverText += "\n[<color=yellow><b>" + HexDvergrAlliesConfiguration.CompanionRenameShortcut.Value + "</b></color>] " + RenameText;
+                hoverText += "\n[<color=yellow><b>" + HexDvergrAlliesConfiguration.CompanionInteractionShortcut.Value + "</b></color>] $hex_dvergr_break_pact";
+                hoverText += "\n[<color=yellow><b>" + HexDvergrAlliesConfiguration.CompanionRenameShortcut.Value + "</b></color>] $hex_dvergr_rename";
                 hoverText += "\n[<color=yellow><b>" + HexDvergrAlliesConfiguration.CompanionModeShortcut.Value + "</b></color>] " + modeAction;
             }
+
+            hoverText = Localization.instance.Localize(hoverText);
 
             return true;
         }
@@ -83,7 +77,7 @@ namespace HexDvergrAllies.Core.UI
                 return true;
             }
 
-            hoverText = Localization.instance.Localize(trader.m_name + TraderInteractionText);
+            hoverText = Localization.instance.Localize(trader.m_name + "\n[<color=yellow><b>$KEY_Use</b></color>] $raven_interact");
 
             return true;
         }

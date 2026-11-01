@@ -28,7 +28,7 @@ namespace HexDvergrAllies.Core.Trading
             trader.m_greetRange = 0f;
             trader.m_byeRange = 0f;
             trader.m_randomTalkInterval = 3600f;
-            trader.m_randomBuy.Add("A fine trade.");
+            trader.m_randomBuy.Add("$hex_dvergr_fine_trade");
 
             AddForgePact(trader);
 

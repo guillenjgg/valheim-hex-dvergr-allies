@@ -2,7 +2,10 @@
 using BepInEx.Logging;
 using HarmonyLib;
 using HexDvergrAllies.Assets;
+using HexDvergrAllies.Core.HexLocalization;
 using HexDvergrAllies.Core.Trading;
+using System;
+using System.IO;
 using System.Reflection;
 
 namespace HexDvergrAllies
@@ -15,6 +18,7 @@ namespace HexDvergrAllies
         private const string PluginVersion = "1.0.0";
 
         private Harmony _harmonyInstance;
+        private FileSystemWatcher _configFileWatcher;
 
         internal static ManualLogSource Log;
         internal static Plugin Instance;
@@ -25,7 +29,16 @@ namespace HexDvergrAllies
             Log = Logger;
 
             AssetHelper.Initialize();
+
+            Config.SaveOnConfigSet = false;
+
             HexDvergrAlliesConfiguration.Init(Config);
+            HexLocalizationManager.Initialize();
+
+            Config.Save();
+            Config.SaveOnConfigSet = true;
+
+            SetupConfigWatcher();
 
             _harmonyInstance = new Harmony(PluginGuid);
             _harmonyInstance.PatchAll(Assembly.GetExecutingAssembly());
@@ -35,12 +48,56 @@ namespace HexDvergrAllies
             Log.LogInfo($"{PluginName} v{PluginVersion} loaded.");
         }
 
+        private void SetupConfigWatcher()
+        {
+            _configFileWatcher = new FileSystemWatcher(Path.GetDirectoryName(Config.ConfigFilePath), Path.GetFileName(Config.ConfigFilePath));
+            _configFileWatcher.Changed += OnConfigFileChanged;
+            _configFileWatcher.Created += OnConfigFileChanged;
+            _configFileWatcher.Renamed += OnConfigFileChanged;
+            _configFileWatcher.IncludeSubdirectories = true;
+            _configFileWatcher.SynchronizingObject = ThreadingHelper.SynchronizingObject;
+            _configFileWatcher.EnableRaisingEvents = true;
+        }
+
+        private void OnConfigFileChanged(object sender, FileSystemEventArgs e)
+        {
+            if (!File.Exists(Config.ConfigFilePath))
+            {
+                return;
+            }
+
+            try
+            {
+                Log.LogDebug("Attempting to reload configuration...");
+                Config.Reload();
+            }
+            catch (Exception exception)
+            {
+                Log.LogError($"There was an issue loading {Path.GetFileName(Config.ConfigFilePath)}: {exception}");
+            }
+        }
+
         private void OnDestroy()
         {
-            Log.LogInfo($"{PluginName} v{PluginVersion} unloaded.");
+            if (_configFileWatcher != null)
+            {
+                _configFileWatcher.EnableRaisingEvents = false;
+                _configFileWatcher.Changed -= OnConfigFileChanged;
+                _configFileWatcher.Created -= OnConfigFileChanged;
+                _configFileWatcher.Renamed -= OnConfigFileChanged;
+                _configFileWatcher.Dispose();
+                _configFileWatcher = null;
+            }
+
+            Config.Save();
 
             _harmonyInstance?.UnpatchSelf();
             _harmonyInstance = null;
+
+            Log.LogInfo($"{PluginName} v{PluginVersion} unloaded.");
+
+            HexLocalizationManager.Shutdown();
+
             Instance = null;
             Log = null;
         }
