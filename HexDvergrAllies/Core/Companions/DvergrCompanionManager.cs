@@ -1,4 +1,6 @@
-﻿using HexDvergrAllies.Core.Monoscripts;
+﻿using HarmonyLib;
+using System;
+using HexDvergrAllies.Core.Monoscripts;
 using HexDvergrAllies.Core.UI;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,6 +13,7 @@ namespace HexDvergrAllies.Core.Companions
         private const string UnhireRpc = "HexDvergrUnhire";
         private const string SetModeRpc = "HexDvergrSetMode";
         private const string HireResultRpc = "HexDvergrHireResult";
+        private const string RemoteSetModeRpc = "HexDvergrRemoteSetMode";
         private const string HiredKey = "HexDvergr_IsHired";
         private const string OwnerKey = "HexDvergr_HiredBy";
         private const string HomeKey = "HexDvergr_HomePosition";
@@ -27,6 +30,8 @@ namespace HexDvergrAllies.Core.Companions
             Companion = 0,
             Sentry = 1
         }
+
+        private static readonly Func<ZRoutedRpc, long> GetServerPeerID = AccessTools.MethodDelegate<Func<ZRoutedRpc, long>>(AccessTools.Method(typeof(ZRoutedRpc), "GetServerPeerID"));
 
         private static readonly Dictionary<long, ZDOID> _hiredCompanions = new Dictionary<long, ZDOID>();
 
@@ -415,6 +420,60 @@ namespace HexDvergrAllies.Core.Companions
             }
         }
 
+        internal static bool TryGetHiredCompanionZDO(Player player, out ZDO companionZdo)
+        {
+            companionZdo = null;
+
+            if (!TryGetHiredCompanionId(player, out var companionId))
+            {
+                return false;
+            }
+
+            companionZdo = ZDOMan.instance.GetZDO(companionId);
+            return companionZdo != null;
+        }
+
+        internal static void RegisterRemoteModeRpc()
+        {
+            ZRoutedRpc.instance.Register<ZDOID, ZDOID>(RemoteSetModeRpc, RPC_RemoteSetMode);
+        }
+
+        internal static void RequestRemoteToggleMode(Player player)
+        {
+            if (!player || !TryGetHiredCompanionId(player, out var companionId))
+            {
+                return;
+            }
+
+            ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), RemoteSetModeRpc, player.GetZDOID(), companionId);
+        }
+
+        private static void RPC_RemoteSetMode(long sender, ZDOID playerId, ZDOID companionId)
+        {
+            if (!ZNet.instance.IsServer())
+            {
+                return;
+            }
+
+            var playerZdo = ZDOMan.instance.GetZDO(playerId);
+            var companionZdo = ZDOMan.instance.GetZDO(companionId);
+
+            if (playerZdo == null || companionZdo == null || playerZdo.GetOwner() != sender)
+            {
+                return;
+            }
+
+            var verifiedPlayerId = playerZdo.GetLong(ZDOVars.s_playerID, 0L);
+
+            if (verifiedPlayerId == 0L || !companionZdo.GetBool(HiredKey, false) || companionZdo.GetLong(OwnerKey, 0L) != verifiedPlayerId)
+            {
+                return;
+            }
+
+            var mode = companionZdo.GetInt(ModeKey, 0) == (int)CompanionMode.Companion ? CompanionMode.Sentry : CompanionMode.Companion;
+            companionZdo.Set(ModeKey, (int)mode);
+        }
+
         private static void InitializeCompanion(Character character)
         {
             var companion = character.GetComponent<DvergrCompanionComponent>();
@@ -466,13 +525,19 @@ namespace HexDvergrAllies.Core.Companions
 
             var player = ResolvePlayer(playerId);
 
-            if (!player || !IsHiredByPlayer(character, player) || !DvergrInteractionHelper.IsWithinRange(player, character))
+            if (!player || !IsHiredByPlayer(character, player))
+            {
+                return;
+            }
+
+            var playerZdo = player.GetComponent<ZNetView>().GetZDO();
+
+            if (playerZdo.GetOwner() != sender)
             {
                 return;
             }
 
             var mode = GetMode(character) == CompanionMode.Companion ? CompanionMode.Sentry : CompanionMode.Companion;
-
             var zdo = nview.GetZDO();
 
             if (mode == CompanionMode.Sentry)
@@ -719,7 +784,7 @@ namespace HexDvergrAllies.Core.Companions
         {
             if (character.TryGetComponent<DvergrCompanionComponent>(out var companion))
             {
-                Object.Destroy(companion);
+                UnityEngine.Object.Destroy(companion);
             }
         }
     }

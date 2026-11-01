@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using HexDvergrAllies.Core.Companions;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,7 +7,11 @@ namespace HexDvergrAllies.Core.UI
 {
     internal static class DvergrCompanionUIController
     {
+        private const string NameKey = "HexDvergr_Name";
+        private const string ModeKey = "HexDvergr_Mode";
+
         private static GameObject _window;
+        private static TextMeshProUGUI _descriptionText;
 
         internal static bool IsVisible => _window && _window.activeSelf;
 
@@ -38,6 +43,7 @@ namespace HexDvergrAllies.Core.UI
                 return;
             }
 
+            RefreshCompanionInfo();
             _window.SetActive(true);
         }
 
@@ -136,6 +142,8 @@ namespace HexDvergrAllies.Core.UI
             descriptionText.fontSize = 20f;
             descriptionText.textWrappingMode = TextWrappingModes.Normal;
 
+            _descriptionText = descriptionText;
+
             var buttonTemplate = crafting.GetComponentInChildren<Button>(true);
             var closeButtonObject = new GameObject("CloseButton", typeof(RectTransform), typeof(Image), typeof(Button));
             closeButtonObject.transform.SetParent(panel.transform, false);
@@ -175,6 +183,22 @@ namespace HexDvergrAllies.Core.UI
             closeText.raycastTarget = false;
 
             _window.SetActive(false);
+        }
+
+        private static void RefreshCompanionInfo()
+        {
+            var player = Player.m_localPlayer;
+
+            if (!DvergrCompanionManager.TryGetHiredCompanionZDO(player, out var companionZdo))
+            {
+                _descriptionText.text = "No hired Dvergr companion.";
+                return;
+            }
+
+            var name = companionZdo.GetString(NameKey, "");
+            var mode = (DvergrCompanionManager.CompanionMode)companionZdo.GetInt(ModeKey, 0);
+
+            _descriptionText.text = $"Name: {(string.IsNullOrEmpty(name) ? "Dvergr" : name)}\nMode: {mode}";
         }
     }
 }
