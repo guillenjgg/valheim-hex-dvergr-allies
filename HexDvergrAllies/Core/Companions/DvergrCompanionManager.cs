@@ -84,7 +84,10 @@ namespace HexDvergrAllies.Core.Companions
                 }
             }
 
-            Plugin.Log.LogInfo($"[Dvergr Companion] Initialized: Dvergr={character.name}, ZDO={zdo.m_uid}, IsOwner={nview.IsOwner()}, IsHired={IsHired(character)}");
+            if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
+            {
+                Plugin.Log.LogInfo($"[Dvergr Companion] Initialized: Dvergr={character.name}, ZDO={zdo.m_uid}, IsOwner={nview.IsOwner()}, IsHired={DvergrCompanionState.IsHired(zdo)}");
+            }
         }
 
         internal static CompanionMode GetMode(Character character)

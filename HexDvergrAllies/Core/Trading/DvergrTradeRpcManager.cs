@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using HexDvergrAllies.Core.Networking;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,12 +14,6 @@ namespace HexDvergrAllies.Core.Trading
 
     internal static class DvergrTradeRpcManager
     {
-        private const string PriceRequestRpc = "HexDvergrPriceRequest";
-        private const string PriceResponseRpc = "HexDvergrPriceResponse";
-        private const string PurchaseRequestRpc = "HexDvergrBuyRequest";
-        private const string PurchaseResponseRpc = "HexDvergrBuyResponse";
-        private const string PurchaseCompleteRpc = "HexDvergrBuyComplete";
-        private const string PurchaseResultRpc = "HexDvergrBuyResult";
         private const string PurchaseCountKey = "hex_dvergr_purchases";
         private const float PurchaseTimeout = 15f;
 
@@ -89,7 +84,7 @@ namespace HexDvergrAllies.Core.Trading
         {
             HasCurrentPrice = false;
             Plugin.Log.LogInfo($"[Dvergr Trade] Requesting price: Trader={traderZdoId}");
-            ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), PriceRequestRpc, traderZdoId);
+            ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), DvergrRpcManager.PriceRequestRpc, traderZdoId);
         }
 
         internal static void RequestPurchase(ZDOID traderZdoId, DvergrPurchaseType purchaseType)
@@ -109,7 +104,7 @@ namespace HexDvergrAllies.Core.Trading
 
             Plugin.Log.LogInfo($"[Dvergr Trade] Purchase requested: Trader={traderZdoId}, Type={purchaseType}, Request={requestId}");
 
-            ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), PurchaseRequestRpc, traderZdoId, (int)purchaseType, requestId);
+            ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), DvergrRpcManager.PurchaseRequestRpc, traderZdoId, (int)purchaseType, requestId);
         }
 
         internal static void ResetPurchaseCount()
@@ -191,7 +186,7 @@ namespace HexDvergrAllies.Core.Trading
             int purchaseNumber = _purchaseCount + 1;
             int sapCost = _purchaseCount >= DvergrPricingConfig.FreeExtractorPurchases ? DvergrPricingConfig.ExtractorSapCost : 0;
 
-            ZRoutedRpc.instance.InvokeRoutedRPC(sender, PriceResponseRpc, purchaseNumber, sapCost);
+            ZRoutedRpc.instance.InvokeRoutedRPC(sender, DvergrRpcManager.PriceResponseRpc, purchaseNumber, sapCost);
         }
 
         private static void OnPriceResponse(long sender, int purchaseNumber, int sapCost)
@@ -315,7 +310,7 @@ namespace HexDvergrAllies.Core.Trading
 
                 Plugin.Log.LogInfo($"[Dvergr Trade] Purchase authorized: Peer={sender}, Type={(DvergrPurchaseType)request.Type}, Request={request.RequestId}, Transaction={_pendingTransactionId}, Sap={sapCost}");
 
-                ZRoutedRpc.instance.InvokeRoutedRPC(sender, PurchaseResponseRpc, request.Trader, request.Type, purchaseNumber, sapCost, _pendingTransactionId, request.RequestId);
+                ZRoutedRpc.instance.InvokeRoutedRPC(sender, DvergrRpcManager.PurchaseResponseRpc, request.Trader, request.Type, purchaseNumber, sapCost, _pendingTransactionId, request.RequestId);
                 return;
             }
         }
@@ -348,7 +343,7 @@ namespace HexDvergrAllies.Core.Trading
 
             Plugin.Log.LogInfo($"[Dvergr Trade] Client transaction result: Type={(DvergrPurchaseType)purchaseType}, Request={requestId}, Success={success}");
 
-            ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), PurchaseCompleteRpc, traderZdoId, purchaseType, purchaseNumber, success, transactionId, requestId);
+            ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), DvergrRpcManager.PurchaseCompleteRpc, traderZdoId, purchaseType, purchaseNumber, success, transactionId, requestId);
         }
 
         private static bool ExecutePurchase(ZDOID traderZdoId, DvergrPurchaseType purchaseType, int sapCost)
@@ -519,7 +514,7 @@ namespace HexDvergrAllies.Core.Trading
                     int nextPurchaseNumber = _purchaseCount + 1;
                     int nextSapCost = _purchaseCount >= DvergrPricingConfig.FreeExtractorPurchases ? DvergrPricingConfig.ExtractorSapCost : 0;
 
-                    ZRoutedRpc.instance.InvokeRoutedRPC(sender, PriceResponseRpc, nextPurchaseNumber, nextSapCost);
+                    ZRoutedRpc.instance.InvokeRoutedRPC(sender, DvergrRpcManager.PriceResponseRpc, nextPurchaseNumber, nextSapCost);
 
                     Plugin.Log.LogInfo($"[Dvergr Trade] Extractor purchase finalized: WorldPurchaseCount={_purchaseCount}");
                 }
@@ -554,7 +549,7 @@ namespace HexDvergrAllies.Core.Trading
 
         private static void SendPurchaseResult(long peer, long requestId, bool success)
         {
-            ZRoutedRpc.instance.InvokeRoutedRPC(peer, PurchaseResultRpc, requestId, success);
+            ZRoutedRpc.instance.InvokeRoutedRPC(peer, DvergrRpcManager.PurchaseResultRpc, requestId, success);
         }
 
         private static void OnBuyResult(long sender, long requestId, bool success)

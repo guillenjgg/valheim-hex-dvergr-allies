@@ -11,6 +11,13 @@ namespace HexDvergrAllies.Core.Networking
         internal const string RenameRpc = "HexDvergrRename";
         internal const string SetModeRpc = "HexDvergrSetMode";
 
+        internal const string PriceRequestRpc = "HexDvergrPriceRequest";
+        internal const string PriceResponseRpc = "HexDvergrPriceResponse";
+        internal const string PurchaseRequestRpc = "HexDvergrBuyRequest";
+        internal const string PurchaseResponseRpc = "HexDvergrBuyResponse";
+        internal const string PurchaseCompleteRpc = "HexDvergrBuyComplete";
+        internal const string PurchaseResultRpc = "HexDvergrBuyResult";
+
         internal const string RemoteUnhireRpc = "HexDvergrRemoteUnhire";
         internal const string RemoteUnhireUnloadedRpc = "HexDvergrRemoteUnhireUnloaded";
         internal const string ProcessRemoteUnhireRpc = "HexDvergrProcessRemoteUnhire";

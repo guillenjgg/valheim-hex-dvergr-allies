@@ -126,18 +126,6 @@ namespace HexDvergrAllies.Core.Companions
             nview.InvokeRPC(sender, DvergrRpcManager.HireResultRpc, playerId, requestId, success);
         }
 
-        internal static bool IsHired(Character character)
-        {
-            if (!character)
-            {
-                return false;
-            }
-
-            var nview = character.GetComponent<ZNetView>();
-
-            return nview && nview.IsValid() && DvergrCompanionState.IsHired(nview.GetZDO());
-        }
-
         internal static void RequestHire(Player player, Character character, long requestId)
         {
             if (!player || !character)
