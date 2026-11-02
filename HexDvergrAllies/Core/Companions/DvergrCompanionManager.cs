@@ -154,37 +154,6 @@ namespace HexDvergrAllies.Core.Companions
             return player && TryGetHiredCompanion(player.GetPlayerID(), out companionId);
         }
 
-        internal static void RequestHire(Player player, Character character, long requestId)
-        {
-            if (!player || !character)
-            {
-                return;
-            }
-
-            ZNetView nview = character.GetComponent<ZNetView>();
-
-            if (!nview || !nview.IsValid())
-            {
-                Plugin.Log.LogWarning("[Dvergr Companion] Hire request rejected: Reason=Invalid ZNetView");
-                return;
-            }
-
-            ZDOID existingCompanion;
-
-            if (TryGetHiredCompanion(player.GetPlayerID(), out existingCompanion))
-            {
-                Plugin.Log.LogWarning($"[Dvergr Companion] Hire request rejected: Player={player.GetPlayerName()}, ExistingCompanion={existingCompanion}, Reason=Already has companion");
-
-                player.Message(MessageHud.MessageType.Center, "You already have a Dvergr companion.");
-
-                return;
-            }
-
-            Plugin.Log.LogInfo($"[Dvergr Companion] Sending hire RPC: DvergrZDO={nview.GetZDO().m_uid}, PlayerZDO={player.GetZDOID()}");
-
-            nview.InvokeRPC(DvergrRpcManager.HireRpc, player.GetZDOID(), requestId);
-        }
-
         internal static void RequestUnhire(Player player, Character character)
         {
             if (!player || !character)
@@ -441,17 +410,6 @@ namespace HexDvergrAllies.Core.Companions
             return companionZdo != null;
         }
 
-        internal static void RegisterRemoteModeRpc()
-        {
-            ZRoutedRpc.instance.Register<ZDOID, ZDOID>(RemoteSetModeRpc, RPC_RemoteSetMode);
-            ZRoutedRpc.instance.Register<ZDOID, ZDOID, Vector3>(RemoteRecallRpc, RPC_RemoteRecall);
-            ZRoutedRpc.instance.Register<ZDOID, ZDOID, string>(RemoteRenameRpc, RPC_RemoteRename);
-            ZRoutedRpc.instance.Register<ZDOID, ZDOID>(RemoteUnhireRpc, RPC_RemoteUnhire);
-            ZRoutedRpc.instance.Register<ZDOID>(ProcessRemoteUnhireRpc, RPC_ProcessRemoteUnhire);
-            ZRoutedRpc.instance.Register<ZDOID>(RemoteUnhireUnloadedRpc, RPC_RemoteUnhireUnloaded);
-            ZRoutedRpc.instance.Register<ZDOID>(RemoteUnhireCompletedRpc, RPC_RemoteUnhireCompleted);
-        }
-
         internal static void RequestRemoteToggleMode(Player player)
         {
             if (!player || !TryGetHiredCompanionId(player, out var companionId))
@@ -692,10 +650,8 @@ namespace HexDvergrAllies.Core.Companions
 
             CleanupUnhire(character, zdo, ownerPlayerId);
         }
-        #endregion
 
-        #region Private
-        private static void RPC_RemoteRecall(long sender, ZDOID playerId, ZDOID companionId, Vector3 destination)
+        internal static void RPC_RemoteRecall(long sender, ZDOID playerId, ZDOID companionId, Vector3 destination)
         {
             if (!ZNet.instance.IsServer())
             {
@@ -727,7 +683,7 @@ namespace HexDvergrAllies.Core.Companions
             companionZdo.Set(PendingModeTeleportKey, true);
         }
 
-        private static void RPC_RemoteSetMode(long sender, ZDOID playerId, ZDOID companionId)
+        internal static void RPC_RemoteSetMode(long sender, ZDOID playerId, ZDOID companionId)
         {
             if (!ZNet.instance.IsServer())
             {
@@ -764,7 +720,7 @@ namespace HexDvergrAllies.Core.Companions
             companionZdo.Set(ModeKey, (int)mode);
         }
 
-        private static void RPC_RemoteUnhire(long sender, ZDOID playerId, ZDOID companionId)
+        internal static void RPC_RemoteUnhire(long sender, ZDOID playerId, ZDOID companionId)
         {
             if (!ZNet.instance.IsServer())
             {
@@ -823,7 +779,7 @@ namespace HexDvergrAllies.Core.Companions
             CleanupUnloadedUnhire(companionZdo, verifiedPlayerId);
         }
 
-        private static void RPC_RemoteRename(long sender, ZDOID playerId, ZDOID companionId, string name)
+        internal static void RPC_RemoteRename(long sender, ZDOID playerId, ZDOID companionId, string name)
         {
             if (!ZNet.instance.IsServer())
             {
@@ -855,7 +811,7 @@ namespace HexDvergrAllies.Core.Companions
             companionZdo.Set(NameKey, name);
         }
 
-        private static void RPC_ProcessRemoteUnhire(long sender, ZDOID companionId)
+        internal static void RPC_ProcessRemoteUnhire(long sender, ZDOID companionId)
         {
             if (sender != GetServerPeerID(ZRoutedRpc.instance))
             {
@@ -881,7 +837,7 @@ namespace HexDvergrAllies.Core.Companions
                 }
 
                 ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), RemoteUnhireUnloadedRpc, companionId);
-                
+
                 return;
             }
 
@@ -902,7 +858,7 @@ namespace HexDvergrAllies.Core.Companions
             }
         }
 
-        private static void RPC_RemoteUnhireUnloaded(long sender, ZDOID companionId)
+        internal static void RPC_RemoteUnhireUnloaded(long sender, ZDOID companionId)
         {
             if (!ZNet.instance.IsServer())
             {
@@ -926,7 +882,7 @@ namespace HexDvergrAllies.Core.Companions
             CleanupUnloadedUnhire(zdo, ownerPlayerId);
         }
 
-        private static void RPC_RemoteUnhireCompleted(long sender, ZDOID companionId)
+        internal static void RPC_RemoteUnhireCompleted(long sender, ZDOID companionId)
         {
             if (!ZNet.instance.IsServer())
             {
@@ -962,7 +918,9 @@ namespace HexDvergrAllies.Core.Companions
             _lastFollowLogTimes.Remove(zdo.m_uid);
             _followOwnerMissingSince.Remove(zdo.m_uid);
         }
+        #endregion
 
+        #region Private
         private static void CleanupUnhire(Character character, ZDO zdo, long ownerPlayerId)
         {
             var monsterAI = character.GetComponent<MonsterAI>();

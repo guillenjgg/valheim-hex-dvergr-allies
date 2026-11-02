@@ -1,4 +1,5 @@
 ﻿using HexDvergrAllies.Core.Companions;
+using UnityEngine;
 
 namespace HexDvergrAllies.Core.Networking
 {
@@ -17,6 +18,17 @@ namespace HexDvergrAllies.Core.Networking
         internal const string RemoteSetModeRpc = "HexDvergrRemoteSetMode";
         internal const string RemoteRecallRpc = "HexDvergrRemoteRecall";
         internal const string RemoteRenameRpc = "HexDvergrRemoteRename";
+
+        internal static void RegisterRoutedRpcs()
+        {
+            ZRoutedRpc.instance.Register<ZDOID, ZDOID>(RemoteSetModeRpc, DvergrCompanionManager.RPC_RemoteSetMode);
+            ZRoutedRpc.instance.Register<ZDOID, ZDOID, Vector3>(RemoteRecallRpc, DvergrCompanionManager.RPC_RemoteRecall);
+            ZRoutedRpc.instance.Register<ZDOID, ZDOID, string>(RemoteRenameRpc, DvergrCompanionManager.RPC_RemoteRename);
+            ZRoutedRpc.instance.Register<ZDOID, ZDOID>(RemoteUnhireRpc, DvergrCompanionManager.RPC_RemoteUnhire);
+            ZRoutedRpc.instance.Register<ZDOID>(ProcessRemoteUnhireRpc, DvergrCompanionManager.RPC_ProcessRemoteUnhire);
+            ZRoutedRpc.instance.Register<ZDOID>(RemoteUnhireUnloadedRpc, DvergrCompanionManager.RPC_RemoteUnhireUnloaded);
+            ZRoutedRpc.instance.Register<ZDOID>(RemoteUnhireCompletedRpc, DvergrCompanionManager.RPC_RemoteUnhireCompleted);
+        }
 
         internal static void Register(ZNetView nview, Character character)
         {

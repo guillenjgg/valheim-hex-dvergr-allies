@@ -59,7 +59,7 @@ namespace HexDvergrAllies.Core.Companions
                 Plugin.Log.LogInfo($"[Dvergr Companion] Forge Pact requested: Player={player.GetPlayerName()}, Dvergr={character.name}, Request={_pendingRequestId}, Cost={cost} MeadTasty");
             }
 
-            DvergrCompanionManager.RequestHire(player, character, _pendingRequestId);
+            RequestHire(player, character, _pendingRequestId);
             StoreGui.instance.Hide();
         }
 
@@ -136,6 +136,34 @@ namespace HexDvergrAllies.Core.Companions
             var nview = character.GetComponent<ZNetView>();
 
             return nview && nview.IsValid() && DvergrCompanionState.IsHired(nview.GetZDO());
+        }
+
+        internal static void RequestHire(Player player, Character character, long requestId)
+        {
+            if (!player || !character)
+            {
+                return;
+            }
+
+            var nview = character.GetComponent<ZNetView>();
+
+            if (!nview || !nview.IsValid())
+            {
+                Plugin.Log.LogWarning("[Dvergr Companion] Hire request rejected: Reason=Invalid ZNetView");
+                return;
+            }
+
+            if (DvergrCompanionManager.TryGetHiredCompanion(player.GetPlayerID(), out var existingCompanion))
+            {
+                Plugin.Log.LogWarning($"[Dvergr Companion] Hire request rejected: Player={player.GetPlayerName()}, ExistingCompanion={existingCompanion}, Reason=Already has companion");
+
+                player.Message(MessageHud.MessageType.Center, "You already have a Dvergr companion.");
+                return;
+            }
+
+            Plugin.Log.LogInfo($"[Dvergr Companion] Sending hire RPC: DvergrZDO={nview.GetZDO().m_uid}, PlayerZDO={player.GetZDOID()}");
+
+            nview.InvokeRPC(DvergrRpcManager.HireRpc, player.GetZDOID(), requestId);
         }
 
         private static bool TryHire(Character character, ZDOID playerId)
