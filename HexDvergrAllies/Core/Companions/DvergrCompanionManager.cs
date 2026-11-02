@@ -18,7 +18,9 @@ namespace HexDvergrAllies.Core.Companions
         private const string HireRpc = "HexDvergrHire";
         private const string UnhireRpc = "HexDvergrUnhire";
         private const string RemoteUnhireRpc = "HexDvergrRemoteUnhire";
+        private const string RemoteUnhireUnloadedRpc = "HexDvergrRemoteUnhireUnloaded";
         private const string ProcessRemoteUnhireRpc = "HexDvergrProcessRemoteUnhire";
+        private const string RemoteUnhireCompletedRpc = "HexDvergrRemoteUnhireCompleted";
         private const string SetModeRpc = "HexDvergrSetMode";
         private const string HireResultRpc = "HexDvergrHireResult";
         private const string RemoteSetModeRpc = "HexDvergrRemoteSetMode";
@@ -481,6 +483,8 @@ namespace HexDvergrAllies.Core.Companions
             ZRoutedRpc.instance.Register<ZDOID, ZDOID, string>(RemoteRenameRpc, RPC_RemoteRename);
             ZRoutedRpc.instance.Register<ZDOID, ZDOID>(RemoteUnhireRpc, RPC_RemoteUnhire);
             ZRoutedRpc.instance.Register<ZDOID>(ProcessRemoteUnhireRpc, RPC_ProcessRemoteUnhire);
+            ZRoutedRpc.instance.Register<ZDOID>(RemoteUnhireUnloadedRpc, RPC_RemoteUnhireUnloaded);
+            ZRoutedRpc.instance.Register<ZDOID>(RemoteUnhireCompletedRpc, RPC_RemoteUnhireCompleted);
         }
 
         internal static void RequestRemoteToggleMode(Player player)
@@ -636,6 +640,11 @@ namespace HexDvergrAllies.Core.Companions
                 return;
             }
 
+            if (companionZdo.GetBool(PendingUnhireKey, false))
+            {
+                return;
+            }
+
             companionZdo.Set(PendingUnhireKey, true);
 
             if (companionZdo.HasOwner())
@@ -656,7 +665,6 @@ namespace HexDvergrAllies.Core.Companions
             }
 
             CleanupUnloadedUnhire(companionZdo, verifiedPlayerId);
-            companionZdo.Set(PendingUnhireKey, false);
         }
 
         private static void RPC_RemoteRename(long sender, ZDOID playerId, ZDOID companionId, string name)
@@ -716,7 +724,8 @@ namespace HexDvergrAllies.Core.Companions
                     return;
                 }
 
-                CleanupUnloadedUnhire(zdo, ownerPlayerId);
+                ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), RemoteUnhireUnloadedRpc, companionId);
+                
                 return;
             }
 
@@ -730,6 +739,59 @@ namespace HexDvergrAllies.Core.Companions
 
             nview.GetZDO().Set(PendingUnhireKey, true);
             ProcessPendingUnhire(character);
+
+            if (!nview.GetZDO().GetBool(HiredKey, false))
+            {
+                ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), RemoteUnhireCompletedRpc, companionId);
+            }
+        }
+
+        private static void RPC_RemoteUnhireUnloaded(long sender, ZDOID companionId)
+        {
+            if (!ZNet.instance.IsServer())
+            {
+                return;
+            }
+
+            var zdo = ZDOMan.instance.GetZDO(companionId);
+
+            if (zdo == null || zdo.GetOwner() != sender || !zdo.GetBool(PendingUnhireKey, false))
+            {
+                return;
+            }
+
+            var ownerPlayerId = zdo.GetLong(OwnerKey, 0L);
+
+            if (!zdo.GetBool(HiredKey, false) || ownerPlayerId == 0L)
+            {
+                return;
+            }
+
+            CleanupUnloadedUnhire(zdo, ownerPlayerId);
+        }
+
+        private static void RPC_RemoteUnhireCompleted(long sender, ZDOID companionId)
+        {
+            if (!ZNet.instance.IsServer())
+            {
+                return;
+            }
+
+            var zdo = ZDOMan.instance.GetZDO(companionId);
+
+            if (zdo == null || zdo.GetOwner() != sender || !zdo.GetBool(PendingUnhireKey, false))
+            {
+                return;
+            }
+
+            var ownerPlayerId = zdo.GetLong(OwnerKey, 0L);
+
+            if (!zdo.GetBool(HiredKey, false) || ownerPlayerId == 0L)
+            {
+                return;
+            }
+
+            CleanupUnloadedUnhire(zdo, ownerPlayerId);
         }
 
         private static void InitializeCompanion(Character character)
