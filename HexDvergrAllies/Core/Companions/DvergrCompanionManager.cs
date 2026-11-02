@@ -11,11 +11,10 @@ namespace HexDvergrAllies.Core.Companions
 {
     internal static class DvergrCompanionManager
     {
-        private const int MaxNameLength = 24;
         private const float FollowLogInterval = 5f;
         private const float FollowOwnerGracePeriod = 10f;
 
-        private static readonly Func<ZRoutedRpc, long> GetServerPeerID = AccessTools.MethodDelegate<Func<ZRoutedRpc, long>>(AccessTools.Method(typeof(ZRoutedRpc), "GetServerPeerID"));
+        internal static readonly Func<ZRoutedRpc, long> GetServerPeerID = AccessTools.MethodDelegate<Func<ZRoutedRpc, long>>(AccessTools.Method(typeof(ZRoutedRpc), "GetServerPeerID"));
 
         private static readonly Dictionary<long, ZDOID> _hiredCompanions = new Dictionary<long, ZDOID>();
 
@@ -177,45 +176,6 @@ namespace HexDvergrAllies.Core.Companions
             _hiredCompanions.Clear();
             _lastFollowLogTimes.Clear();
             _followOwnerMissingSince.Clear();
-        }
-
-        internal static string GetCompanionName(Character character)
-        {
-            var nview = character.GetComponent<ZNetView>();
-
-            if (!nview || !nview.IsValid())
-            {
-                return Localization.instance.Localize(character.m_name);
-            }
-
-            var name = nview.GetZDO().GetString(DvergrCompanionState.NameKey, "");
-
-            return string.IsNullOrEmpty(name) ? Localization.instance.Localize(character.m_name) : name;
-        }
-
-        internal static void RequestRename(Player player, Character character, string name)
-        {
-            if (!player || !character || !IsHiredByPlayer(character, player))
-            {
-                return;
-            }
-
-            name = name.Trim();
-
-            if (name.Length == 0 || name.Length > MaxNameLength || name.Contains("<") || name.Contains(">"))
-            {
-                player.Message(MessageHud.MessageType.Center, "Invalid companion name.");
-                return;
-            }
-
-            var nview = character.GetComponent<ZNetView>();
-
-            if (!nview || !nview.IsValid())
-            {
-                return;
-            }
-
-            nview.InvokeRPC(DvergrRpcManager.RenameRpc, player.GetZDOID(), name);
         }
 
         internal static void UpdateFollow(MonsterAI monsterAI)
@@ -425,24 +385,6 @@ namespace HexDvergrAllies.Core.Companions
             ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), DvergrRpcManager.RemoteRecallRpc, player.GetZDOID(), companionId, destination);
         }
 
-        internal static void RequestRemoteRename(Player player, string name)
-        {
-            if (!player || !TryGetHiredCompanionId(player, out var companionId))
-            {
-                return;
-            }
-
-            name = name.Trim();
-
-            if (name.Length == 0 || name.Length > MaxNameLength || name.Contains("<") || name.Contains(">"))
-            {
-                player.Message(MessageHud.MessageType.Center, "Invalid companion name.");
-                return;
-            }
-
-            ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), DvergrRpcManager.RemoteRenameRpc, player.GetZDOID(), companionId, name);
-        }
-
         internal static void RequestRemoteUnhire(Player player)
         {
             if (!player || !TryGetHiredCompanionId(player, out var companionId))
@@ -518,34 +460,6 @@ namespace HexDvergrAllies.Core.Companions
         internal static void CacheHiredCompanion(long ownerPlayerId, ZDOID companionId)
         {
             _hiredCompanions[ownerPlayerId] = companionId;
-        }
-
-        internal static void Rename(Character character, long sender, ZDOID playerId, string name)
-        {
-            var nview = character.GetComponent<ZNetView>();
-
-            if (!nview || !nview.IsValid() || !nview.IsOwner())
-            {
-                return;
-            }
-
-            var player = ResolvePlayer(playerId);
-
-            if (!player || !IsHiredByPlayer(character, player) || !DvergrInteractionHelper.IsWithinRange(player, character))
-            {
-                return;
-            }
-
-            name = name.Trim();
-
-            if (name.Length == 0 || name.Length > MaxNameLength || name.Contains("<") || name.Contains(">"))
-            {
-                return;
-            }
-
-            nview.GetZDO().Set(DvergrCompanionState.NameKey, name);
-
-            Plugin.Log.LogInfo($"[Dvergr Companion] Renamed: Dvergr={character.name}, Name={name}, Player={player.GetPlayerName()}");
         }
 
         internal static void SetMode(Character character, long sender, ZDOID playerId)
@@ -769,38 +683,6 @@ namespace HexDvergrAllies.Core.Companions
             }
 
             CleanupUnloadedUnhire(companionZdo, verifiedPlayerId);
-        }
-
-        internal static void RPC_RemoteRename(long sender, ZDOID playerId, ZDOID companionId, string name)
-        {
-            if (!ZNet.instance.IsServer())
-            {
-                return;
-            }
-
-            var playerZdo = ZDOMan.instance.GetZDO(playerId);
-            var companionZdo = ZDOMan.instance.GetZDO(companionId);
-
-            if (playerZdo == null || companionZdo == null || playerZdo.GetOwner() != sender)
-            {
-                return;
-            }
-
-            var verifiedPlayerId = playerZdo.GetLong(ZDOVars.s_playerID, 0L);
-
-            if (verifiedPlayerId == 0L || !companionZdo.GetBool(DvergrCompanionState.HiredKey, false) || companionZdo.GetLong(DvergrCompanionState.OwnerKey, 0L) != verifiedPlayerId)
-            {
-                return;
-            }
-
-            name = name.Trim();
-
-            if (name.Length == 0 || name.Length > MaxNameLength || name.Contains("<") || name.Contains(">"))
-            {
-                return;
-            }
-
-            companionZdo.Set(DvergrCompanionState.NameKey, name);
         }
 
         internal static void RPC_ProcessRemoteUnhire(long sender, ZDOID companionId)

@@ -13,7 +13,7 @@ namespace HexDvergrAllies.Patches
                 return;
             }
 
-            __result = DvergrCompanionManager.GetCompanionName(__instance);
+            __result = DvergrCompanionNameManager.GetCompanionName(__instance);
         }
     }
 }

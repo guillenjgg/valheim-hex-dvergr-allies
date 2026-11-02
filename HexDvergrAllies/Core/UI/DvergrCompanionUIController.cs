@@ -371,7 +371,7 @@ namespace HexDvergrAllies.Core.UI
                 return;
             }
 
-            DvergrCompanionManager.RequestRemoteRename(player, _nameInput.text);
+            DvergrCompanionNameManager.RequestRemoteRename(player, _nameInput.text);
             _nameInput.DeactivateInputField();
         }
     }

@@ -13,12 +13,12 @@ namespace HexDvergrAllies.Core.Companions
 
         public string GetText()
         {
-            return DvergrCompanionManager.GetCompanionName(_character);
+            return DvergrCompanionNameManager.GetCompanionName(_character);
         }
 
         public void SetText(string text)
         {
-            DvergrCompanionManager.RequestRename(Player.m_localPlayer, _character, text);
+            DvergrCompanionNameManager.RequestRename(Player.m_localPlayer, _character, text);
         }
     }
 }

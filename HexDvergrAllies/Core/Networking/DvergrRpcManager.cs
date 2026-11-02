@@ -31,7 +31,7 @@ namespace HexDvergrAllies.Core.Networking
         {
             ZRoutedRpc.instance.Register<ZDOID, ZDOID>(RemoteSetModeRpc, DvergrCompanionManager.RPC_RemoteSetMode);
             ZRoutedRpc.instance.Register<ZDOID, ZDOID, Vector3>(RemoteRecallRpc, DvergrCompanionManager.RPC_RemoteRecall);
-            ZRoutedRpc.instance.Register<ZDOID, ZDOID, string>(RemoteRenameRpc, DvergrCompanionManager.RPC_RemoteRename);
+            ZRoutedRpc.instance.Register<ZDOID, ZDOID, string>(RemoteRenameRpc, DvergrCompanionNameManager.RPC_RemoteRename);
             ZRoutedRpc.instance.Register<ZDOID, ZDOID>(RemoteUnhireRpc, DvergrCompanionManager.RPC_RemoteUnhire);
             ZRoutedRpc.instance.Register<ZDOID>(ProcessRemoteUnhireRpc, DvergrCompanionManager.RPC_ProcessRemoteUnhire);
             ZRoutedRpc.instance.Register<ZDOID>(RemoteUnhireUnloadedRpc, DvergrCompanionManager.RPC_RemoteUnhireUnloaded);
@@ -50,7 +50,7 @@ namespace HexDvergrAllies.Core.Networking
             nview.Register<ZDOID, long>(HireRpc, (sender, playerId, requestId) => DvergrForgePactManager.Hire(character, sender, playerId, requestId));
             nview.Register<ZDOID, long, bool>(HireResultRpc, (sender, playerId, requestId, success) => DvergrForgePactManager.OnHireResult(character, sender, playerId, requestId, success));
             nview.Register<ZDOID>(UnhireRpc, (sender, playerId) => DvergrCompanionManager.Unhire(character, sender, playerId));
-            nview.Register<ZDOID, string>(RenameRpc, (sender, playerId, name) => DvergrCompanionManager.Rename(character, sender, playerId, name));
+            nview.Register<ZDOID, string>(RenameRpc, (sender, playerId, name) => DvergrCompanionNameManager.Rename(character, sender, playerId, name));
             nview.Register<ZDOID>(SetModeRpc, (sender, playerId) => DvergrCompanionManager.SetMode(character, sender, playerId));
         }
     }
