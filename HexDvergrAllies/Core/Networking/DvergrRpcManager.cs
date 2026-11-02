@@ -32,10 +32,10 @@ namespace HexDvergrAllies.Core.Networking
             ZRoutedRpc.instance.Register<ZDOID, ZDOID>(RemoteSetModeRpc, DvergrCompanionModeManager.RPC_RemoteSetMode);
             ZRoutedRpc.instance.Register<ZDOID, ZDOID, Vector3>(RemoteRecallRpc, DvergrCompanionRecallManager.RPC_RemoteRecall);
             ZRoutedRpc.instance.Register<ZDOID, ZDOID, string>(RemoteRenameRpc, DvergrCompanionNameManager.RPC_RemoteRename);
-            ZRoutedRpc.instance.Register<ZDOID, ZDOID>(RemoteUnhireRpc, DvergrCompanionManager.RPC_RemoteUnhire);
-            ZRoutedRpc.instance.Register<ZDOID>(ProcessRemoteUnhireRpc, DvergrCompanionManager.RPC_ProcessRemoteUnhire);
-            ZRoutedRpc.instance.Register<ZDOID>(RemoteUnhireUnloadedRpc, DvergrCompanionManager.RPC_RemoteUnhireUnloaded);
-            ZRoutedRpc.instance.Register<ZDOID>(RemoteUnhireCompletedRpc, DvergrCompanionManager.RPC_RemoteUnhireCompleted);
+            ZRoutedRpc.instance.Register<ZDOID, ZDOID>(RemoteUnhireRpc, DvergrCompanionUnhireManager.RPC_RemoteUnhire);
+            ZRoutedRpc.instance.Register<ZDOID>(ProcessRemoteUnhireRpc, DvergrCompanionUnhireManager.RPC_ProcessRemoteUnhire);
+            ZRoutedRpc.instance.Register<ZDOID>(RemoteUnhireUnloadedRpc, DvergrCompanionUnhireManager.RPC_RemoteUnhireUnloaded);
+            ZRoutedRpc.instance.Register<ZDOID>(RemoteUnhireCompletedRpc, DvergrCompanionUnhireManager.RPC_RemoteUnhireCompleted);
 
             ZRoutedRpc.instance.Register<ZDOID>(PriceRequestRpc, DvergrTradeRpcManager.OnPriceRequest);
             ZRoutedRpc.instance.Register<int, int>(PriceResponseRpc, DvergrTradeRpcManager.OnPriceResponse);

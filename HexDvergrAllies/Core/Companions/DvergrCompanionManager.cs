@@ -44,7 +44,7 @@ namespace HexDvergrAllies.Core.Companions
 
             if (DvergrCompanionState.IsUnhirePending(zdo) && nview.IsOwner())
             {
-                ProcessPendingUnhire(character);
+                DvergrCompanionUnhireManager.ProcessPendingUnhire(character);
             }
 
             if (!DvergrCompanionState.IsHired(zdo) && nview.IsOwner())
@@ -149,7 +149,7 @@ namespace HexDvergrAllies.Core.Companions
 
             if (zdo.GetBool(DvergrCompanionState.PendingUnhireKey, false))
             {
-                ProcessPendingUnhire(character);
+                DvergrCompanionUnhireManager.ProcessPendingUnhire(character);
                 return;
             }
 
@@ -432,7 +432,7 @@ namespace HexDvergrAllies.Core.Companions
 
                 if (instance)
                 {
-                    ProcessPendingUnhire(instance.GetComponent<Character>());
+                    DvergrCompanionUnhireManager.ProcessPendingUnhire(instance.GetComponent<Character>());
                     return;
                 }
             }
@@ -479,7 +479,7 @@ namespace HexDvergrAllies.Core.Companions
             }
 
             nview.GetZDO().Set(DvergrCompanionState.PendingUnhireKey, true);
-            ProcessPendingUnhire(character);
+            DvergrCompanionUnhireManager.ProcessPendingUnhire(character);
 
             if (!nview.GetZDO().GetBool(DvergrCompanionState.HiredKey, false))
             {
@@ -606,6 +606,22 @@ namespace HexDvergrAllies.Core.Companions
                 Plugin.Log.LogInfo($"[Dvergr Companion] Unhire cleanup completed: Dvergr={character.name}, OwnerPlayerID={ownerPlayerId}, Home={homePosition}");
             }
         }
+
+        internal static void RemoveHireCache(long ownerPlayerId, ZDOID companionId, bool logRemoval = false)
+        {
+            if (_hiredCompanions.TryGetValue(ownerPlayerId, out var cachedCompanion) && cachedCompanion == companionId)
+            {
+                _hiredCompanions.Remove(ownerPlayerId);
+
+                if (logRemoval && HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
+                {
+                    Plugin.Log.LogInfo($"[Dvergr Companion] Hire cache removed: PlayerID={ownerPlayerId}, DvergrZDO={companionId}");
+                }
+            }
+
+            _lastFollowLogTimes.Remove(companionId);
+            _followOwnerMissingSince.Remove(companionId);
+        }
         #endregion
 
         #region Private
@@ -641,39 +657,6 @@ namespace HexDvergrAllies.Core.Companions
             if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
             {
                 Plugin.Log.LogInfo($"[Dvergr Companion] Remote unhire completed: ZDO={zdo.m_uid}, PlayerID={ownerPlayerId}, Home={homePosition}");
-            }
-        }
-
-        private static void ProcessPendingUnhire(Character character)
-        {
-            var nview = character.GetComponent<ZNetView>();
-
-            if (!nview || !nview.IsValid() || !nview.IsOwner())
-            {
-                return;
-            }
-
-            var zdo = nview.GetZDO();
-
-            if (!zdo.GetBool(DvergrCompanionState.PendingUnhireKey, false))
-            {
-                return;
-            }
-
-            var ownerPlayerId = zdo.GetLong(DvergrCompanionState.OwnerKey, 0L);
-
-            if (!zdo.GetBool(DvergrCompanionState.HiredKey, false) || ownerPlayerId == 0L)
-            {
-                zdo.Set(DvergrCompanionState.PendingUnhireKey, false);
-                return;
-            }
-
-            CleanupUnhire(character, zdo, ownerPlayerId);
-
-            if (!zdo.GetBool(DvergrCompanionState.HiredKey, false))
-            {
-                zdo.Set(DvergrCompanionState.PendingModeTeleportKey, false);
-                zdo.Set(DvergrCompanionState.PendingUnhireKey, false);
             }
         }
 
