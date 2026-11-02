@@ -18,6 +18,7 @@ namespace HexDvergrAllies.Core.Companions
         private const string HireRpc = "HexDvergrHire";
         private const string UnhireRpc = "HexDvergrUnhire";
         private const string RemoteUnhireRpc = "HexDvergrRemoteUnhire";
+        private const string ProcessRemoteUnhireRpc = "HexDvergrProcessRemoteUnhire";
         private const string SetModeRpc = "HexDvergrSetMode";
         private const string HireResultRpc = "HexDvergrHireResult";
         private const string RemoteSetModeRpc = "HexDvergrRemoteSetMode";
@@ -76,6 +77,11 @@ namespace HexDvergrAllies.Core.Companions
             if (zdo.GetBool(PendingUnhireKey, false) && nview.IsOwner())
             {
                 ProcessPendingUnhire(character);
+            }
+
+            if (!zdo.GetBool(HiredKey, false) && nview.IsOwner())
+            {
+                DvergrCompanionBehaviorManager.ResetBehavior(character, character.GetComponent<MonsterAI>());
             }
 
             if (zdo.GetBool(HiredKey, false))
@@ -474,6 +480,7 @@ namespace HexDvergrAllies.Core.Companions
             ZRoutedRpc.instance.Register<ZDOID, ZDOID, Vector3>(RemoteRecallRpc, RPC_RemoteRecall);
             ZRoutedRpc.instance.Register<ZDOID, ZDOID, string>(RemoteRenameRpc, RPC_RemoteRename);
             ZRoutedRpc.instance.Register<ZDOID, ZDOID>(RemoteUnhireRpc, RPC_RemoteUnhire);
+            ZRoutedRpc.instance.Register<ZDOID>(ProcessRemoteUnhireRpc, RPC_ProcessRemoteUnhire);
         }
 
         internal static void RequestRemoteToggleMode(Player player)
@@ -630,6 +637,26 @@ namespace HexDvergrAllies.Core.Companions
             }
 
             companionZdo.Set(PendingUnhireKey, true);
+
+            if (companionZdo.HasOwner())
+            {
+                if (!companionZdo.IsOwner())
+                {
+                    ZRoutedRpc.instance.InvokeRoutedRPC(companionZdo.GetOwner(), ProcessRemoteUnhireRpc, companionId);
+                    return;
+                }
+
+                var instance = ZNetScene.instance.FindInstance(companionId);
+
+                if (instance)
+                {
+                    ProcessPendingUnhire(instance.GetComponent<Character>());
+                    return;
+                }
+            }
+
+            CleanupUnloadedUnhire(companionZdo, verifiedPlayerId);
+            companionZdo.Set(PendingUnhireKey, false);
         }
 
         private static void RPC_RemoteRename(long sender, ZDOID playerId, ZDOID companionId, string name)
@@ -662,6 +689,47 @@ namespace HexDvergrAllies.Core.Companions
             }
 
             companionZdo.Set(NameKey, name);
+        }
+
+        private static void RPC_ProcessRemoteUnhire(long sender, ZDOID companionId)
+        {
+            if (sender != GetServerPeerID(ZRoutedRpc.instance))
+            {
+                return;
+            }
+
+            var instance = ZNetScene.instance.FindInstance(companionId);
+
+            if (!instance)
+            {
+                var zdo = ZDOMan.instance.GetZDO(companionId);
+
+                if (zdo == null || !zdo.IsOwner() || !zdo.GetBool(PendingUnhireKey, false))
+                {
+                    return;
+                }
+
+                var ownerPlayerId = zdo.GetLong(OwnerKey, 0L);
+
+                if (!zdo.GetBool(HiredKey, false) || ownerPlayerId == 0L)
+                {
+                    return;
+                }
+
+                CleanupUnloadedUnhire(zdo, ownerPlayerId);
+                return;
+            }
+
+            var character = instance.GetComponent<Character>();
+            var nview = instance.GetComponent<ZNetView>();
+
+            if (!character || !nview || !nview.IsValid() || !nview.IsOwner())
+            {
+                return;
+            }
+
+            nview.GetZDO().Set(PendingUnhireKey, true);
+            ProcessPendingUnhire(character);
         }
 
         private static void InitializeCompanion(Character character)
@@ -871,6 +939,13 @@ namespace HexDvergrAllies.Core.Companions
                 return;
             }
 
+            var playerZdo = ZDOMan.instance.GetZDO(playerId);
+
+            if (playerZdo == null || playerZdo.GetOwner() != sender)
+            {
+                return;
+            }
+
             var player = ResolvePlayer(playerId);
 
             if (!player)
@@ -930,6 +1005,7 @@ namespace HexDvergrAllies.Core.Companions
             DvergrCompanionBehaviorManager.ResetBehavior(character, monsterAI);
 
             zdo.Set(ModeKey, (int)CompanionMode.Companion);
+            zdo.Set(PendingModeTeleportKey, false);
             zdo.Set(HiredKey, false);
             zdo.Set(OwnerKey, 0L);
 
@@ -974,6 +1050,7 @@ namespace HexDvergrAllies.Core.Companions
             zdo.Set(HiredKey, false);
             zdo.Set(OwnerKey, 0L);
             zdo.Set(PendingModeTeleportKey, false);
+            zdo.Set(PendingUnhireKey, false);
             zdo.SetPosition(homePosition);
 
             if (_hiredCompanions.TryGetValue(ownerPlayerId, out var cachedCompanion) && cachedCompanion == zdo.m_uid)
@@ -1018,6 +1095,7 @@ namespace HexDvergrAllies.Core.Companions
 
             if (!zdo.GetBool(HiredKey, false))
             {
+                zdo.Set(PendingModeTeleportKey, false);
                 zdo.Set(PendingUnhireKey, false);
             }
         }
