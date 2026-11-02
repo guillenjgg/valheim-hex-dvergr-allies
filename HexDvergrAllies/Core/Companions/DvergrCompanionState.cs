@@ -22,6 +22,23 @@ namespace HexDvergrAllies.Core.Companions
             return zdo.GetBool(HiredKey, false);
         }
 
+        internal static bool IsHired(Character character)
+        {
+            if (!character)
+            {
+                return false;
+            }
+
+            var nview = character.GetComponent<ZNetView>();
+
+            if (!nview || !nview.IsValid())
+            {
+                return false;
+            }
+
+            return IsHired(nview.GetZDO());
+        }
+
         internal static long GetOwnerPlayerId(ZDO zdo)
         {
             return zdo.GetLong(OwnerKey, 0L);

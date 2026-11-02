@@ -420,7 +420,7 @@ namespace HexDvergrAllies.Core.Companions
                 return;
             }
 
-            ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), RemoteSetModeRpc, player.GetZDOID(), companionId);
+            ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), DvergrRpcManager.RemoteSetModeRpc, player.GetZDOID(), companionId);
         }
 
         internal static void RequestRemoteRecall(Player player)
@@ -432,7 +432,7 @@ namespace HexDvergrAllies.Core.Companions
 
             var destination = player.transform.position + player.transform.right * 2f;
 
-            ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), RemoteRecallRpc, player.GetZDOID(), companionId, destination);
+            ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), DvergrRpcManager.RemoteRecallRpc, player.GetZDOID(), companionId, destination);
         }
 
         internal static void RequestRemoteRename(Player player, string name)
@@ -450,7 +450,7 @@ namespace HexDvergrAllies.Core.Companions
                 return;
             }
 
-            ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), RemoteRenameRpc, player.GetZDOID(), companionId, name);
+            ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), DvergrRpcManager.RemoteRenameRpc, player.GetZDOID(), companionId, name);
         }
 
         internal static void RequestRemoteUnhire(Player player)
@@ -460,7 +460,7 @@ namespace HexDvergrAllies.Core.Companions
                 return;
             }
 
-            ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), RemoteUnhireRpc, player.GetZDOID(), companionId);
+            ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), DvergrRpcManager.RemoteUnhireRpc, player.GetZDOID(), companionId);
         }
 
         internal static Player ResolvePlayer(ZDOID playerId)
@@ -766,7 +766,7 @@ namespace HexDvergrAllies.Core.Companions
             {
                 if (!companionZdo.IsOwner())
                 {
-                    ZRoutedRpc.instance.InvokeRoutedRPC(companionZdo.GetOwner(), ProcessRemoteUnhireRpc, companionId);
+                    ZRoutedRpc.instance.InvokeRoutedRPC(companionZdo.GetOwner(), DvergrRpcManager.ProcessRemoteUnhireRpc, companionId);
                     return;
                 }
 
@@ -839,7 +839,7 @@ namespace HexDvergrAllies.Core.Companions
                     return;
                 }
 
-                ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), RemoteUnhireUnloadedRpc, companionId);
+                ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), DvergrRpcManager.RemoteUnhireUnloadedRpc, companionId);
 
                 return;
             }
@@ -857,7 +857,7 @@ namespace HexDvergrAllies.Core.Companions
 
             if (!nview.GetZDO().GetBool(HiredKey, false))
             {
-                ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), RemoteUnhireCompletedRpc, companionId);
+                ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), DvergrRpcManager.RemoteUnhireCompletedRpc, companionId);
             }
         }
 

@@ -41,12 +41,12 @@ namespace HexDvergrAllies.Core.Trading
 
         internal static void Register()
         {
-            ZRoutedRpc.instance.Register<ZDOID>(PriceRequestRpc, OnPriceRequest);
-            ZRoutedRpc.instance.Register<int, int>(PriceResponseRpc, OnPriceResponse);
-            ZRoutedRpc.instance.Register<ZDOID, int, long>(PurchaseRequestRpc, OnBuyRequest);
-            ZRoutedRpc.instance.Register<ZDOID, int, int, int, long, long>(PurchaseResponseRpc, OnBuyResponse);
-            ZRoutedRpc.instance.Register<ZDOID, int, int, bool, long, long>(PurchaseCompleteRpc, OnBuyComplete);
-            ZRoutedRpc.instance.Register<long, bool>(PurchaseResultRpc, OnBuyResult);
+            ZRoutedRpc.instance.Register<ZDOID>(DvergrRpcManager.PriceRequestRpc, OnPriceRequest);
+            ZRoutedRpc.instance.Register<int, int>(DvergrRpcManager.PriceResponseRpc, OnPriceResponse);
+            ZRoutedRpc.instance.Register<ZDOID, int, long>(DvergrRpcManager.PurchaseRequestRpc, OnBuyRequest);
+            ZRoutedRpc.instance.Register<ZDOID, int, int, int, long, long>(DvergrRpcManager.PurchaseResponseRpc, OnBuyResponse);
+            ZRoutedRpc.instance.Register<ZDOID, int, int, bool, long, long>(DvergrRpcManager.PurchaseCompleteRpc, OnBuyComplete);
+            ZRoutedRpc.instance.Register<long, bool>(DvergrRpcManager.PurchaseResultRpc, OnBuyResult);
 
             _initialized = false;
             _hasPendingPurchase = false;

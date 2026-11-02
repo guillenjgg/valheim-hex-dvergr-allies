@@ -134,7 +134,7 @@ namespace HexDvergrAllies.Core.Companions
                 return;
             }
 
-            if (!DvergrCompanionManager.IsHired(character))
+            if (!DvergrCompanionState.IsHired(character))
             {
                 if (CompanionStates.ContainsKey(character))
                 {
@@ -184,7 +184,7 @@ namespace HexDvergrAllies.Core.Companions
 
             var animator = AnimatorField(character);
 
-            if (!DvergrCompanionManager.IsHired(character))
+            if (!DvergrCompanionState.IsHired(character))
             {
                 RestoreAttackAnimation(character, state);
                 return;
@@ -286,7 +286,7 @@ namespace HexDvergrAllies.Core.Companions
 
         internal static bool IsImmuneToDamage(Character character, HitData hit)
         {
-            return DvergrCompanionManager.IsHired(character) &&
+            return DvergrCompanionState.IsHired(character) &&
                    character.name.StartsWith(PrefabHelper.AshlandsDvergrPrefix) &&
                    (hit.m_hitType == HitData.HitType.AshlandsOcean ||
                     hit.m_hitType == HitData.HitType.AshlandsLava);

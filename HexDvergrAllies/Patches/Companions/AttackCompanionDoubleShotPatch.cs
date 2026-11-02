@@ -17,7 +17,7 @@ namespace HexDvergrAllies.Patches.Companions
             var character = CharacterField(__instance);
             var weapon = WeaponField(__instance);
 
-            if (!character || !DvergrCompanionManager.IsHired(character) ||
+            if (!character || !DvergrCompanionState.IsHired(character) ||
                 character.GetFaction() != Character.Faction.Dverger ||
                 weapon == null || weapon.m_dropPrefab.name != PrefabHelper.CrossbowArbalest)
             {

@@ -42,7 +42,7 @@ namespace HexDvergrAllies.Patches.Companions
 
             foreach (var character in Character.GetAllCharacters())
             {
-                if (!character || !DvergrCompanionManager.IsHired(character))
+                if (!character || !DvergrCompanionState.IsHired(character))
                 {
                     continue;
                 }
@@ -125,7 +125,7 @@ namespace HexDvergrAllies.Patches.Companions
                 var nview = companionObject.GetComponent<ZNetView>();
                 var character = companionObject.GetComponent<Character>();
 
-                if (!nview || !nview.IsValid() || !nview.IsOwner() || !character || !DvergrCompanionManager.IsHired(character))
+                if (!nview || !nview.IsValid() || !nview.IsOwner() || !character || !DvergrCompanionState.IsHired(character))
                 {
                     Plugin.Log.LogInfo($"[Dvergr Portal] Companion not locally owned. Requesting server relocation: ZDO={companion.ZdoId}");
 

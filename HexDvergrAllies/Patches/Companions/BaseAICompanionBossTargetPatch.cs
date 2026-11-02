@@ -28,7 +28,7 @@ namespace HexDvergrAllies.Patches
                 return;
             }
 
-            if (!DvergrCompanionManager.IsHired(a))
+            if (!DvergrCompanionState.IsHired(a))
             {
                 return;
             }

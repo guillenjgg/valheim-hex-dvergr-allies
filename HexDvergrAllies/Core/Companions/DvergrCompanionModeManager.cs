@@ -11,7 +11,7 @@ namespace HexDvergrAllies.Core.Companions
 
             var character = monsterAI.GetComponent<Character>();
 
-            if (!character || !DvergrCompanionManager.IsHired(character))
+            if (!character || !DvergrCompanionState.IsHired(character))
             {
                 return false;
             }
