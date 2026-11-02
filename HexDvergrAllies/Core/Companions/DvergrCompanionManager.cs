@@ -21,6 +21,7 @@ namespace HexDvergrAllies.Core.Companions
         private const string RenameRpc = "HexDvergrRename";
         private const string NameKey = "HexDvergr_Name";
         private const string ModeKey = "HexDvergr_Mode";
+        private const string PendingModeTeleportKey = "HexDvergr_PendingModeTeleport";
         private const int MaxNameLength = 24;
         private const float FollowLogInterval = 5f;
         private const float FollowOwnerGracePeriod = 10f;
@@ -295,6 +296,23 @@ namespace HexDvergrAllies.Core.Companions
                 return;
             }
 
+            if (GetMode(character) == CompanionMode.Companion && zdo.GetBool(PendingModeTeleportKey, false))
+            {
+                foreach (var player in Player.GetAllPlayers())
+                {
+                    if (!player || player.GetPlayerID() != zdo.GetLong(OwnerKey, 0L))
+                    {
+                        continue;
+                    }
+
+                    var destination = player.transform.position + player.transform.right * 2f;
+                    character.transform.position = destination;
+                    zdo.SetPosition(destination);
+                    zdo.Set(PendingModeTeleportKey, false);
+                    break;
+                }
+            }
+
             if (GetMode(character) == CompanionMode.Sentry)
             {
                 if (monsterAI.GetFollowTarget())
@@ -471,8 +489,15 @@ namespace HexDvergrAllies.Core.Companions
             }
 
             var mode = companionZdo.GetInt(ModeKey, 0) == (int)CompanionMode.Companion ? CompanionMode.Sentry : CompanionMode.Companion;
+
+            if (mode == CompanionMode.Sentry)
+            {
+                companionZdo.Set("HexDvergr_SentryPosition", companionZdo.GetPosition());
+            }
+
             companionZdo.Set(ModeKey, (int)mode);
         }
+
 
         private static void InitializeCompanion(Character character)
         {
@@ -546,6 +571,11 @@ namespace HexDvergrAllies.Core.Companions
             }
 
             zdo.Set(ModeKey, (int)mode);
+
+            if (mode == CompanionMode.Companion)
+            {
+                zdo.Set(PendingModeTeleportKey, true);
+            }
 
             Plugin.Log.LogInfo($"[Dvergr Companion] Mode changed: Dvergr={character.name}, Player={player.GetPlayerName()}, Mode={mode}");
         }

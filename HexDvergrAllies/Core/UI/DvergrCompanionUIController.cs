@@ -1,4 +1,5 @@
-﻿using HexDvergrAllies.Core.Companions;
+﻿
+using HexDvergrAllies.Core.Companions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,6 +13,8 @@ namespace HexDvergrAllies.Core.UI
 
         private static GameObject _window;
         private static TextMeshProUGUI _descriptionText;
+        private static Button _modeButton;
+        private static TextMeshProUGUI _modeButtonText;
 
         internal static bool IsVisible => _window && _window.activeSelf;
 
@@ -122,7 +125,6 @@ namespace HexDvergrAllies.Core.UI
 
             var titleDragHandler = title.AddComponent<DvergrCompanionDragHandler>();
             titleDragHandler.Initialize(panelRect);
-
             titleText.raycastTarget = true;
 
             var description = Object.Instantiate(titleTemplate.gameObject, panel.transform, false);
@@ -133,11 +135,10 @@ namespace HexDvergrAllies.Core.UI
             descriptionRect.anchorMin = new Vector2(0.5f, 0.5f);
             descriptionRect.anchorMax = new Vector2(0.5f, 0.5f);
             descriptionRect.pivot = new Vector2(0.5f, 0.5f);
-            descriptionRect.anchoredPosition = Vector2.zero;
+            descriptionRect.anchoredPosition = new Vector2(0f, 25f);
             descriptionRect.sizeDelta = new Vector2(440f, 100f);
 
             var descriptionText = description.GetComponent<TextMeshProUGUI>();
-            descriptionText.text = "Companion management controls will appear here.";
             descriptionText.alignment = TextAlignmentOptions.Center;
             descriptionText.fontSize = 20f;
             descriptionText.textWrappingMode = TextWrappingModes.Normal;
@@ -145,6 +146,48 @@ namespace HexDvergrAllies.Core.UI
             _descriptionText = descriptionText;
 
             var buttonTemplate = crafting.GetComponentInChildren<Button>(true);
+
+            var modeButtonObject = new GameObject("ModeButton", typeof(RectTransform), typeof(Image), typeof(Button));
+            modeButtonObject.transform.SetParent(panel.transform, false);
+
+            var modeRect = modeButtonObject.GetComponent<RectTransform>();
+            modeRect.anchorMin = new Vector2(0.5f, 0.5f);
+            modeRect.anchorMax = new Vector2(0.5f, 0.5f);
+            modeRect.pivot = new Vector2(0.5f, 0.5f);
+            modeRect.anchoredPosition = new Vector2(0f, -85f);
+            modeRect.sizeDelta = new Vector2(240f, 48f);
+
+            var modeImage = modeButtonObject.GetComponent<Image>();
+
+            if (buttonTemplate)
+            {
+                var templateImage = buttonTemplate.GetComponent<Image>();
+
+                if (templateImage)
+                {
+                    modeImage.sprite = templateImage.sprite;
+                    modeImage.type = templateImage.type;
+                }
+            }
+
+            _modeButton = modeButtonObject.GetComponent<Button>();
+            _modeButton.onClick.AddListener(ToggleCompanionMode);
+
+            var modeTextObject = Object.Instantiate(titleTemplate.gameObject, modeButtonObject.transform, false);
+            modeTextObject.name = "ModeButtonText";
+            modeTextObject.SetActive(true);
+
+            var modeTextRect = modeTextObject.GetComponent<RectTransform>();
+            modeTextRect.anchorMin = Vector2.zero;
+            modeTextRect.anchorMax = Vector2.one;
+            modeTextRect.offsetMin = Vector2.zero;
+            modeTextRect.offsetMax = Vector2.zero;
+
+            _modeButtonText = modeTextObject.GetComponent<TextMeshProUGUI>();
+            _modeButtonText.alignment = TextAlignmentOptions.Center;
+            _modeButtonText.fontSize = 20f;
+            _modeButtonText.raycastTarget = false;
+
             var closeButtonObject = new GameObject("CloseButton", typeof(RectTransform), typeof(Image), typeof(Button));
             closeButtonObject.transform.SetParent(panel.transform, false);
 
@@ -159,8 +202,13 @@ namespace HexDvergrAllies.Core.UI
 
             if (buttonTemplate)
             {
-                closeImage.sprite = buttonTemplate.GetComponent<Image>().sprite;
-                closeImage.type = Image.Type.Sliced;
+                var templateImage = buttonTemplate.GetComponent<Image>();
+
+                if (templateImage)
+                {
+                    closeImage.sprite = templateImage.sprite;
+                    closeImage.type = templateImage.type;
+                }
             }
 
             var closeButton = closeButtonObject.GetComponent<Button>();
@@ -185,6 +233,19 @@ namespace HexDvergrAllies.Core.UI
             _window.SetActive(false);
         }
 
+        private static void ToggleCompanionMode()
+        {
+            var player = Player.m_localPlayer;
+
+            if (!DvergrCompanionManager.TryGetHiredCompanionZDO(player, out var companionZdo))
+            {
+                return;
+            }
+
+            DvergrCompanionManager.RequestRemoteToggleMode(player);
+            _modeButton.interactable = false;
+        }
+
         private static void RefreshCompanionInfo()
         {
             var player = Player.m_localPlayer;
@@ -192,6 +253,8 @@ namespace HexDvergrAllies.Core.UI
             if (!DvergrCompanionManager.TryGetHiredCompanionZDO(player, out var companionZdo))
             {
                 _descriptionText.text = "No hired Dvergr companion.";
+                _modeButton.interactable = false;
+                _modeButtonText.text = "No Companion";
                 return;
             }
 
@@ -199,6 +262,16 @@ namespace HexDvergrAllies.Core.UI
             var mode = (DvergrCompanionManager.CompanionMode)companionZdo.GetInt(ModeKey, 0);
 
             _descriptionText.text = $"Name: {(string.IsNullOrEmpty(name) ? "Dvergr" : name)}\nMode: {mode}";
+            _modeButtonText.text = mode == DvergrCompanionManager.CompanionMode.Sentry ? "Switch to Companion" : "Switch to Sentry";
+            _modeButton.interactable = true;
+        }
+
+        internal static void Update()
+        {
+            if (IsVisible)
+            {
+                RefreshCompanionInfo();
+            }
         }
     }
 }
