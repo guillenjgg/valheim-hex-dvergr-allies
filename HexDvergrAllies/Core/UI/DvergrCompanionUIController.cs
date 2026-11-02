@@ -18,6 +18,7 @@ namespace HexDvergrAllies.Core.UI
         private static Button _recallButton;
         private static TMP_InputField _nameInput;
         private static Button _renameButton;
+        private static Button _unhireButton;
         private static bool _nameEdited;
 
         internal static bool IsVisible => _window && _window.activeSelf;
@@ -110,7 +111,7 @@ namespace HexDvergrAllies.Core.UI
             panelRect.anchorMax = new Vector2(0.5f, 0.5f);
             panelRect.pivot = new Vector2(0.5f, 0.5f);
             panelRect.anchoredPosition = Vector2.zero;
-            panelRect.sizeDelta = new Vector2(520f, 360f);
+            panelRect.sizeDelta = new Vector2(520f, 460f);
 
             var title = Object.Instantiate(titleTemplate.gameObject, panel.transform, false);
             title.name = "CompanionTitle";
@@ -204,6 +205,19 @@ namespace HexDvergrAllies.Core.UI
 
             var recallText = recallButtonObject.GetComponentInChildren<TextMeshProUGUI>();
             recallText.text = "Get over here";
+
+            var unhireButtonObject = Object.Instantiate(modeButtonObject, panel.transform, false);
+            unhireButtonObject.name = "BreakPactButton";
+
+            var unhireRect = unhireButtonObject.GetComponent<RectTransform>();
+            unhireRect.anchoredPosition = new Vector2(0f, -195f);
+
+            _unhireButton = unhireButtonObject.GetComponent<Button>();
+            _unhireButton.onClick.RemoveAllListeners();
+            _unhireButton.onClick.AddListener(ConfirmRemoteUnhire);
+
+            var unhireText = unhireButtonObject.GetComponentInChildren<TextMeshProUGUI>();
+            unhireText.text = "Break Pact";
 
             var nameInputObject = new GameObject("CompanionNameInput", typeof(RectTransform), typeof(Image), typeof(TMP_InputField));
             nameInputObject.transform.SetParent(panel.transform, false);
@@ -325,6 +339,7 @@ namespace HexDvergrAllies.Core.UI
                 _modeButtonText.text = "No Companion";
                 _recallButton.interactable = false;
                 _renameButton.interactable = false;
+                _unhireButton.interactable = false;
                 _nameInput.interactable = false;
                 _nameInput.SetTextWithoutNotify("");
                 _nameEdited = false;
@@ -351,6 +366,7 @@ namespace HexDvergrAllies.Core.UI
             _modeButton.interactable = true;
             _recallButton.interactable = true;
             _renameButton.interactable = true;
+            _unhireButton.interactable = true;
             _nameInput.interactable = true;
         }
 
@@ -373,6 +389,37 @@ namespace HexDvergrAllies.Core.UI
 
             DvergrCompanionNameManager.RequestRemoteRename(player, _nameInput.text);
             _nameInput.DeactivateInputField();
+        }
+
+        private static void ConfirmRemoteUnhire()
+        {
+            var player = Player.m_localPlayer;
+
+            if (!DvergrCompanionManager.TryGetHiredCompanionId(player, out var companionId))
+            {
+                return;
+            }
+
+            if (!UnifiedPopup.IsAvailable() || UnifiedPopup.IsVisible())
+            {
+                return;
+            }
+
+            var popup = new YesNoPopup(
+                "Break Your Pact?",
+                "Release this Dvergr from your service?\n\nYour companion will return to its original home.",
+                () =>
+                {
+                    UnifiedPopup.Pop();
+                    DvergrCompanionUnhireManager.RequestRemoteUnhire(Player.m_localPlayer);
+                    Close();
+                },
+                () => UnifiedPopup.Pop(),
+                false,
+                false);
+
+            UnifiedPopup.Push(popup);
+            UnifiedPopup.SetFocus();
         }
     }
 }
