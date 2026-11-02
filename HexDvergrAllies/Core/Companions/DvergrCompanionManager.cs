@@ -9,8 +9,15 @@ namespace HexDvergrAllies.Core.Companions
 {
     internal static class DvergrCompanionManager
     {
+        internal enum CompanionMode
+        {
+            Companion = 0,
+            Sentry = 1
+        }
+
         private const string HireRpc = "HexDvergrHire";
         private const string UnhireRpc = "HexDvergrUnhire";
+        private const string RemoteUnhireRpc = "HexDvergrRemoteUnhire";
         private const string SetModeRpc = "HexDvergrSetMode";
         private const string HireResultRpc = "HexDvergrHireResult";
         private const string RemoteSetModeRpc = "HexDvergrRemoteSetMode";
@@ -29,12 +36,6 @@ namespace HexDvergrAllies.Core.Companions
         private const float FollowLogInterval = 5f;
         private const float FollowOwnerGracePeriod = 10f;
 
-        internal enum CompanionMode
-        {
-            Companion = 0,
-            Sentry = 1
-        }
-
         private static readonly Func<ZRoutedRpc, long> GetServerPeerID = AccessTools.MethodDelegate<Func<ZRoutedRpc, long>>(AccessTools.Method(typeof(ZRoutedRpc), "GetServerPeerID"));
 
         private static readonly Dictionary<long, ZDOID> _hiredCompanions = new Dictionary<long, ZDOID>();
@@ -43,6 +44,7 @@ namespace HexDvergrAllies.Core.Companions
 
         private static readonly Dictionary<ZDOID, float> _followOwnerMissingSince = new Dictionary<ZDOID, float>();
 
+        #region Internal
         internal static void Initialize(Character character)
         {
             if (character.GetFaction() != Character.Faction.Dverger)
@@ -459,6 +461,7 @@ namespace HexDvergrAllies.Core.Companions
             ZRoutedRpc.instance.Register<ZDOID, ZDOID>(RemoteSetModeRpc, RPC_RemoteSetMode);
             ZRoutedRpc.instance.Register<ZDOID, ZDOID, Vector3>(RemoteRecallRpc, RPC_RemoteRecall);
             ZRoutedRpc.instance.Register<ZDOID, ZDOID, string>(RemoteRenameRpc, RPC_RemoteRename);
+            ZRoutedRpc.instance.Register<ZDOID, ZDOID>(RemoteUnhireRpc, RPC_RemoteUnhire);
         }
 
         internal static void RequestRemoteToggleMode(Player player)
@@ -483,6 +486,36 @@ namespace HexDvergrAllies.Core.Companions
             ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), RemoteRecallRpc, player.GetZDOID(), companionId, destination);
         }
 
+        internal static void RequestRemoteRename(Player player, string name)
+        {
+            if (!player || !TryGetHiredCompanionId(player, out var companionId))
+            {
+                return;
+            }
+
+            name = name.Trim();
+
+            if (name.Length == 0 || name.Length > MaxNameLength || name.Contains("<") || name.Contains(">"))
+            {
+                player.Message(MessageHud.MessageType.Center, "Invalid companion name.");
+                return;
+            }
+
+            ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), RemoteRenameRpc, player.GetZDOID(), companionId, name);
+        }
+
+        internal static void RequestRemoteUnhire(Player player)
+        {
+            if (!player || !TryGetHiredCompanionId(player, out var companionId))
+            {
+                return;
+            }
+
+            ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), RemoteUnhireRpc, player.GetZDOID(), companionId);
+        }
+        #endregion
+
+        #region Private
         private static void RPC_RemoteRecall(long sender, ZDOID playerId, ZDOID companionId, Vector3 destination)
         {
             if (!ZNet.instance.IsServer())
@@ -552,22 +585,29 @@ namespace HexDvergrAllies.Core.Companions
             companionZdo.Set(ModeKey, (int)mode);
         }
 
-        internal static void RequestRemoteRename(Player player, string name)
+        private static void RPC_RemoteUnhire(long sender, ZDOID playerId, ZDOID companionId)
         {
-            if (!player || !TryGetHiredCompanionId(player, out var companionId))
+            if (!ZNet.instance.IsServer())
             {
                 return;
             }
 
-            name = name.Trim();
+            var playerZdo = ZDOMan.instance.GetZDO(playerId);
+            var companionZdo = ZDOMan.instance.GetZDO(companionId);
 
-            if (name.Length == 0 || name.Length > MaxNameLength || name.Contains("<") || name.Contains(">"))
+            if (playerZdo == null || companionZdo == null || playerZdo.GetOwner() != sender)
             {
-                player.Message(MessageHud.MessageType.Center, "Invalid companion name.");
                 return;
             }
 
-            ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), RemoteRenameRpc, player.GetZDOID(), companionId, name);
+            var verifiedPlayerId = playerZdo.GetLong(ZDOVars.s_playerID, 0L);
+
+            if (verifiedPlayerId == 0L || !companionZdo.GetBool(HiredKey, false) || companionZdo.GetLong(OwnerKey, 0L) != verifiedPlayerId)
+            {
+                return;
+            }
+
+            // Remote unhire cleanup will be added here.
         }
 
         private static void RPC_RemoteRename(long sender, ZDOID playerId, ZDOID companionId, string name)
@@ -801,15 +841,23 @@ namespace HexDvergrAllies.Core.Companions
 
             if (!zdo.GetBool(HiredKey, false))
             {
-                Plugin.Log.LogWarning($"[Dvergr Companion] Unhire rejected: Dvergr={character.name}, Reason=Not hired");
+                if(HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
+                {
+                    Plugin.Log.LogInfo($"[Dvergr Companion] Unhire request ignored: Dvergr={character.name}, Reason=Not hired");
+                }
+
                 return;
             }
 
             var player = ResolvePlayer(playerId);
 
-            if (!player || !DvergrInteractionHelper.IsWithinRange(player, character))
+            if (!player)
             {
-                Plugin.Log.LogWarning($"[Dvergr Companion] Unhire rejected: PlayerZDO={playerId}, Reason=Player missing or out of range");
+                if(HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
+                {
+                    Plugin.Log.LogInfo($"[Dvergr Companion] Unhire request ignored: Dvergr={character.name}, PlayerZDO={playerId}, Reason=Player missing or out of range");
+                }
+
                 return;
             }
 
@@ -817,21 +865,38 @@ namespace HexDvergrAllies.Core.Companions
 
             if (ownerPlayerId != player.GetPlayerID())
             {
-                Plugin.Log.LogWarning($"[Dvergr Companion] Unhire rejected: Player={player.GetPlayerName()}, Reason=Not hiring player");
+                if(HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
+                {
+                    Plugin.Log.LogInfo($"[Dvergr Companion] Unhire request ignored: Dvergr={character.name}, Player={player.GetPlayerName()}, PlayerID={player.GetPlayerID()}, OwnerPlayerID={ownerPlayerId}, Reason=Not owner");
+                }
+                
                 return;
             }
 
+            CleanupUnhire(character, zdo, ownerPlayerId);
+        }
+
+        private static void CleanupUnhire(Character character, ZDO zdo, long ownerPlayerId)
+        {
             var monsterAI = character.GetComponent<MonsterAI>();
 
             if (!monsterAI)
             {
-                Plugin.Log.LogWarning("[Dvergr Companion] Unhire rejected: Reason=MonsterAI missing");
+                if(HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
+                {
+                    Plugin.Log.LogWarning($"[Dvergr Companion] Unhire rejected: Dvergr={character.name}, Reason=MonsterAI missing");
+                }
+                
                 return;
             }
 
             if (!zdo.GetBool(HomeSavedKey, false))
             {
-                Plugin.Log.LogWarning($"[Dvergr Companion] Unhire rejected: Dvergr={character.name}, Reason=Original home missing");
+                if(HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
+                {
+                    Plugin.Log.LogWarning($"[Dvergr Companion] Unhire rejected: Dvergr={character.name}, Reason=Home not saved");
+                }
+                
                 return;
             }
 
@@ -852,7 +917,10 @@ namespace HexDvergrAllies.Core.Companions
             {
                 _hiredCompanions.Remove(ownerPlayerId);
 
-                Plugin.Log.LogInfo($"[Dvergr Companion] Hire cache removed: PlayerID={ownerPlayerId}, DvergrZDO={zdo.m_uid}");
+                if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
+                {
+                    Plugin.Log.LogInfo($"[Dvergr Companion] Hire cache removed: PlayerID={ownerPlayerId}, DvergrZDO={zdo.m_uid}");
+                }
             }
 
             _lastFollowLogTimes.Remove(zdo.m_uid);
@@ -860,7 +928,10 @@ namespace HexDvergrAllies.Core.Companions
 
             ReturnHome(character, zdo, homePosition);
 
-            Plugin.Log.LogInfo($"[Dvergr Companion] Unhired successfully: Dvergr={character.name}, Player={player.GetPlayerName()}, Home={homePosition}");
+            if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
+            {
+                Plugin.Log.LogInfo($"[Dvergr Companion] Unhire cleanup completed: Dvergr={character.name}, OwnerPlayerID={ownerPlayerId}, Home={homePosition}");
+            }
         }
 
         private static void ReturnHome(Character character, ZDO zdo, Vector3 homePosition)
@@ -920,5 +991,6 @@ namespace HexDvergrAllies.Core.Companions
                 UnityEngine.Object.Destroy(companion);
             }
         }
+        #endregion
     }
 }
