@@ -14,6 +14,8 @@ namespace HexDvergrAllies.Core.Companions
         private const string SetModeRpc = "HexDvergrSetMode";
         private const string HireResultRpc = "HexDvergrHireResult";
         private const string RemoteSetModeRpc = "HexDvergrRemoteSetMode";
+        private const string RemoteRecallRpc = "HexDvergrRemoteRecall";
+        private const string RecallPositionKey = "HexDvergr_RecallPosition";
         private const string HiredKey = "HexDvergr_IsHired";
         private const string OwnerKey = "HexDvergr_HiredBy";
         private const string HomeKey = "HexDvergr_HomePosition";
@@ -454,6 +456,7 @@ namespace HexDvergrAllies.Core.Companions
         internal static void RegisterRemoteModeRpc()
         {
             ZRoutedRpc.instance.Register<ZDOID, ZDOID>(RemoteSetModeRpc, RPC_RemoteSetMode);
+            ZRoutedRpc.instance.Register<ZDOID, ZDOID, Vector3>(RemoteRecallRpc, RPC_RemoteRecall);
         }
 
         internal static void RequestRemoteToggleMode(Player player)
@@ -464,6 +467,50 @@ namespace HexDvergrAllies.Core.Companions
             }
 
             ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), RemoteSetModeRpc, player.GetZDOID(), companionId);
+        }
+
+        internal static void RequestRemoteRecall(Player player)
+        {
+            if (!player || !TryGetHiredCompanionId(player, out var companionId))
+            {
+                return;
+            }
+
+            var destination = player.transform.position + player.transform.right * 2f;
+
+            ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), RemoteRecallRpc, player.GetZDOID(), companionId, destination);
+        }
+
+        private static void RPC_RemoteRecall(long sender, ZDOID playerId, ZDOID companionId, Vector3 destination)
+        {
+            if (!ZNet.instance.IsServer())
+            {
+                return;
+            }
+
+            var playerZdo = ZDOMan.instance.GetZDO(playerId);
+            var companionZdo = ZDOMan.instance.GetZDO(companionId);
+
+            if (playerZdo == null || companionZdo == null || playerZdo.GetOwner() != sender)
+            {
+                return;
+            }
+
+            var verifiedPlayerId = playerZdo.GetLong(ZDOVars.s_playerID, 0L);
+
+            if (verifiedPlayerId == 0L || !companionZdo.GetBool(HiredKey, false) || companionZdo.GetLong(OwnerKey, 0L) != verifiedPlayerId)
+            {
+                return;
+            }
+
+            if (Vector3.Distance(playerZdo.GetPosition(), destination) > 10f)
+            {
+                return;
+            }
+
+            companionZdo.Set(ModeKey, (int)CompanionMode.Companion);
+            companionZdo.Set(RecallPositionKey, destination);
+            companionZdo.Set(PendingModeTeleportKey, true);
         }
 
         private static void RPC_RemoteSetMode(long sender, ZDOID playerId, ZDOID companionId)

@@ -15,6 +15,7 @@ namespace HexDvergrAllies.Core.UI
         private static TextMeshProUGUI _descriptionText;
         private static Button _modeButton;
         private static TextMeshProUGUI _modeButtonText;
+        private static Button _recallButton;
 
         internal static bool IsVisible => _window && _window.activeSelf;
 
@@ -188,6 +189,19 @@ namespace HexDvergrAllies.Core.UI
             _modeButtonText.fontSize = 20f;
             _modeButtonText.raycastTarget = false;
 
+            var recallButtonObject = Object.Instantiate(modeButtonObject, panel.transform, false);
+            recallButtonObject.name = "RecallButton";
+
+            var recallRect = recallButtonObject.GetComponent<RectTransform>();
+            recallRect.anchoredPosition = new Vector2(0f, -140f);
+
+            _recallButton = recallButtonObject.GetComponent<Button>();
+            _recallButton.onClick.RemoveAllListeners();
+            _recallButton.onClick.AddListener(() => DvergrCompanionManager.RequestRemoteRecall(Player.m_localPlayer));
+
+            var recallText = recallButtonObject.GetComponentInChildren<TextMeshProUGUI>();
+            recallText.text = "Get over here";
+
             var closeButtonObject = new GameObject("CloseButton", typeof(RectTransform), typeof(Image), typeof(Button));
             closeButtonObject.transform.SetParent(panel.transform, false);
 
@@ -255,6 +269,7 @@ namespace HexDvergrAllies.Core.UI
                 _descriptionText.text = "No hired Dvergr companion.";
                 _modeButton.interactable = false;
                 _modeButtonText.text = "No Companion";
+                _recallButton.interactable = false;
                 return;
             }
 
@@ -264,6 +279,7 @@ namespace HexDvergrAllies.Core.UI
             _descriptionText.text = $"Name: {(string.IsNullOrEmpty(name) ? "Dvergr" : name)}\nMode: {mode}";
             _modeButtonText.text = mode == DvergrCompanionManager.CompanionMode.Sentry ? "Switch to Companion" : "Switch to Sentry";
             _modeButton.interactable = true;
+            _recallButton.interactable = true;
         }
 
         internal static void Update()

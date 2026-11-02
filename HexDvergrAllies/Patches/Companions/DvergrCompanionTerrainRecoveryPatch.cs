@@ -36,6 +36,8 @@ namespace HexDvergrAllies.Patches.Companions
                 return;
             }
 
+            ProcessPendingRecall(__instance, character);
+
             if (DvergrCompanionShipManager.IsPassenger(character))
             {
                 States.Remove(__instance);
@@ -137,6 +139,40 @@ namespace HexDvergrAllies.Patches.Companions
             Plugin.Log.LogInfo($"[Dvergr Terrain Recovery] Dvergr={character.name}, Reason={reason}, Distance={distance:F1}, From={character.transform.position}, To={destination}");
 
             character.transform.position = destination;
+        }
+
+        private static void ProcessPendingRecall(MonsterAI monsterAI, Character character)
+        {
+            var nview = character.GetComponent<ZNetView>();
+
+            if (!nview || !nview.IsValid() || !nview.IsOwner())
+            {
+                return;
+            }
+
+            var zdo = nview.GetZDO();
+
+            if (!zdo.GetBool("HexDvergr_PendingModeTeleport", false))
+            {
+                return;
+            }
+
+            var destination = zdo.GetVec3("HexDvergr_RecallPosition", character.transform.position);
+
+            var rigidbody = character.GetComponent<Rigidbody>();
+
+            if (rigidbody)
+            {
+                rigidbody.linearVelocity = Vector3.zero;
+                rigidbody.angularVelocity = Vector3.zero;
+                rigidbody.position = destination;
+            }
+
+            character.transform.position = destination;
+            zdo.SetPosition(destination);
+            zdo.Set("HexDvergr_PendingModeTeleport", false);
+
+            monsterAI.ResetPatrolPoint();
         }
     }
 }
