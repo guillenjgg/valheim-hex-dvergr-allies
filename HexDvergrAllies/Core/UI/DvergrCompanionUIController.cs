@@ -333,10 +333,10 @@ namespace HexDvergrAllies.Core.UI
 
             var name = companionZdo.GetString(NameKey, "");
             var displayName = string.IsNullOrEmpty(name) ? "Dvergr" : name;
-            var mode = (DvergrCompanionManager.CompanionMode)companionZdo.GetInt(ModeKey, 0);
+            var mode = (DvergrCompanionMode)companionZdo.GetInt(ModeKey, 0);
 
             _descriptionText.text = $"Mode: {mode}";
-            _modeButtonText.text = mode == DvergrCompanionManager.CompanionMode.Sentry ? "Switch to Companion" : "Switch to Sentry";
+            _modeButtonText.text = mode == DvergrCompanionMode.Sentry ? "Switch to Companion" : "Switch to Sentry";
 
             if (_nameEdited && _nameInput.text == displayName)
             {

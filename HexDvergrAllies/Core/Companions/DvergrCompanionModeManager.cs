@@ -16,7 +16,7 @@ namespace HexDvergrAllies.Core.Companions
                 return false;
             }
 
-            if (DvergrCompanionManager.GetMode(character) == DvergrCompanionManager.CompanionMode.Sentry)
+            if (DvergrCompanionManager.GetMode(character) == DvergrCompanionMode.Sentry)
             {
                 return false;
             }

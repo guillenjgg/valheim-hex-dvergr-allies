@@ -4,17 +4,12 @@ using HexDvergrAllies.Core.Monoscripts;
 using HexDvergrAllies.Core.UI;
 using System.Collections.Generic;
 using UnityEngine;
+using CompanionMode = HexDvergrAllies.Core.Companions.DvergrCompanionMode;
 
 namespace HexDvergrAllies.Core.Companions
 {
     internal static class DvergrCompanionManager
     {
-        internal enum CompanionMode
-        {
-            Companion = 0,
-            Sentry = 1
-        }
-
         private const string HireRpc = "HexDvergrHire";
         private const string UnhireRpc = "HexDvergrUnhire";
         private const string RemoteUnhireRpc = "HexDvergrRemoteUnhire";
@@ -26,16 +21,18 @@ namespace HexDvergrAllies.Core.Companions
         private const string RemoteSetModeRpc = "HexDvergrRemoteSetMode";
         private const string RemoteRecallRpc = "HexDvergrRemoteRecall";
         private const string RemoteRenameRpc = "HexDvergrRemoteRename";
-        private const string RecallPositionKey = "HexDvergr_RecallPosition";
-        private const string HiredKey = "HexDvergr_IsHired";
-        private const string OwnerKey = "HexDvergr_HiredBy";
-        private const string HomeKey = "HexDvergr_HomePosition";
-        private const string HomeSavedKey = "HexDvergr_HomeSaved";
         private const string RenameRpc = "HexDvergrRename";
-        private const string NameKey = "HexDvergr_Name";
-        private const string ModeKey = "HexDvergr_Mode";
-        private const string PendingModeTeleportKey = "HexDvergr_PendingModeTeleport";
-        private const string PendingUnhireKey = "HexDvergr_PendingUnhire";
+
+        private const string HiredKey = DvergrCompanionState.HiredKey;
+        private const string OwnerKey = DvergrCompanionState.OwnerKey;
+        private const string HomeKey = DvergrCompanionState.HomeKey;
+        private const string HomeSavedKey = DvergrCompanionState.HasHomeKeyBeenSaved;
+        private const string NameKey = DvergrCompanionState.NameKey;
+        private const string ModeKey = DvergrCompanionState.ModeKey;
+        private const string PendingModeTeleportKey = DvergrCompanionState.PendingModeTeleportKey;
+        private const string PendingUnhireKey = DvergrCompanionState.PendingUnhireKey;
+        private const string RecallPositionKey = DvergrCompanionState.RecallPositionKey;
+
         private const int MaxNameLength = 24;
         private const float FollowLogInterval = 5f;
         private const float FollowOwnerGracePeriod = 10f;
@@ -76,21 +73,21 @@ namespace HexDvergrAllies.Core.Companions
 
             var zdo = nview.GetZDO();
 
-            if (zdo.GetBool(PendingUnhireKey, false) && nview.IsOwner())
+            if (DvergrCompanionState.IsUnhirePending(zdo) && nview.IsOwner())
             {
                 ProcessPendingUnhire(character);
             }
 
-            if (!zdo.GetBool(HiredKey, false) && nview.IsOwner())
+            if (!DvergrCompanionState.IsHired(zdo) && nview.IsOwner())
             {
                 DvergrCompanionBehaviorManager.ResetBehavior(character, character.GetComponent<MonsterAI>());
             }
 
-            if (zdo.GetBool(HiredKey, false))
+            if (DvergrCompanionState.IsHired(zdo))
             {
                 InitializeCompanion(character);
 
-                var ownerPlayerId = zdo.GetLong(OwnerKey, 0L);
+                var ownerPlayerId = DvergrCompanionState.GetOwnerPlayerId(zdo);
 
                 if (ownerPlayerId != 0L)
                 {
@@ -117,9 +114,9 @@ namespace HexDvergrAllies.Core.Companions
                 return false;
             }
 
-            ZNetView nview = character.GetComponent<ZNetView>();
+            var nview = character.GetComponent<ZNetView>();
 
-            return nview && nview.IsValid() && nview.GetZDO().GetBool(HiredKey, false);
+            return nview && nview.IsValid() && DvergrCompanionState.IsHired(nview.GetZDO());
         }
 
         internal static CompanionMode GetMode(Character character)
@@ -131,7 +128,7 @@ namespace HexDvergrAllies.Core.Companions
                 return CompanionMode.Companion;
             }
 
-            return (CompanionMode)nview.GetZDO().GetInt(ModeKey, (int)CompanionMode.Companion);
+            return DvergrCompanionState.GetMode(nview.GetZDO());
         }
 
         internal static void RequestToggleMode(Player player, Character character)
@@ -158,16 +155,16 @@ namespace HexDvergrAllies.Core.Companions
                 return false;
             }
 
-            ZNetView nview = character.GetComponent<ZNetView>();
+            var nview = character.GetComponent<ZNetView>();
 
             if (!nview || !nview.IsValid())
             {
                 return false;
             }
 
-            ZDO zdo = nview.GetZDO();
+            var zdo = nview.GetZDO();
 
-            return zdo.GetBool(HiredKey, false) && zdo.GetLong(OwnerKey, 0L) == player.GetPlayerID();
+            return DvergrCompanionState.IsHired(zdo) && DvergrCompanionState.GetOwnerPlayerId(zdo) == player.GetPlayerID();
         }
 
         internal static bool HasHiredCompanion(Player player)

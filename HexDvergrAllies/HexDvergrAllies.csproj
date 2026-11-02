@@ -98,6 +98,7 @@
     <Compile Include="Core\Companions\DvergrCompanionBehaviorManager.cs" />
     <Compile Include="Core\Companions\DvergrCompanionHireManager.cs" />
     <Compile Include="Core\Companions\DvergrCompanionManager.cs" />
+    <Compile Include="Core\Companions\DvergrCompanionMode.cs" />
     <Compile Include="Core\Companions\DvergrCompanionModeManager.cs" />
     <Compile Include="Core\Companions\DvergrCompanionNameReceiver.cs" />
     <Compile Include="Core\Companions\DvergrCompanionPinManager.cs" />

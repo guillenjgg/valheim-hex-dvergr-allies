@@ -37,9 +37,9 @@ namespace HexDvergrAllies.Core.Companions
             return zdo.GetVec3(HomeKey, zdo.GetPosition());
         }
 
-        internal static DvergrCompanionManager.CompanionMode GetMode(ZDO zdo)
+        internal static DvergrCompanionMode GetMode(ZDO zdo)
         {
-            return (DvergrCompanionManager.CompanionMode)zdo.GetInt(ModeKey, (int)DvergrCompanionManager.CompanionMode.Companion);
+            return (DvergrCompanionMode)zdo.GetInt(ModeKey, (int)DvergrCompanionMode.Companion);
         }
 
         internal static bool IsUnhirePending(ZDO zdo)
