@@ -13,7 +13,7 @@ namespace HexDvergrAllies.Patches
     {
         private static void Postfix()
         {
-            DvergrTradeRpcManager.Register();
+            DvergrTradeRpcManager.Initialize();
             DvergrTradeSessionManager.Register();
             DvergrCompanionPortalRelocationManager.Register();
             DvergrRpcManager.RegisterRoutedRpcs();

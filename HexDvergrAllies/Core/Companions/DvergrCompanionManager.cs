@@ -49,7 +49,7 @@ namespace HexDvergrAllies.Core.Companions
                 return;
             }
 
-            DvergrRpcManager.Register(nview, character);
+            DvergrRpcManager.RegisterCharacterRpcs(nview, character);
 
             var zdo = nview.GetZDO();
 

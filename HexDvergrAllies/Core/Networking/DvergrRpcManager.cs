@@ -1,4 +1,5 @@
 ﻿using HexDvergrAllies.Core.Companions;
+using HexDvergrAllies.Core.Trading;
 using UnityEngine;
 
 namespace HexDvergrAllies.Core.Networking
@@ -35,9 +36,16 @@ namespace HexDvergrAllies.Core.Networking
             ZRoutedRpc.instance.Register<ZDOID>(ProcessRemoteUnhireRpc, DvergrCompanionManager.RPC_ProcessRemoteUnhire);
             ZRoutedRpc.instance.Register<ZDOID>(RemoteUnhireUnloadedRpc, DvergrCompanionManager.RPC_RemoteUnhireUnloaded);
             ZRoutedRpc.instance.Register<ZDOID>(RemoteUnhireCompletedRpc, DvergrCompanionManager.RPC_RemoteUnhireCompleted);
+
+            ZRoutedRpc.instance.Register<ZDOID>(PriceRequestRpc, DvergrTradeRpcManager.OnPriceRequest);
+            ZRoutedRpc.instance.Register<int, int>(PriceResponseRpc, DvergrTradeRpcManager.OnPriceResponse);
+            ZRoutedRpc.instance.Register<ZDOID, int, long>(PurchaseRequestRpc, DvergrTradeRpcManager.OnBuyRequest);
+            ZRoutedRpc.instance.Register<ZDOID, int, int, int, long, long>(PurchaseResponseRpc, DvergrTradeRpcManager.OnBuyResponse);
+            ZRoutedRpc.instance.Register<ZDOID, int, int, bool, long, long>(PurchaseCompleteRpc, DvergrTradeRpcManager.OnBuyComplete);
+            ZRoutedRpc.instance.Register<long, bool>(PurchaseResultRpc, DvergrTradeRpcManager.OnBuyResult);
         }
 
-        internal static void Register(ZNetView nview, Character character)
+        internal static void RegisterCharacterRpcs(ZNetView nview, Character character)
         {
             nview.Register<ZDOID, long>(HireRpc, (sender, playerId, requestId) => DvergrForgePactManager.Hire(character, sender, playerId, requestId));
             nview.Register<ZDOID, long, bool>(HireResultRpc, (sender, playerId, requestId, success) => DvergrForgePactManager.OnHireResult(character, sender, playerId, requestId, success));
