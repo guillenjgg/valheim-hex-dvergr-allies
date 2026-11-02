@@ -105,6 +105,7 @@
     <Compile Include="Core\Companions\DvergrCompanionSentryMode.cs" />
     <Compile Include="Core\Companions\DvergrCompanionShipManager.cs" />
     <Compile Include="Core\Companions\DvergrCompanionSpawnerTargeting.cs" />
+    <Compile Include="Core\Companions\DvergrCompanionState.cs" />
     <Compile Include="Core\HexLocalization\HexLocalizationManager.cs" />
     <Compile Include="Core\Monoscripts\DvergrCompanionComponent.cs" />
     <Compile Include="Core\PrefabHelper.cs" />
