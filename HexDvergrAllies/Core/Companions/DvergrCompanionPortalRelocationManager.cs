@@ -108,7 +108,7 @@ namespace HexDvergrAllies.Core.Companions
             var previousPosition = companionZdo.GetPosition();
 
             companionZdo.SetOwner(ZDOMan.GetSessionID());
-            companionZdo.Set(ModeKey, (int)DvergrCompanionManager.CompanionMode.Companion);
+            companionZdo.Set(ModeKey, (int)DvergrCompanionMode.Companion);
             companionZdo.SetPosition(destination);
 
             ZDOMan.instance.ForceSendZDO(companionId);

@@ -15,7 +15,7 @@ namespace HexDvergrAllies.Patches.Companions
         {
             var character = __instance.GetComponent<Character>();
 
-            if (!character || !DvergrCompanionManager.IsHired(character))
+            if (!character || !DvergrCompanionState.IsHired(character))
             {
                 return;
             }

@@ -30,7 +30,7 @@ namespace HexDvergrAllies.Patches.Companions
         {
             var character = __instance.GetComponent<Character>();
 
-            if (character == null || !DvergrCompanionManager.IsHired(character))
+            if (character == null || !DvergrCompanionState.IsHired(character))
             {
                 States.Remove(__instance);
                 return;

@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using HexDvergrAllies.Core.Companions;
+using HexDvergrAllies.Core.Networking;
 using HexDvergrAllies.Core.Trading;
 
 namespace HexDvergrAllies.Patches
@@ -12,10 +13,10 @@ namespace HexDvergrAllies.Patches
     {
         private static void Postfix()
         {
-            DvergrTradeRpcManager.Register();
+            DvergrTradeRpcManager.Initialize();
             DvergrTradeSessionManager.Register();
             DvergrCompanionPortalRelocationManager.Register();
-            DvergrCompanionManager.RegisterRemoteModeRpc();
+            DvergrRpcManager.RegisterRoutedRpcs();
         }
     }
 }

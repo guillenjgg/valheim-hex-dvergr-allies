@@ -98,7 +98,7 @@ namespace HexDvergrAllies.Core.Trading
                 return false;
             }
 
-            if (DvergrCompanionManager.IsHired(character) || DvergrCompanionManager.HasHiredCompanion(player))
+            if (DvergrCompanionState.IsHired(character) || DvergrCompanionManager.HasHiredCompanion(player))
             {
                 return false;
             }

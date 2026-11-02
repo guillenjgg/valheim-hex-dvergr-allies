@@ -21,7 +21,7 @@ namespace HexDvergrAllies.Patches.Companions
                 return;
             }
 
-            if (DvergrCompanionManager.IsHired(__instance))
+            if (DvergrCompanionState.IsHired(__instance))
             {
                 var damageTakenMultiplier = HexDvergrAlliesConfiguration.CompanionDamageTakenMultiplier.Value;
                 hit.ApplyModifier(damageTakenMultiplier);
@@ -29,7 +29,7 @@ namespace HexDvergrAllies.Patches.Companions
 
             var attacker = hit.GetAttacker();
 
-            if (attacker == null || !DvergrCompanionManager.IsHired(attacker))
+            if (attacker == null || !DvergrCompanionState.IsHired(attacker))
             {
                 return;
             }

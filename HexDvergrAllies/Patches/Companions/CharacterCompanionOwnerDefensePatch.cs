@@ -54,7 +54,7 @@ namespace HexDvergrAllies.Patches
                 Character companion = monsterAI.GetComponent<Character>();
 
                 if (companion == null ||
-                    !DvergrCompanionManager.IsHired(companion) ||
+                    !DvergrCompanionState.IsHired(companion) ||
                     companion.IsDead())
                 {
                     continue;

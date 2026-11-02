@@ -96,8 +96,14 @@
     <Compile Include="Assets\AssetHelper.cs" />
     <Compile Include="Core\Companions\DvergrCompanionAttributes.cs" />
     <Compile Include="Core\Companions\DvergrCompanionBehaviorManager.cs" />
-    <Compile Include="Core\Companions\DvergrCompanionHireManager.cs" />
+    <Compile Include="Core\Companions\DvergrCompanionFollowManager.cs" />
+    <Compile Include="Core\Companions\DvergrCompanionNameManager.cs" />
+    <Compile Include="Core\Companions\DvergrCompanionRecallManager.cs" />
+    <Compile Include="Core\Companions\DvergrCompanionUnhireManager.cs" />
+    <Compile Include="Core\Networking\DvergrRpcManager.cs" />
+    <Compile Include="Core\Companions\DvergrForgePactManager.cs" />
     <Compile Include="Core\Companions\DvergrCompanionManager.cs" />
+    <Compile Include="Core\Companions\DvergrCompanionMode.cs" />
     <Compile Include="Core\Companions\DvergrCompanionModeManager.cs" />
     <Compile Include="Core\Companions\DvergrCompanionNameReceiver.cs" />
     <Compile Include="Core\Companions\DvergrCompanionPinManager.cs" />
@@ -105,6 +111,7 @@
     <Compile Include="Core\Companions\DvergrCompanionSentryMode.cs" />
     <Compile Include="Core\Companions\DvergrCompanionShipManager.cs" />
     <Compile Include="Core\Companions\DvergrCompanionSpawnerTargeting.cs" />
+    <Compile Include="Core\Companions\DvergrCompanionState.cs" />
     <Compile Include="Core\HexLocalization\HexLocalizationManager.cs" />
     <Compile Include="Core\Monoscripts\DvergrCompanionComponent.cs" />
     <Compile Include="Core\PrefabHelper.cs" />

@@ -7,7 +7,7 @@ namespace HexDvergrAllies.Core.UI
     {
         internal static bool Init(Character character, out string hoverText)
         {
-            if (DvergrCompanionManager.IsHired(character))
+            if (DvergrCompanionState.IsHired(character))
             {
                 hoverText = "";
                 return false;

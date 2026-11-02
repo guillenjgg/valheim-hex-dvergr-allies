@@ -8,12 +8,12 @@ namespace HexDvergrAllies.Patches
     {
         private static void Postfix(Character __instance, ref string __result)
         {
-            if (!DvergrCompanionManager.IsHired(__instance))
+            if (!DvergrCompanionState.IsHired(__instance))
             {
                 return;
             }
 
-            __result = DvergrCompanionManager.GetCompanionName(__instance);
+            __result = DvergrCompanionNameManager.GetCompanionName(__instance);
         }
     }
 }

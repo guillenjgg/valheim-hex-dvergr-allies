@@ -33,7 +33,7 @@ namespace HexDvergrAllies.Patches
                 _playerCollider = playerCollider;
             }
 
-            var isHired = DvergrCompanionManager.IsHired(__instance);
+            var isHired = DvergrCompanionState.IsHired(__instance);
 
             if (_collisionStates.TryGetValue(__instance, out var previousState) && previousState == isHired)
             {

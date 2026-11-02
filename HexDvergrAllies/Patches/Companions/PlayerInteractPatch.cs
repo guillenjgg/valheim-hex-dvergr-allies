@@ -62,7 +62,7 @@ namespace HexDvergrAllies.Patches
                 return false;
             }
 
-            if (DvergrCompanionManager.IsHired(character))
+            if (DvergrCompanionState.IsHired(character))
             {
                 return false;
             }
