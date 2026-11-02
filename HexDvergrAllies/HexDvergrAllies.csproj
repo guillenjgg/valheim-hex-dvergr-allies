@@ -97,6 +97,8 @@
     <Compile Include="Core\Companions\DvergrCompanionAttributes.cs" />
     <Compile Include="Core\Companions\DvergrCompanionBehaviorManager.cs" />
     <Compile Include="Core\Companions\DvergrCompanionNameManager.cs" />
+    <Compile Include="Core\Companions\DvergrCompanionRecallManager.cs" />
+    <Compile Include="Core\Companions\DvergrCompanionUnhireManager.cs" />
     <Compile Include="Core\Networking\DvergrRpcManager.cs" />
     <Compile Include="Core\Companions\DvergrForgePactManager.cs" />
     <Compile Include="Core\Companions\DvergrCompanionManager.cs" />

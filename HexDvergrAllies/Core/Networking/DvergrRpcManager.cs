@@ -29,8 +29,8 @@ namespace HexDvergrAllies.Core.Networking
 
         internal static void RegisterRoutedRpcs()
         {
-            ZRoutedRpc.instance.Register<ZDOID, ZDOID>(RemoteSetModeRpc, DvergrCompanionManager.RPC_RemoteSetMode);
-            ZRoutedRpc.instance.Register<ZDOID, ZDOID, Vector3>(RemoteRecallRpc, DvergrCompanionManager.RPC_RemoteRecall);
+            ZRoutedRpc.instance.Register<ZDOID, ZDOID>(RemoteSetModeRpc, DvergrCompanionModeManager.RPC_RemoteSetMode);
+            ZRoutedRpc.instance.Register<ZDOID, ZDOID, Vector3>(RemoteRecallRpc, DvergrCompanionRecallManager.RPC_RemoteRecall);
             ZRoutedRpc.instance.Register<ZDOID, ZDOID, string>(RemoteRenameRpc, DvergrCompanionNameManager.RPC_RemoteRename);
             ZRoutedRpc.instance.Register<ZDOID, ZDOID>(RemoteUnhireRpc, DvergrCompanionManager.RPC_RemoteUnhire);
             ZRoutedRpc.instance.Register<ZDOID>(ProcessRemoteUnhireRpc, DvergrCompanionManager.RPC_ProcessRemoteUnhire);
@@ -49,9 +49,9 @@ namespace HexDvergrAllies.Core.Networking
         {
             nview.Register<ZDOID, long>(HireRpc, (sender, playerId, requestId) => DvergrForgePactManager.Hire(character, sender, playerId, requestId));
             nview.Register<ZDOID, long, bool>(HireResultRpc, (sender, playerId, requestId, success) => DvergrForgePactManager.OnHireResult(character, sender, playerId, requestId, success));
-            nview.Register<ZDOID>(UnhireRpc, (sender, playerId) => DvergrCompanionManager.Unhire(character, sender, playerId));
+            nview.Register<ZDOID>(UnhireRpc, (sender, playerId) => DvergrCompanionUnhireManager.Unhire(character, sender, playerId));
             nview.Register<ZDOID, string>(RenameRpc, (sender, playerId, name) => DvergrCompanionNameManager.Rename(character, sender, playerId, name));
-            nview.Register<ZDOID>(SetModeRpc, (sender, playerId) => DvergrCompanionManager.SetMode(character, sender, playerId));
+            nview.Register<ZDOID>(SetModeRpc, (sender, playerId) => DvergrCompanionModeManager.SetMode(character, sender, playerId));
         }
     }
 }

@@ -200,7 +200,7 @@ namespace HexDvergrAllies.Core.UI
 
             _recallButton = recallButtonObject.GetComponent<Button>();
             _recallButton.onClick.RemoveAllListeners();
-            _recallButton.onClick.AddListener(() => DvergrCompanionManager.RequestRemoteRecall(Player.m_localPlayer));
+            _recallButton.onClick.AddListener(() => DvergrCompanionRecallManager.RequestRemoteRecall(Player.m_localPlayer));
 
             var recallText = recallButtonObject.GetComponentInChildren<TextMeshProUGUI>();
             recallText.text = "Get over here";
@@ -310,7 +310,7 @@ namespace HexDvergrAllies.Core.UI
                 return;
             }
 
-            DvergrCompanionManager.RequestRemoteToggleMode(player);
+            DvergrCompanionModeManager.RequestRemoteToggleMode(player);
             _modeButton.interactable = false;
         }
 

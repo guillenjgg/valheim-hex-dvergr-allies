@@ -17,7 +17,7 @@ namespace HexDvergrAllies.Core.Companions
         internal static bool IsActive(Character character)
         {
             return DvergrCompanionState.IsHired(character) &&
-                   DvergrCompanionManager.GetMode(character) == DvergrCompanionMode.Sentry;
+                   DvergrCompanionModeManager.GetMode(character) == DvergrCompanionMode.Sentry;
         }
 
         internal static Vector3 GetAnchor(Character character)
