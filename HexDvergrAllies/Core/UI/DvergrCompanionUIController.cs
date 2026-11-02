@@ -16,6 +16,8 @@ namespace HexDvergrAllies.Core.UI
         private static Button _modeButton;
         private static TextMeshProUGUI _modeButtonText;
         private static Button _recallButton;
+        private static TMP_InputField _nameInput;
+        private static Button _renameButton;
 
         internal static bool IsVisible => _window && _window.activeSelf;
 
@@ -136,8 +138,8 @@ namespace HexDvergrAllies.Core.UI
             descriptionRect.anchorMin = new Vector2(0.5f, 0.5f);
             descriptionRect.anchorMax = new Vector2(0.5f, 0.5f);
             descriptionRect.pivot = new Vector2(0.5f, 0.5f);
-            descriptionRect.anchoredPosition = new Vector2(0f, 25f);
-            descriptionRect.sizeDelta = new Vector2(440f, 100f);
+            descriptionRect.anchoredPosition = new Vector2(0f, 65f);
+            descriptionRect.sizeDelta = new Vector2(440f, 65f);
 
             var descriptionText = description.GetComponent<TextMeshProUGUI>();
             descriptionText.alignment = TextAlignmentOptions.Center;
@@ -201,6 +203,56 @@ namespace HexDvergrAllies.Core.UI
 
             var recallText = recallButtonObject.GetComponentInChildren<TextMeshProUGUI>();
             recallText.text = "Get over here";
+
+            var nameInputObject = new GameObject("CompanionNameInput", typeof(RectTransform), typeof(Image), typeof(TMP_InputField));
+            nameInputObject.transform.SetParent(panel.transform, false);
+
+            var nameInputRect = nameInputObject.GetComponent<RectTransform>();
+            nameInputRect.anchorMin = new Vector2(0.5f, 0.5f);
+            nameInputRect.anchorMax = new Vector2(0.5f, 0.5f);
+            nameInputRect.pivot = new Vector2(0.5f, 0.5f);
+            nameInputRect.anchoredPosition = new Vector2(-75f, -30f);
+            nameInputRect.sizeDelta = new Vector2(240f, 40f);
+
+            var nameInputImage = nameInputObject.GetComponent<Image>();
+            nameInputImage.color = new Color(0.12f, 0.1f, 0.08f, 0.95f);
+
+            var nameTextObject = Object.Instantiate(titleTemplate.gameObject, nameInputObject.transform, false);
+            nameTextObject.name = "NameInputText";
+            nameTextObject.SetActive(true);
+
+            var nameTextRect = nameTextObject.GetComponent<RectTransform>();
+            nameTextRect.anchorMin = Vector2.zero;
+            nameTextRect.anchorMax = Vector2.one;
+            nameTextRect.offsetMin = new Vector2(10f, 0f);
+            nameTextRect.offsetMax = new Vector2(-10f, 0f);
+
+            var nameText = nameTextObject.GetComponent<TextMeshProUGUI>();
+            nameText.text = "";
+            nameText.fontSize = 20f;
+            nameText.alignment = TextAlignmentOptions.MidlineLeft;
+            nameText.raycastTarget = false;
+
+            _nameInput = nameInputObject.GetComponent<TMP_InputField>();
+            _nameInput.textViewport = nameInputRect;
+            _nameInput.textComponent = nameText;
+            _nameInput.targetGraphic = nameInputImage;
+            _nameInput.characterLimit = 24;
+            _nameInput.lineType = TMP_InputField.LineType.SingleLine;
+
+            var renameButtonObject = Object.Instantiate(modeButtonObject, panel.transform, false);
+            renameButtonObject.name = "RenameButton";
+
+            var renameRect = renameButtonObject.GetComponent<RectTransform>();
+            renameRect.anchoredPosition = new Vector2(150f, -30f);
+            renameRect.sizeDelta = new Vector2(130f, 40f);
+
+            _renameButton = renameButtonObject.GetComponent<Button>();
+            _renameButton.onClick.RemoveAllListeners();
+            _renameButton.onClick.AddListener(RenameCompanion);
+
+            var renameText = renameButtonObject.GetComponentInChildren<TextMeshProUGUI>();
+            renameText.text = "Rename";
 
             var closeButtonObject = new GameObject("CloseButton", typeof(RectTransform), typeof(Image), typeof(Button));
             closeButtonObject.transform.SetParent(panel.transform, false);
@@ -270,16 +322,27 @@ namespace HexDvergrAllies.Core.UI
                 _modeButton.interactable = false;
                 _modeButtonText.text = "No Companion";
                 _recallButton.interactable = false;
+                _renameButton.interactable = false;
+                _nameInput.interactable = false;
+                _nameInput.SetTextWithoutNotify("");
                 return;
             }
 
             var name = companionZdo.GetString(NameKey, "");
             var mode = (DvergrCompanionManager.CompanionMode)companionZdo.GetInt(ModeKey, 0);
 
-            _descriptionText.text = $"Name: {(string.IsNullOrEmpty(name) ? "Dvergr" : name)}\nMode: {mode}";
+            _descriptionText.text = $"Mode: {mode}";
             _modeButtonText.text = mode == DvergrCompanionManager.CompanionMode.Sentry ? "Switch to Companion" : "Switch to Sentry";
+
+            if (!_nameInput.isFocused)
+            {
+                _nameInput.SetTextWithoutNotify(string.IsNullOrEmpty(name) ? "Dvergr" : name);
+            }
+
             _modeButton.interactable = true;
             _recallButton.interactable = true;
+            _renameButton.interactable = true;
+            _nameInput.interactable = true;
         }
 
         internal static void Update()
@@ -288,6 +351,19 @@ namespace HexDvergrAllies.Core.UI
             {
                 RefreshCompanionInfo();
             }
+        }
+
+        private static void RenameCompanion()
+        {
+            var player = Player.m_localPlayer;
+
+            if (!DvergrCompanionManager.TryGetHiredCompanionZDO(player, out var companionZdo))
+            {
+                return;
+            }
+
+            DvergrCompanionManager.RequestRemoteRename(player, _nameInput.text);
+            _nameInput.DeactivateInputField();
         }
     }
 }

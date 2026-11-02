@@ -15,6 +15,7 @@ namespace HexDvergrAllies.Core.Companions
         private const string HireResultRpc = "HexDvergrHireResult";
         private const string RemoteSetModeRpc = "HexDvergrRemoteSetMode";
         private const string RemoteRecallRpc = "HexDvergrRemoteRecall";
+        private const string RemoteRenameRpc = "HexDvergrRemoteRename";
         private const string RecallPositionKey = "HexDvergr_RecallPosition";
         private const string HiredKey = "HexDvergr_IsHired";
         private const string OwnerKey = "HexDvergr_HiredBy";
@@ -457,6 +458,7 @@ namespace HexDvergrAllies.Core.Companions
         {
             ZRoutedRpc.instance.Register<ZDOID, ZDOID>(RemoteSetModeRpc, RPC_RemoteSetMode);
             ZRoutedRpc.instance.Register<ZDOID, ZDOID, Vector3>(RemoteRecallRpc, RPC_RemoteRecall);
+            ZRoutedRpc.instance.Register<ZDOID, ZDOID, string>(RemoteRenameRpc, RPC_RemoteRename);
         }
 
         internal static void RequestRemoteToggleMode(Player player)
@@ -541,10 +543,64 @@ namespace HexDvergrAllies.Core.Companions
             {
                 companionZdo.Set("HexDvergr_SentryPosition", companionZdo.GetPosition());
             }
+            else
+            {
+                companionZdo.Set(RecallPositionKey, playerZdo.GetPosition() + Vector3.right * 2f);
+                companionZdo.Set(PendingModeTeleportKey, true);
+            }
 
             companionZdo.Set(ModeKey, (int)mode);
         }
 
+        internal static void RequestRemoteRename(Player player, string name)
+        {
+            if (!player || !TryGetHiredCompanionId(player, out var companionId))
+            {
+                return;
+            }
+
+            name = name.Trim();
+
+            if (name.Length == 0 || name.Length > MaxNameLength || name.Contains("<") || name.Contains(">"))
+            {
+                player.Message(MessageHud.MessageType.Center, "Invalid companion name.");
+                return;
+            }
+
+            ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), RemoteRenameRpc, player.GetZDOID(), companionId, name);
+        }
+
+        private static void RPC_RemoteRename(long sender, ZDOID playerId, ZDOID companionId, string name)
+        {
+            if (!ZNet.instance.IsServer())
+            {
+                return;
+            }
+
+            var playerZdo = ZDOMan.instance.GetZDO(playerId);
+            var companionZdo = ZDOMan.instance.GetZDO(companionId);
+
+            if (playerZdo == null || companionZdo == null || playerZdo.GetOwner() != sender)
+            {
+                return;
+            }
+
+            var verifiedPlayerId = playerZdo.GetLong(ZDOVars.s_playerID, 0L);
+
+            if (verifiedPlayerId == 0L || !companionZdo.GetBool(HiredKey, false) || companionZdo.GetLong(OwnerKey, 0L) != verifiedPlayerId)
+            {
+                return;
+            }
+
+            name = name.Trim();
+
+            if (name.Length == 0 || name.Length > MaxNameLength || name.Contains("<") || name.Contains(">"))
+            {
+                return;
+            }
+
+            companionZdo.Set(NameKey, name);
+        }
 
         private static void InitializeCompanion(Character character)
         {
@@ -616,13 +672,13 @@ namespace HexDvergrAllies.Core.Companions
             {
                 DvergrCompanionSentryMode.Activate(character);
             }
-
-            zdo.Set(ModeKey, (int)mode);
-
-            if (mode == CompanionMode.Companion)
+            else
             {
+                zdo.Set(RecallPositionKey, player.transform.position + player.transform.right * 2f);
                 zdo.Set(PendingModeTeleportKey, true);
             }
+
+            zdo.Set(ModeKey, (int)mode);
 
             Plugin.Log.LogInfo($"[Dvergr Companion] Mode changed: Dvergr={character.name}, Player={player.GetPlayerName()}, Mode={mode}");
         }

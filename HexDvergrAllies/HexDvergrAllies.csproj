@@ -170,6 +170,7 @@
     <Compile Include="Patches\Combat\MineRock5RPCDamagePatch.cs" />
     <Compile Include="Patches\Companions\MonsterAICompanionFollowPatch.cs" />
     <Compile Include="Patches\UI\GameCameraCompanionCursorPatch.cs" />
+    <Compile Include="Patches\UI\PlayerCompanionInputPatch.cs" />
     <Compile Include="Patches\UI\PlayerCompanionShortcutPatch.cs" />
     <Compile Include="Patches\Companions\PlayerInteractPatch.cs" />
     <Compile Include="Patches\Homestead\PlayerRemovePiecePatch.cs" />
