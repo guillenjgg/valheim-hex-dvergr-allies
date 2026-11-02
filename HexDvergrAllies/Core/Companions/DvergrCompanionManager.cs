@@ -791,7 +791,20 @@ namespace HexDvergrAllies.Core.Companions
                 return;
             }
 
-            CleanupUnloadedUnhire(zdo, ownerPlayerId);
+            zdo.Set(ModeKey, (int)CompanionMode.Companion);
+            zdo.Set(HiredKey, false);
+            zdo.Set(OwnerKey, 0L);
+            zdo.Set(PendingModeTeleportKey, false);
+            zdo.Set(PendingUnhireKey, false);
+            zdo.SetPosition(zdo.GetVec3(HomeKey, zdo.GetPosition()));
+
+            if (_hiredCompanions.TryGetValue(ownerPlayerId, out var cachedCompanion) && cachedCompanion == zdo.m_uid)
+            {
+                _hiredCompanions.Remove(ownerPlayerId);
+            }
+
+            _lastFollowLogTimes.Remove(zdo.m_uid);
+            _followOwnerMissingSince.Remove(zdo.m_uid);
         }
 
         private static void InitializeCompanion(Character character)
