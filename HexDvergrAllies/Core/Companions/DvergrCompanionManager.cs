@@ -5,24 +5,12 @@ using HexDvergrAllies.Core.UI;
 using System.Collections.Generic;
 using UnityEngine;
 using CompanionMode = HexDvergrAllies.Core.Companions.DvergrCompanionMode;
+using HexDvergrAllies.Core.Networking;
 
 namespace HexDvergrAllies.Core.Companions
 {
     internal static class DvergrCompanionManager
     {
-        private const string HireRpc = "HexDvergrHire";
-        private const string UnhireRpc = "HexDvergrUnhire";
-        private const string RemoteUnhireRpc = "HexDvergrRemoteUnhire";
-        private const string RemoteUnhireUnloadedRpc = "HexDvergrRemoteUnhireUnloaded";
-        private const string ProcessRemoteUnhireRpc = "HexDvergrProcessRemoteUnhire";
-        private const string RemoteUnhireCompletedRpc = "HexDvergrRemoteUnhireCompleted";
-        private const string SetModeRpc = "HexDvergrSetMode";
-        private const string HireResultRpc = "HexDvergrHireResult";
-        private const string RemoteSetModeRpc = "HexDvergrRemoteSetMode";
-        private const string RemoteRecallRpc = "HexDvergrRemoteRecall";
-        private const string RemoteRenameRpc = "HexDvergrRemoteRename";
-        private const string RenameRpc = "HexDvergrRename";
-
         private const string HiredKey = DvergrCompanionState.HiredKey;
         private const string OwnerKey = DvergrCompanionState.OwnerKey;
         private const string HomeKey = DvergrCompanionState.HomeKey;
@@ -61,15 +49,7 @@ namespace HexDvergrAllies.Core.Companions
                 return;
             }
 
-            nview.Register<ZDOID, long>(HireRpc, (sender, playerId, requestId) => Hire(character, sender, playerId, requestId));
-            nview.Register<ZDOID>(UnhireRpc, (sender, playerId) => Unhire(character, sender, playerId));
-            nview.Register<ZDOID, string>(RenameRpc, (sender, playerId, name) => Rename(character, sender, playerId, name));
-            nview.Register<ZDOID>(SetModeRpc, (sender, playerId) => SetMode(character, sender, playerId));
-
-            nview.Register<ZDOID, long, bool>(HireResultRpc, (sender, playerId, requestId, success) =>
-            {
-                DvergrCompanionHireManager.OnHireResult(character, sender, playerId, requestId, success);
-            });
+            DvergrRpcManager.Register(nview, character);
 
             var zdo = nview.GetZDO();
 
@@ -107,18 +87,6 @@ namespace HexDvergrAllies.Core.Companions
             Plugin.Log.LogInfo($"[Dvergr Companion] Initialized: Dvergr={character.name}, ZDO={zdo.m_uid}, IsOwner={nview.IsOwner()}, IsHired={IsHired(character)}");
         }
 
-        internal static bool IsHired(Character character)
-        {
-            if (!character)
-            {
-                return false;
-            }
-
-            var nview = character.GetComponent<ZNetView>();
-
-            return nview && nview.IsValid() && DvergrCompanionState.IsHired(nview.GetZDO());
-        }
-
         internal static CompanionMode GetMode(Character character)
         {
             var nview = character.GetComponent<ZNetView>();
@@ -145,7 +113,7 @@ namespace HexDvergrAllies.Core.Companions
                 return;
             }
 
-            nview.InvokeRPC(SetModeRpc, player.GetZDOID());
+            nview.InvokeRPC(DvergrRpcManager.SetModeRpc, player.GetZDOID());
         }
 
         internal static bool IsHiredByPlayer(Character character, Player player)
@@ -214,7 +182,7 @@ namespace HexDvergrAllies.Core.Companions
 
             Plugin.Log.LogInfo($"[Dvergr Companion] Sending hire RPC: DvergrZDO={nview.GetZDO().m_uid}, PlayerZDO={player.GetZDOID()}");
 
-            nview.InvokeRPC(HireRpc, player.GetZDOID(), requestId);
+            nview.InvokeRPC(DvergrRpcManager.HireRpc, player.GetZDOID(), requestId);
         }
 
         internal static void RequestUnhire(Player player, Character character)
@@ -234,7 +202,7 @@ namespace HexDvergrAllies.Core.Companions
 
             Plugin.Log.LogInfo($"[Dvergr Companion] Sending unhire RPC: DvergrZDO={nview.GetZDO().m_uid}, PlayerZDO={player.GetZDOID()}");
 
-            nview.InvokeRPC(UnhireRpc, player.GetZDOID());
+            nview.InvokeRPC(DvergrRpcManager.UnhireRpc, player.GetZDOID());
         }
 
         internal static void ResetSessionState()
@@ -285,7 +253,7 @@ namespace HexDvergrAllies.Core.Companions
                 return;
             }
 
-            nview.InvokeRPC(RenameRpc, player.GetZDOID(), name);
+            nview.InvokeRPC(DvergrRpcManager.RenameRpc, player.GetZDOID(), name);
         }
 
         internal static void UpdateFollow(MonsterAI monsterAI)
@@ -532,6 +500,197 @@ namespace HexDvergrAllies.Core.Companions
             }
 
             ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), RemoteUnhireRpc, player.GetZDOID(), companionId);
+        }
+
+        internal static Player ResolvePlayer(ZDOID playerId)
+        {
+            if (ZNetScene.instance == null)
+            {
+                return null;
+            }
+
+            GameObject playerObject = ZNetScene.instance.FindInstance(playerId);
+
+            return playerObject
+                ? playerObject.GetComponent<Player>()
+                : null;
+        }
+
+        internal static bool TryGetHiredCompanion(long playerId, out ZDOID companionId)
+        {
+            if (!_hiredCompanions.TryGetValue(playerId, out companionId))
+            {
+                return false;
+            }
+
+            if (ZDOMan.instance == null)
+            {
+                return true;
+            }
+
+            ZDO companionZdo = ZDOMan.instance.GetZDO(companionId);
+
+            if (companionZdo == null)
+            {
+                // Do not clear the cache merely because the
+                // companion's zone is currently unloaded.
+                return true;
+            }
+
+            bool isHired = companionZdo.GetBool(HiredKey, false);
+            long ownerPlayerId = companionZdo.GetLong(OwnerKey, 0L);
+
+            if (isHired && ownerPlayerId == playerId)
+            {
+                return true;
+            }
+
+            _hiredCompanions.Remove(playerId);
+
+            Plugin.Log.LogInfo($"[Dvergr Companion] Stale hire cache removed: PlayerID={playerId}, DvergrZDO={companionId}");
+
+            return false;
+        }
+
+        internal static void InitializeCompanion(Character character)
+        {
+            var companion = character.GetComponent<DvergrCompanionComponent>();
+
+            if (!companion)
+            {
+                companion = character.gameObject.AddComponent<DvergrCompanionComponent>();
+            }
+
+            companion.Initialize(character);
+        }
+
+        internal static void CacheHiredCompanion(long ownerPlayerId, ZDOID companionId)
+        {
+            _hiredCompanions[ownerPlayerId] = companionId;
+        }
+
+        internal static void Rename(Character character, long sender, ZDOID playerId, string name)
+        {
+            var nview = character.GetComponent<ZNetView>();
+
+            if (!nview || !nview.IsValid() || !nview.IsOwner())
+            {
+                return;
+            }
+
+            var player = ResolvePlayer(playerId);
+
+            if (!player || !IsHiredByPlayer(character, player) || !DvergrInteractionHelper.IsWithinRange(player, character))
+            {
+                return;
+            }
+
+            name = name.Trim();
+
+            if (name.Length == 0 || name.Length > MaxNameLength || name.Contains("<") || name.Contains(">"))
+            {
+                return;
+            }
+
+            nview.GetZDO().Set(NameKey, name);
+
+            Plugin.Log.LogInfo($"[Dvergr Companion] Renamed: Dvergr={character.name}, Name={name}, Player={player.GetPlayerName()}");
+        }
+
+        internal static void SetMode(Character character, long sender, ZDOID playerId)
+        {
+            var nview = character.GetComponent<ZNetView>();
+
+            if (!nview || !nview.IsValid() || !nview.IsOwner())
+            {
+                return;
+            }
+
+            var player = ResolvePlayer(playerId);
+
+            if (!player || !IsHiredByPlayer(character, player))
+            {
+                return;
+            }
+
+            var playerZdo = player.GetComponent<ZNetView>().GetZDO();
+
+            if (playerZdo.GetOwner() != sender)
+            {
+                return;
+            }
+
+            var mode = GetMode(character) == CompanionMode.Companion ? CompanionMode.Sentry : CompanionMode.Companion;
+            var zdo = nview.GetZDO();
+
+            if (mode == CompanionMode.Sentry)
+            {
+                DvergrCompanionSentryMode.Activate(character);
+            }
+            else
+            {
+                zdo.Set(RecallPositionKey, player.transform.position + player.transform.right * 2f);
+                zdo.Set(PendingModeTeleportKey, true);
+            }
+
+            zdo.Set(ModeKey, (int)mode);
+
+            Plugin.Log.LogInfo($"[Dvergr Companion] Mode changed: Dvergr={character.name}, Player={player.GetPlayerName()}, Mode={mode}");
+        }
+
+        internal static void Unhire(Character character, long sender, ZDOID playerId)
+        {
+            var nview = character.GetComponent<ZNetView>();
+
+            if (!nview || !nview.IsValid() || !nview.IsOwner())
+            {
+                return;
+            }
+
+            var zdo = nview.GetZDO();
+
+            if (!zdo.GetBool(HiredKey, false))
+            {
+                if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
+                {
+                    Plugin.Log.LogInfo($"[Dvergr Companion] Unhire request ignored: Dvergr={character.name}, Reason=Not hired");
+                }
+
+                return;
+            }
+
+            var playerZdo = ZDOMan.instance.GetZDO(playerId);
+
+            if (playerZdo == null || playerZdo.GetOwner() != sender)
+            {
+                return;
+            }
+
+            var player = ResolvePlayer(playerId);
+
+            if (!player)
+            {
+                if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
+                {
+                    Plugin.Log.LogInfo($"[Dvergr Companion] Unhire request ignored: Dvergr={character.name}, PlayerZDO={playerId}, Reason=Player missing or out of range");
+                }
+
+                return;
+            }
+
+            var ownerPlayerId = zdo.GetLong(OwnerKey, 0L);
+
+            if (ownerPlayerId != player.GetPlayerID())
+            {
+                if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
+                {
+                    Plugin.Log.LogInfo($"[Dvergr Companion] Unhire request ignored: Dvergr={character.name}, Player={player.GetPlayerName()}, PlayerID={player.GetPlayerID()}, OwnerPlayerID={ownerPlayerId}, Reason=Not owner");
+                }
+
+                return;
+            }
+
+            CleanupUnhire(character, zdo, ownerPlayerId);
         }
         #endregion
 
@@ -804,247 +963,6 @@ namespace HexDvergrAllies.Core.Companions
             _followOwnerMissingSince.Remove(zdo.m_uid);
         }
 
-        private static void InitializeCompanion(Character character)
-        {
-            var companion = character.GetComponent<DvergrCompanionComponent>();
-
-            if (!companion)
-            {
-                companion = character.gameObject.AddComponent<DvergrCompanionComponent>();
-            }
-
-            companion.Initialize(character);
-        }
-
-        private static void Rename(Character character, long sender, ZDOID playerId, string name)
-        {
-            var nview = character.GetComponent<ZNetView>();
-
-            if (!nview || !nview.IsValid() || !nview.IsOwner())
-            {
-                return;
-            }
-
-            var player = ResolvePlayer(playerId);
-
-            if (!player || !IsHiredByPlayer(character, player) || !DvergrInteractionHelper.IsWithinRange(player, character))
-            {
-                return;
-            }
-
-            name = name.Trim();
-
-            if (name.Length == 0 || name.Length > MaxNameLength || name.Contains("<") || name.Contains(">"))
-            {
-                return;
-            }
-
-            nview.GetZDO().Set(NameKey, name);
-
-            Plugin.Log.LogInfo($"[Dvergr Companion] Renamed: Dvergr={character.name}, Name={name}, Player={player.GetPlayerName()}");
-        }
-
-        private static void SetMode(Character character, long sender, ZDOID playerId)
-        {
-            var nview = character.GetComponent<ZNetView>();
-
-            if (!nview || !nview.IsValid() || !nview.IsOwner())
-            {
-                return;
-            }
-
-            var player = ResolvePlayer(playerId);
-
-            if (!player || !IsHiredByPlayer(character, player))
-            {
-                return;
-            }
-
-            var playerZdo = player.GetComponent<ZNetView>().GetZDO();
-
-            if (playerZdo.GetOwner() != sender)
-            {
-                return;
-            }
-
-            var mode = GetMode(character) == CompanionMode.Companion ? CompanionMode.Sentry : CompanionMode.Companion;
-            var zdo = nview.GetZDO();
-
-            if (mode == CompanionMode.Sentry)
-            {
-                DvergrCompanionSentryMode.Activate(character);
-            }
-            else
-            {
-                zdo.Set(RecallPositionKey, player.transform.position + player.transform.right * 2f);
-                zdo.Set(PendingModeTeleportKey, true);
-            }
-
-            zdo.Set(ModeKey, (int)mode);
-
-            Plugin.Log.LogInfo($"[Dvergr Companion] Mode changed: Dvergr={character.name}, Player={player.GetPlayerName()}, Mode={mode}");
-        }
-
-        private static bool TryGetHiredCompanion(long playerId, out ZDOID companionId)
-        {
-            if (!_hiredCompanions.TryGetValue(playerId, out companionId))
-            {
-                return false;
-            }
-
-            if (ZDOMan.instance == null)
-            {
-                return true;
-            }
-
-            ZDO companionZdo = ZDOMan.instance.GetZDO(companionId);
-
-            if (companionZdo == null)
-            {
-                // Do not clear the cache merely because the
-                // companion's zone is currently unloaded.
-                return true;
-            }
-
-            bool isHired = companionZdo.GetBool(HiredKey, false);
-            long ownerPlayerId = companionZdo.GetLong(OwnerKey, 0L);
-
-            if (isHired && ownerPlayerId == playerId)
-            {
-                return true;
-            }
-
-            _hiredCompanions.Remove(playerId);
-
-            Plugin.Log.LogInfo($"[Dvergr Companion] Stale hire cache removed: PlayerID={playerId}, DvergrZDO={companionId}");
-
-            return false;
-        }
-
-        private static void Hire(Character character, long sender, ZDOID playerId, long requestId)
-        {
-            var nview = character.GetComponent<ZNetView>();
-
-            if (!nview || !nview.IsValid() || !nview.IsOwner())
-            {
-                return;
-            }
-
-            var success = TryHire(character, playerId);
-            nview.InvokeRPC(sender, HireResultRpc, playerId, requestId, success);
-        }
-
-        private static bool TryHire(Character character, ZDOID playerId)
-        {
-            var player = ResolvePlayer(playerId);
-
-            if (!player || !DvergrInteractionHelper.IsWithinRange(player, character))
-            {
-                return false;
-            }
-
-            var nview = character.GetComponent<ZNetView>();
-            var zdo = nview.GetZDO();
-
-            if (zdo.GetBool(HiredKey, false))
-            {
-                return false;
-            }
-
-            var ownerPlayerId = player.GetPlayerID();
-
-            if (TryGetHiredCompanion(ownerPlayerId, out var existingCompanion))
-            {
-                return false;
-            }
-
-            var monsterAI = character.GetComponent<MonsterAI>();
-
-            if (!monsterAI)
-            {
-                return false;
-            }
-
-            DvergrCompanionBehaviorManager.CaptureState(character, monsterAI);
-            zdo.Set(ModeKey, (int)CompanionMode.Companion);
-
-            if (!zdo.GetBool(HomeSavedKey, false))
-            {
-                zdo.Set(HomeKey, character.transform.position);
-                zdo.Set(HomeSavedKey, true);
-            }
-
-            zdo.Set(OwnerKey, ownerPlayerId);
-            zdo.Set(HiredKey, true);
-            InitializeCompanion(character);
-            _hiredCompanions[ownerPlayerId] = zdo.m_uid;
-
-            monsterAI.ResetPatrolPoint();
-            monsterAI.SetFollowTarget(player.gameObject);
-
-            if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
-            {
-                Plugin.Log.LogInfo($"[Dvergr Companion] Hired successfully: Dvergr={character.name}, Player={player.GetPlayerName()}, PlayerID={ownerPlayerId}");
-            }
-
-            return true;
-        }
-
-        private static void Unhire(Character character, long sender, ZDOID playerId)
-        {
-            var nview = character.GetComponent<ZNetView>();
-
-            if (!nview || !nview.IsValid() || !nview.IsOwner())
-            {
-                return;
-            }
-
-            var zdo = nview.GetZDO();
-
-            if (!zdo.GetBool(HiredKey, false))
-            {
-                if(HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
-                {
-                    Plugin.Log.LogInfo($"[Dvergr Companion] Unhire request ignored: Dvergr={character.name}, Reason=Not hired");
-                }
-
-                return;
-            }
-
-            var playerZdo = ZDOMan.instance.GetZDO(playerId);
-
-            if (playerZdo == null || playerZdo.GetOwner() != sender)
-            {
-                return;
-            }
-
-            var player = ResolvePlayer(playerId);
-
-            if (!player)
-            {
-                if(HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
-                {
-                    Plugin.Log.LogInfo($"[Dvergr Companion] Unhire request ignored: Dvergr={character.name}, PlayerZDO={playerId}, Reason=Player missing or out of range");
-                }
-
-                return;
-            }
-
-            var ownerPlayerId = zdo.GetLong(OwnerKey, 0L);
-
-            if (ownerPlayerId != player.GetPlayerID())
-            {
-                if(HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
-                {
-                    Plugin.Log.LogInfo($"[Dvergr Companion] Unhire request ignored: Dvergr={character.name}, Player={player.GetPlayerName()}, PlayerID={player.GetPlayerID()}, OwnerPlayerID={ownerPlayerId}, Reason=Not owner");
-                }
-                
-                return;
-            }
-
-            CleanupUnhire(character, zdo, ownerPlayerId);
-        }
-
         private static void CleanupUnhire(Character character, ZDO zdo, long ownerPlayerId)
         {
             var monsterAI = character.GetComponent<MonsterAI>();
@@ -1190,20 +1108,6 @@ namespace HexDvergrAllies.Core.Companions
             zdo.SetPosition(homePosition);
 
             Plugin.Log.LogInfo($"[Dvergr Companion] Returned home: Dvergr={character.name}, ZDO={zdo.m_uid}, From={previousPosition}, To={homePosition}, Distance={distance:F2}");
-        }
-
-        private static Player ResolvePlayer(ZDOID playerId)
-        {
-            if (ZNetScene.instance == null)
-            {
-                return null;
-            }
-
-            GameObject playerObject = ZNetScene.instance.FindInstance(playerId);
-
-            return playerObject
-                ? playerObject.GetComponent<Player>()
-                : null;
         }
 
         private static bool ShouldLogFollow(ZDOID zdoId)

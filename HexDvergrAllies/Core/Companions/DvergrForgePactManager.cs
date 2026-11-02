@@ -1,10 +1,12 @@
-﻿using System;
-using HexDvergrAllies.Core.Trading;
+﻿using HexDvergrAllies.Core.Trading;
+using HexDvergrAllies.Core.UI;
+using HexDvergrAllies.Core.Networking;
+using System;
 using UnityEngine;
 
 namespace HexDvergrAllies.Core.Companions
 {
-    internal static class DvergrCompanionHireManager
+    internal static class DvergrForgePactManager
     {
         private static bool _hirePending;
         private static long _pendingRequestId;
@@ -58,7 +60,6 @@ namespace HexDvergrAllies.Core.Companions
             }
 
             DvergrCompanionManager.RequestHire(player, character, _pendingRequestId);
-            
             StoreGui.instance.Hide();
         }
 
@@ -110,6 +111,88 @@ namespace HexDvergrAllies.Core.Companions
             _pendingRequestId = 0L;
             _pendingPlayer = null;
             _pendingInventory = null;
+        }
+
+        internal static void Hire(Character character, long sender, ZDOID playerId, long requestId)
+        {
+            var nview = character.GetComponent<ZNetView>();
+
+            if (!nview || !nview.IsValid() || !nview.IsOwner())
+            {
+                return;
+            }
+
+            var success = TryHire(character, playerId);
+            nview.InvokeRPC(sender, DvergrRpcManager.HireResultRpc, playerId, requestId, success);
+        }
+
+        internal static bool IsHired(Character character)
+        {
+            if (!character)
+            {
+                return false;
+            }
+
+            var nview = character.GetComponent<ZNetView>();
+
+            return nview && nview.IsValid() && DvergrCompanionState.IsHired(nview.GetZDO());
+        }
+
+        private static bool TryHire(Character character, ZDOID playerId)
+        {
+            var player = DvergrCompanionManager.ResolvePlayer(playerId);
+
+            if (!player || !DvergrInteractionHelper.IsWithinRange(player, character))
+            {
+                return false;
+            }
+
+            var nview = character.GetComponent<ZNetView>();
+            var zdo = nview.GetZDO();
+
+            if (DvergrCompanionState.IsHired(zdo))
+            {
+                return false;
+            }
+
+            var ownerPlayerId = player.GetPlayerID();
+
+            if (DvergrCompanionManager.TryGetHiredCompanion(ownerPlayerId, out var existingCompanion))
+            {
+                return false;
+            }
+
+            var monsterAI = character.GetComponent<MonsterAI>();
+
+            if (!monsterAI)
+            {
+                return false;
+            }
+
+            DvergrCompanionBehaviorManager.CaptureState(character, monsterAI);
+            zdo.Set(DvergrCompanionState.ModeKey, (int)DvergrCompanionMode.Companion);
+
+            if (!DvergrCompanionState.HasHome(zdo))
+            {
+                zdo.Set(DvergrCompanionState.HomeKey, character.transform.position);
+                zdo.Set(DvergrCompanionState.HasHomeKeyBeenSaved, true);
+            }
+
+            zdo.Set(DvergrCompanionState.OwnerKey, ownerPlayerId);
+            zdo.Set(DvergrCompanionState.HiredKey, true);
+
+            DvergrCompanionManager.InitializeCompanion(character);
+            DvergrCompanionManager.CacheHiredCompanion(ownerPlayerId, zdo.m_uid);
+
+            monsterAI.ResetPatrolPoint();
+            monsterAI.SetFollowTarget(player.gameObject);
+
+            if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
+            {
+                Plugin.Log.LogInfo($"[Dvergr Companion] Hired successfully: Dvergr={character.name}, Player={player.GetPlayerName()}, PlayerID={ownerPlayerId}");
+            }
+
+            return true;
         }
     }
 }

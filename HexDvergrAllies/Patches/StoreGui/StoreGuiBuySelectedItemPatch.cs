@@ -22,7 +22,7 @@ namespace HexDvergrAllies.Patches
 
             if (DvergrTraderManager.IsForgePact(___m_selectedItem))
             {
-                DvergrCompanionHireManager.RequestForgePact(Player.m_localPlayer, ___m_trader.GetComponent<Character>());
+                DvergrForgePactManager.RequestForgePact(Player.m_localPlayer, ___m_trader.GetComponent<Character>());
                 return false;
             }
 

@@ -96,7 +96,8 @@
     <Compile Include="Assets\AssetHelper.cs" />
     <Compile Include="Core\Companions\DvergrCompanionAttributes.cs" />
     <Compile Include="Core\Companions\DvergrCompanionBehaviorManager.cs" />
-    <Compile Include="Core\Companions\DvergrCompanionHireManager.cs" />
+    <Compile Include="Core\Networking\DvergrRpcManager.cs" />
+    <Compile Include="Core\Companions\DvergrForgePactManager.cs" />
     <Compile Include="Core\Companions\DvergrCompanionManager.cs" />
     <Compile Include="Core\Companions\DvergrCompanionMode.cs" />
     <Compile Include="Core\Companions\DvergrCompanionModeManager.cs" />
