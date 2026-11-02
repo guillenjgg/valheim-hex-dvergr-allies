@@ -18,6 +18,7 @@ namespace HexDvergrAllies.Core.UI
         private static Button _recallButton;
         private static TMP_InputField _nameInput;
         private static Button _renameButton;
+        private static bool _nameEdited;
 
         internal static bool IsVisible => _window && _window.activeSelf;
 
@@ -239,6 +240,7 @@ namespace HexDvergrAllies.Core.UI
             _nameInput.targetGraphic = nameInputImage;
             _nameInput.characterLimit = 24;
             _nameInput.lineType = TMP_InputField.LineType.SingleLine;
+            _nameInput.onValueChanged.AddListener(_ => _nameEdited = true);
 
             var renameButtonObject = Object.Instantiate(modeButtonObject, panel.transform, false);
             renameButtonObject.name = "RenameButton";
@@ -325,18 +327,25 @@ namespace HexDvergrAllies.Core.UI
                 _renameButton.interactable = false;
                 _nameInput.interactable = false;
                 _nameInput.SetTextWithoutNotify("");
+                _nameEdited = false;
                 return;
             }
 
             var name = companionZdo.GetString(NameKey, "");
+            var displayName = string.IsNullOrEmpty(name) ? "Dvergr" : name;
             var mode = (DvergrCompanionManager.CompanionMode)companionZdo.GetInt(ModeKey, 0);
 
             _descriptionText.text = $"Mode: {mode}";
             _modeButtonText.text = mode == DvergrCompanionManager.CompanionMode.Sentry ? "Switch to Companion" : "Switch to Sentry";
 
-            if (!_nameInput.isFocused)
+            if (_nameEdited && _nameInput.text == displayName)
             {
-                _nameInput.SetTextWithoutNotify(string.IsNullOrEmpty(name) ? "Dvergr" : name);
+                _nameEdited = false;
+            }
+
+            if (!_nameEdited && !_nameInput.isFocused)
+            {
+                _nameInput.SetTextWithoutNotify(displayName);
             }
 
             _modeButton.interactable = true;
