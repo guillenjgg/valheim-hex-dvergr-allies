@@ -22,6 +22,7 @@ namespace HexDvergrAllies
         internal static ConfigEntry<bool> CompanionEnableAutoHealing;
         internal static ConfigEntry<float> CompanionAutoHealThreshold;
         internal static ConfigEntry<float> CompanionAutoHealCooldown;
+        internal static ConfigEntry<KeyboardShortcut> CompanionUIShortcut;
 
         internal static void Init(ConfigFile config)
         {
@@ -54,6 +55,8 @@ namespace HexDvergrAllies
             CompanionAutoHealCooldown = config.Bind("Dvergr Companion", "AutoHealCooldown", 60f, new ConfigDescription("Minimum number of seconds between automatic heals for each companion.", new AcceptableValueRange<float>(0f, 3600f), new ConfigurationManagerAttributes { Order = 680 }));
 
             EnableDebugLogs = config.Bind("Debug", "EnableDebugLogs", false, new ConfigDescription("Logs Dvergr damage events, status effects, and AI states.", null, new ConfigurationManagerAttributes { Order = 100, IsAdvanced = true }));
+
+            CompanionUIShortcut = config.Bind("Dvergr Companion", "UIShortcut", new KeyboardShortcut(KeyCode.F9), new ConfigDescription("Keyboard shortcut to open or close the Dvergr Companion Management UI.", null, new ConfigurationManagerAttributes { Order = 1010 }));
         }
     }
 

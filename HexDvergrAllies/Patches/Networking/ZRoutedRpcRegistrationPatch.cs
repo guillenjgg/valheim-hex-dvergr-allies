@@ -15,6 +15,7 @@ namespace HexDvergrAllies.Patches
             DvergrTradeRpcManager.Register();
             DvergrTradeSessionManager.Register();
             DvergrCompanionPortalRelocationManager.Register();
+            DvergrCompanionManager.RegisterRemoteModeRpc();
         }
     }
 }
