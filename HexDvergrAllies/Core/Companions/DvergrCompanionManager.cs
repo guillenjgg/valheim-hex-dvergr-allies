@@ -32,6 +32,7 @@ namespace HexDvergrAllies.Core.Companions
         private const string NameKey = "HexDvergr_Name";
         private const string ModeKey = "HexDvergr_Mode";
         private const string PendingModeTeleportKey = "HexDvergr_PendingModeTeleport";
+        private const string PendingUnhireKey = "HexDvergr_PendingUnhire";
         private const int MaxNameLength = 24;
         private const float FollowLogInterval = 5f;
         private const float FollowOwnerGracePeriod = 10f;
@@ -71,6 +72,11 @@ namespace HexDvergrAllies.Core.Companions
             });
 
             var zdo = nview.GetZDO();
+
+            if (zdo.GetBool(PendingUnhireKey, false) && nview.IsOwner())
+            {
+                ProcessPendingUnhire(character);
+            }
 
             if (zdo.GetBool(HiredKey, false))
             {
@@ -294,6 +300,12 @@ namespace HexDvergrAllies.Core.Companions
             }
 
             ZDO zdo = nview.GetZDO();
+
+            if (zdo.GetBool(PendingUnhireKey, false))
+            {
+                ProcessPendingUnhire(character);
+                return;
+            }
 
             if (!zdo.GetBool(HiredKey, false))
             {
@@ -607,7 +619,17 @@ namespace HexDvergrAllies.Core.Companions
                 return;
             }
 
-            // Remote unhire cleanup will be added here.
+            if (!companionZdo.GetBool(HomeSavedKey, false))
+            {
+                if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
+                {
+                    Plugin.Log.LogWarning($"[Dvergr Companion] Remote unhire rejected: ZDO={companionId}, Reason=Original home missing");
+                }
+
+                return;
+            }
+
+            companionZdo.Set(PendingUnhireKey, true);
         }
 
         private static void RPC_RemoteRename(long sender, ZDOID playerId, ZDOID companionId, string name)
@@ -931,6 +953,72 @@ namespace HexDvergrAllies.Core.Companions
             if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
             {
                 Plugin.Log.LogInfo($"[Dvergr Companion] Unhire cleanup completed: Dvergr={character.name}, OwnerPlayerID={ownerPlayerId}, Home={homePosition}");
+            }
+        }
+
+        private static void CleanupUnloadedUnhire(ZDO zdo, long ownerPlayerId)
+        {
+            if (!zdo.GetBool(HomeSavedKey, false))
+            {
+                if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
+                {
+                    Plugin.Log.LogWarning($"[Dvergr Companion] Remote unhire rejected: ZDO={zdo.m_uid}, Reason=Original home missing");
+                }
+
+                return;
+            }
+
+            var homePosition = zdo.GetVec3(HomeKey, zdo.GetPosition());
+
+            zdo.Set(ModeKey, (int)CompanionMode.Companion);
+            zdo.Set(HiredKey, false);
+            zdo.Set(OwnerKey, 0L);
+            zdo.Set(PendingModeTeleportKey, false);
+            zdo.SetPosition(homePosition);
+
+            if (_hiredCompanions.TryGetValue(ownerPlayerId, out var cachedCompanion) && cachedCompanion == zdo.m_uid)
+            {
+                _hiredCompanions.Remove(ownerPlayerId);
+            }
+
+            _lastFollowLogTimes.Remove(zdo.m_uid);
+            _followOwnerMissingSince.Remove(zdo.m_uid);
+
+            if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
+            {
+                Plugin.Log.LogInfo($"[Dvergr Companion] Remote unhire completed: ZDO={zdo.m_uid}, PlayerID={ownerPlayerId}, Home={homePosition}");
+            }
+        }
+
+        private static void ProcessPendingUnhire(Character character)
+        {
+            var nview = character.GetComponent<ZNetView>();
+
+            if (!nview || !nview.IsValid() || !nview.IsOwner())
+            {
+                return;
+            }
+
+            var zdo = nview.GetZDO();
+
+            if (!zdo.GetBool(PendingUnhireKey, false))
+            {
+                return;
+            }
+
+            var ownerPlayerId = zdo.GetLong(OwnerKey, 0L);
+
+            if (!zdo.GetBool(HiredKey, false) || ownerPlayerId == 0L)
+            {
+                zdo.Set(PendingUnhireKey, false);
+                return;
+            }
+
+            CleanupUnhire(character, zdo, ownerPlayerId);
+
+            if (!zdo.GetBool(HiredKey, false))
+            {
+                zdo.Set(PendingUnhireKey, false);
             }
         }
 
