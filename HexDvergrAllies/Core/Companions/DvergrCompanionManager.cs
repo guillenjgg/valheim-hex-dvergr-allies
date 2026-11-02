@@ -1,28 +1,18 @@
 ﻿using HarmonyLib;
-using System;
 using HexDvergrAllies.Core.Monoscripts;
-using HexDvergrAllies.Core.UI;
+using HexDvergrAllies.Core.Networking;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
-using CompanionMode = HexDvergrAllies.Core.Companions.DvergrCompanionMode;
-using HexDvergrAllies.Core.Networking;
 
 namespace HexDvergrAllies.Core.Companions
 {
     internal static class DvergrCompanionManager
     {
-        private const float FollowLogInterval = 5f;
-        private const float FollowOwnerGracePeriod = 10f;
-
         internal static readonly Func<ZRoutedRpc, long> GetServerPeerID = AccessTools.MethodDelegate<Func<ZRoutedRpc, long>>(AccessTools.Method(typeof(ZRoutedRpc), "GetServerPeerID"));
 
         private static readonly Dictionary<long, ZDOID> _hiredCompanions = new Dictionary<long, ZDOID>();
 
-        private static readonly Dictionary<ZDOID, float> _lastFollowLogTimes = new Dictionary<ZDOID, float>();
-
-        private static readonly Dictionary<ZDOID, float> _followOwnerMissingSince = new Dictionary<ZDOID, float>();
-
-        #region Internal
         internal static void Initialize(Character character)
         {
             if (character.GetFaction() != Character.Faction.Dverger)
@@ -121,149 +111,11 @@ namespace HexDvergrAllies.Core.Companions
         {
             if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
             {
-                Plugin.Log.LogInfo($"[Dvergr Companion] Session state reset: CachedHires={_hiredCompanions.Count}, FollowLogs={_lastFollowLogTimes.Count}, MissingOwners={_followOwnerMissingSince.Count}");
+                Plugin.Log.LogInfo($"[Dvergr Companion] Session state reset: CachedHires={_hiredCompanions.Count}, FollowLogs={DvergrCompanionFollowManager.FollowLogCount}, MissingOwners={DvergrCompanionFollowManager.MissingOwnerCount}");
             }
 
             _hiredCompanions.Clear();
-            _lastFollowLogTimes.Clear();
-            _followOwnerMissingSince.Clear();
-        }
-
-        internal static void UpdateFollow(MonsterAI monsterAI)
-        {
-            Character character = monsterAI.GetComponent<Character>();
-
-            if (!character)
-            {
-                return;
-            }
-
-            ZNetView nview = monsterAI.GetComponent<ZNetView>();
-
-            if (!nview || !nview.IsValid() || !nview.IsOwner())
-            {
-                return;
-            }
-
-            ZDO zdo = nview.GetZDO();
-
-            if (zdo.GetBool(DvergrCompanionState.PendingUnhireKey, false))
-            {
-                DvergrCompanionUnhireManager.ProcessPendingUnhire(character);
-                return;
-            }
-
-            if (!zdo.GetBool(DvergrCompanionState.HiredKey, false))
-            {
-                _followOwnerMissingSince.Remove(zdo.m_uid);
-                return;
-            }
-
-            if (DvergrCompanionModeManager.GetMode(character) == CompanionMode.Companion && zdo.GetBool(DvergrCompanionState.PendingModeTeleportKey, false))
-            {
-                foreach (var player in Player.GetAllPlayers())
-                {
-                    if (!player || player.GetPlayerID() != zdo.GetLong(DvergrCompanionState.OwnerKey, 0L))
-                    {
-                        continue;
-                    }
-
-                    var destination = player.transform.position + player.transform.right * 2f;
-                    character.transform.position = destination;
-                    zdo.SetPosition(destination);
-                    zdo.Set(DvergrCompanionState.PendingModeTeleportKey, false);
-                    break;
-                }
-            }
-
-            if (DvergrCompanionModeManager.GetMode(character) == CompanionMode.Sentry)
-            {
-                if (monsterAI.GetFollowTarget())
-                {
-                    monsterAI.SetFollowTarget(null);
-                }
-
-                _followOwnerMissingSince.Remove(zdo.m_uid);
-                return;
-            }
-
-            long playerId = zdo.GetLong(DvergrCompanionState.OwnerKey, 0L);
-            GameObject followTarget = monsterAI.GetFollowTarget();
-
-            foreach (Player player in Player.GetAllPlayers())
-            {
-                if (!player || player.GetPlayerID() != playerId)
-                {
-                    continue;
-                }
-
-                float missingSince;
-
-                if (_followOwnerMissingSince.TryGetValue(zdo.m_uid, out missingSince))
-                {
-                    if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
-                    {
-                        Plugin.Log.LogInfo($"[Dvergr Companion] Follow owner resolved: Dvergr={character.name}, OwnerPlayerID={playerId}, Waited={Time.time - missingSince:F2}s");
-                    }
-
-                    _followOwnerMissingSince.Remove(zdo.m_uid);
-                }
-
-                if (followTarget != player.gameObject)
-                {
-                    monsterAI.ResetPatrolPoint();
-                    monsterAI.SetFollowTarget(player.gameObject);
-
-                    if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
-                    {
-                        Plugin.Log.LogInfo($"[Dvergr Companion] Follow target assigned: Dvergr={character.name}, Player={player.GetPlayerName()}");
-                    }
-                }
-
-                if (ShouldLogFollow(zdo.m_uid))
-                {
-                    float distance = Vector3.Distance(monsterAI.transform.position, player.transform.position);
-
-                    Plugin.Log.LogInfo($"[Dvergr Companion] Follow status: Dvergr={character.name}, Player={player.GetPlayerName()}, Distance={distance:F2}");
-                }
-
-                return;
-            }
-
-            float firstMissingTime;
-
-            if (!_followOwnerMissingSince.TryGetValue(zdo.m_uid, out firstMissingTime))
-            {
-                firstMissingTime = Time.time;
-                _followOwnerMissingSince[zdo.m_uid] = firstMissingTime;
-            }
-
-            float missingDuration = Time.time - firstMissingTime;
-
-            if (missingDuration < FollowOwnerGracePeriod)
-            {
-                return;
-            }
-
-            Player localPlayer = Player.m_localPlayer;
-            bool isLocalOwner = localPlayer && localPlayer.GetPlayerID() == playerId;
-
-            if (isLocalOwner)
-            {
-                if (ShouldLogFollow(zdo.m_uid))
-                {
-                    Plugin.Log.LogWarning($"[Dvergr Companion] Local follow owner not found: Dvergr={character.name}, ZDO={zdo.m_uid}, OwnerPlayerID={playerId}, LocalPlayerID={localPlayer.GetPlayerID()}, MissingFor={missingDuration:F2}s");
-                }
-            }
-            else if (ShouldLogFollow(zdo.m_uid))
-            {
-                Plugin.Log.LogInfo($"[Dvergr Companion] Remote follow owner unavailable: Dvergr={character.name}, ZDO={zdo.m_uid}, OwnerPlayerID={playerId}, LocalPlayerID={(localPlayer ? localPlayer.GetPlayerID() : 0L)}, MissingFor={missingDuration:F2}s");
-            }
-
-            if (followTarget)
-            {
-                monsterAI.SetFollowTarget(null);
-            }
+            DvergrCompanionFollowManager.ResetSessionState();
         }
 
         internal static void OnCompanionDeath(Character character)
@@ -387,27 +239,7 @@ namespace HexDvergrAllies.Core.Companions
                 }
             }
 
-            _lastFollowLogTimes.Remove(companionId);
-            _followOwnerMissingSince.Remove(companionId);
+            DvergrCompanionFollowManager.RemoveFollowState(companionId);
         }
-        #endregion
-
-        #region Private
-        private static bool ShouldLogFollow(ZDOID zdoId)
-        {
-            if (!HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
-            {
-                return false;
-            }
-
-            if (_lastFollowLogTimes.TryGetValue(zdoId, out var lastLogTime) && Time.time - lastLogTime < FollowLogInterval)
-            {
-                return false;
-            }
-
-            _lastFollowLogTimes[zdoId] = Time.time;
-            return true;
-        }
-        #endregion
     }
 }

@@ -20,7 +20,7 @@ namespace HexDvergrAllies.Patches
                 return;
             }
 
-            DvergrCompanionManager.UpdateFollow(__instance);
+            DvergrCompanionFollowManager.UpdateFollow(__instance);
             DvergrCompanionBehaviorManager.UpdateCombatLeash(__instance);
         }
 
