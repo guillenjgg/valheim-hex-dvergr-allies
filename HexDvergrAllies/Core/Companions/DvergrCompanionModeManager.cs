@@ -17,6 +17,8 @@ namespace HexDvergrAllies.Core.Companions
             return DvergrCompanionState.GetMode(nview.GetZDO());
         }
 
+
+        // Keep for later. I'm going to disable it for now, but may re-enable it in the future.
         internal static bool ShouldSuppressAutomaticTargeting(BaseAI baseAI)
         {
             if (!(baseAI is MonsterAI monsterAI))

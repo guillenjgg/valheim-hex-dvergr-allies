@@ -6,7 +6,6 @@ namespace HexDvergrAllies.Patches.Companions
     [HarmonyPatch(typeof(BaseAI), "Flee")]
     internal static class BaseAICompanionFleePatch
     {
-
         private static bool Prefix(BaseAI __instance)
         {
             if (!(__instance is MonsterAI monsterAI))

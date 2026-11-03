@@ -18,6 +18,9 @@ namespace HexDvergrAllies.Core.Companions
             internal float OriginalMinAttackInterval;
             internal float OriginalMaxHealth;
             internal float OriginalAnimationSpeed;
+            internal bool OriginalFleeIfHurtWhenTargetCantBeReached;
+            internal bool OriginalFleeIfNotAlerted;
+            internal float OriginalFleeIfLowHealth;
 
             internal float AppliedMovementMultiplier = 1f;
             internal float AppliedAttackSpeedMultiplier = 1f;
@@ -44,7 +47,10 @@ namespace HexDvergrAllies.Core.Companions
                 OriginalWalkSpeed = character.m_walkSpeed,
                 OriginalRunSpeed = character.m_runSpeed,
                 OriginalMinAttackInterval = monsterAI.m_minAttackInterval,
-                OriginalMaxHealth = character.GetMaxHealth()
+                OriginalMaxHealth = character.GetMaxHealth(),
+                OriginalFleeIfHurtWhenTargetCantBeReached = monsterAI.m_fleeIfHurtWhenTargetCantBeReached,
+                OriginalFleeIfNotAlerted = monsterAI.m_fleeIfNotAlerted,
+                OriginalFleeIfLowHealth = monsterAI.m_fleeIfLowHealth
             };
 
             CompanionStates.Add(character, state);
@@ -151,6 +157,10 @@ namespace HexDvergrAllies.Core.Companions
             ApplyMovementSpeed(character, state);
             ApplyAttackSpeed(monsterAI, state);
 
+            monsterAI.m_fleeIfHurtWhenTargetCantBeReached = false;
+            monsterAI.m_fleeIfNotAlerted = false;
+            monsterAI.m_fleeIfLowHealth = 0f;
+
             var netView = character.GetComponent<ZNetView>();
 
             if (netView != null && netView.IsValid() && netView.IsOwner())
@@ -251,6 +261,9 @@ namespace HexDvergrAllies.Core.Companions
                 if (monsterAI != null)
                 {
                     monsterAI.m_minAttackInterval = state.OriginalMinAttackInterval;
+                    monsterAI.m_fleeIfHurtWhenTargetCantBeReached = state.OriginalFleeIfHurtWhenTargetCantBeReached;
+                    monsterAI.m_fleeIfNotAlerted = state.OriginalFleeIfNotAlerted;
+                    monsterAI.m_fleeIfLowHealth = state.OriginalFleeIfLowHealth;
                 }
 
                 CompanionStates.Remove(character);
