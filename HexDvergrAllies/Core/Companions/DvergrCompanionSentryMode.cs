@@ -5,7 +5,7 @@ namespace HexDvergrAllies.Core.Companions
 {
     internal static class DvergrCompanionSentryMode
     {
-        private const string SentryPositionKey = "HexDvergr_SentryPosition";
+        internal const string SentryPositionKey = "HexDvergr_SentryPosition";
 
         internal const float CombatRadius = 20f;
         internal const float ReturnTolerance = 2f;
@@ -27,11 +27,11 @@ namespace HexDvergrAllies.Core.Companions
             return nview.GetZDO().GetVec3(SentryPositionKey, character.transform.position);
         }
 
-        internal static void Activate(Character character)
+        internal static void Activate(Character character, Vector3 position)
         {
             var nview = character.GetComponent<ZNetView>();
 
-            nview.GetZDO().Set(SentryPositionKey, character.transform.position);
+            nview.GetZDO().Set(SentryPositionKey, position);
         }
 
         internal static bool IsWithinCombatRadius(Character character, Character target)

@@ -86,7 +86,7 @@ namespace HexDvergrAllies.Core.Companions
 
             if (mode == DvergrCompanionMode.Sentry)
             {
-                DvergrCompanionSentryMode.Activate(character);
+                DvergrCompanionSentryMode.Activate(character, player.transform.position);
             }
             else
             {
@@ -134,7 +134,7 @@ namespace HexDvergrAllies.Core.Companions
 
             if (mode == DvergrCompanionMode.Sentry)
             {
-                companionZdo.Set("HexDvergr_SentryPosition", companionZdo.GetPosition());
+                companionZdo.Set(DvergrCompanionSentryMode.SentryPositionKey, playerZdo.GetPosition());
             }
             else
             {

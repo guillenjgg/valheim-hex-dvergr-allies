@@ -1,4 +1,7 @@
 ﻿using HarmonyLib;
+using System;
+using System.Collections.Generic;
+using System.Reflection.Emit;
 using HexDvergrAllies.Core.Companions;
 
 namespace HexDvergrAllies.Patches
@@ -28,6 +31,46 @@ namespace HexDvergrAllies.Patches
         {
             DvergrCompanionSpawnerTargeting.Update(__instance);
             DvergrCompanionSentryMode.Update(__instance);
+        }
+    }
+
+    [HarmonyPatch(typeof(BaseAI), "Follow")]
+    internal static class BaseAICompanionFollowDistancePatch
+    {
+        private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            var replacements = 0;
+
+            foreach (var instruction in instructions)
+            {
+                // Preserve vanilla following and pathfinding, replacing only its stopping distance.
+                if (instruction.opcode == OpCodes.Ldc_R4 && (float)instruction.operand == 3f)
+                {
+                    replacements++;
+                    instruction.opcode = OpCodes.Ldarg_0;
+                    instruction.operand = null;
+                    yield return instruction;
+                    yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(BaseAICompanionFollowDistancePatch), nameof(GetFollowDistance)));
+                }
+                else
+                {
+                    yield return instruction;
+                }
+            }
+
+            if (replacements != 1)
+            {
+                throw new InvalidOperationException("BaseAICompanionFollowDistancePatch: Expected one vanilla follow stopping distance.");
+            }
+        }
+
+        private static float GetFollowDistance(BaseAI baseAI)
+        {
+            var character = baseAI.GetComponent<Character>();
+
+            return character && DvergrCompanionState.IsHired(character)
+                ? HexDvergrAlliesConfiguration.CompanionFollowDistance.Value
+                : 3f;
         }
     }
 }
