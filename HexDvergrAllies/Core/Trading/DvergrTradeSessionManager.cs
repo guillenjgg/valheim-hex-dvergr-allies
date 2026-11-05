@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+using HexDvergrAllies.Core.HexLocalization;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -130,17 +131,17 @@ namespace HexDvergrAllies.Core.Trading
             }
 
             var approved = false;
-            var reason = "Unable to open Dvergr store.";
+            var reason = "$hex_dvergr_store_unavailable";
             var traderZdo = ZDOMan.instance.GetZDO(traderZdoId);
             var peer = ZNet.instance.GetPeer(sender);
 
             if (traderZdo == null)
             {
-                reason = "Trader ZDO not found.";
+                reason = "$hex_dvergr_store_unavailable";
             }
             else if (sender != ZNet.GetUID() && peer == null)
             {
-                reason = "Player peer not found.";
+                reason = "$hex_dvergr_store_unavailable";
             }
             else
             {
@@ -151,11 +152,11 @@ namespace HexDvergrAllies.Core.Trading
 
                 if (!humanoid || humanoid.GetFaction() != Character.Faction.Dverger)
                 {
-                    reason = "Invalid Dvergr trader.";
+                    reason = "$hex_dvergr_store_unavailable";
                 }
                 else if (playerZdo == null)
                 {
-                    reason = "Player character ZDO not found.";
+                    reason = "$hex_dvergr_store_unavailable";
                 }
                 else
                 {
@@ -164,7 +165,7 @@ namespace HexDvergrAllies.Core.Trading
 
                     if (distance > maximumDistance)
                     {
-                        reason = $"Too far away from Dvergr ({distance:F2}m).";
+                        reason = "$hex_dvergr_store_too_far";
                     }
                     else if (!_sessions.TryGetValue(traderZdoId, out var session))
                     {
@@ -185,7 +186,7 @@ namespace HexDvergrAllies.Core.Trading
                     }
                     else
                     {
-                        reason = "This Dvergr is currently trading with another player.";
+                        reason = "$hex_dvergr_store_busy";
                     }
                 }
             }
@@ -211,7 +212,7 @@ namespace HexDvergrAllies.Core.Trading
 
             if (!approved)
             {
-                Player.m_localPlayer.Message(MessageHud.MessageType.Center, reason);
+                Player.m_localPlayer.Message(MessageHud.MessageType.Center, HexLocalizationManager.Localize(reason));
                 return;
             }
 

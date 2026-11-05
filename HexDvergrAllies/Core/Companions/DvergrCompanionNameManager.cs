@@ -1,4 +1,5 @@
-﻿using HexDvergrAllies.Core.Networking;
+using HexDvergrAllies.Core.HexLocalization;
+using HexDvergrAllies.Core.Networking;
 using HexDvergrAllies.Core.UI;
 
 namespace HexDvergrAllies.Core.Companions
@@ -32,7 +33,7 @@ namespace HexDvergrAllies.Core.Companions
 
             if (name.Length == 0 || name.Length > MaxNameLength || name.Contains("<") || name.Contains(">"))
             {
-                player.Message(MessageHud.MessageType.Center, "Invalid companion name.");
+                player.Message(MessageHud.MessageType.Center, HexLocalizationManager.Localize("$hex_dvergr_invalid_name"));
                 return;
             }
 
@@ -85,7 +86,7 @@ namespace HexDvergrAllies.Core.Companions
 
             if (name.Length == 0 || name.Length > MaxNameLength || name.Contains("<") || name.Contains(">"))
             {
-                player.Message(MessageHud.MessageType.Center, "Invalid companion name.");
+                player.Message(MessageHud.MessageType.Center, HexLocalizationManager.Localize("$hex_dvergr_invalid_name"));
                 return;
             }
 

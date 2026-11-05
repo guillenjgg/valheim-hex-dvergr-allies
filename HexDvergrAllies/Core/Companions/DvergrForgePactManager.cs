@@ -1,4 +1,5 @@
-﻿using HexDvergrAllies.Core.Trading;
+using HexDvergrAllies.Core.HexLocalization;
+using HexDvergrAllies.Core.Trading;
 using HexDvergrAllies.Core.UI;
 using HexDvergrAllies.Core.Networking;
 using System;
@@ -85,7 +86,7 @@ namespace HexDvergrAllies.Core.Companions
             {
                 if (player)
                 {
-                    player.Message(MessageHud.MessageType.Center, "Forge Pact established.");
+                    player.Message(MessageHud.MessageType.Center, HexLocalizationManager.Localize("$hex_dvergr_pact_established"));
                 }
 
                 if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
@@ -98,7 +99,7 @@ namespace HexDvergrAllies.Core.Companions
                 if (player)
                 {
                     inventory.AddItem(PrefabHelper.MeadTasty, cost, 1, 0, 0L, "", false, false);
-                    player.Message(MessageHud.MessageType.Center, "Unable to complete Forge Pact. Payment refunded.");
+                    player.Message(MessageHud.MessageType.Center, HexLocalizationManager.Localize("$hex_dvergr_pact_refunded"));
                 }
 
                 if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
@@ -145,7 +146,7 @@ namespace HexDvergrAllies.Core.Companions
             {
                 Plugin.Log.LogWarning($"[Dvergr Companion] Hire request rejected: Player={player.GetPlayerName()}, ExistingCompanion={existingCompanion}, Reason=Already has companion");
 
-                player.Message(MessageHud.MessageType.Center, "You already have a Dvergr companion.");
+                player.Message(MessageHud.MessageType.Center, HexLocalizationManager.Localize("$hex_dvergr_one_companion_only"));
                 return;
             }
 

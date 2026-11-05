@@ -67,6 +67,7 @@ Changes apply without restarting. Use Configuration Manager or edit the config f
 
 * **FollowDistance:** Defaults to 2 meters. Controls how close your ally gets before they stop following. This doesn't limit how far they can move during combat.
 * **TargetScanInterval:** Defaults to 1 second. Controls how often hired Dvergr scan for enemies in Companion and Sentry modes. Adjustable from 0.1 to 10 seconds; lower values mean more frequent scans. Changes take effect at the next normal scan reset. Attack cooldowns and special chase delays stay the same.
+* **EnableCombatCircling:** Disabled by default. Stops your hired Dvergr from taking periodic breaks to run around enemies. Enable it to restore their normal circling behavior. This setting can be changed while playing.
 * **MovementSpeedMultiplier:** Defaults to 2.5x.
 * **HealthMultiplier:** Defaults to 2x maximum health.
 * **DamageTakenMultiplier:** Defaults to 0.5, meaning 50% less incoming damage.
