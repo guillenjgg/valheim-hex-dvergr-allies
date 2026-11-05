@@ -11,6 +11,8 @@ namespace HexDvergrAllies
         internal static ConfigEntry<bool> AllowTemporaryHomestead;
 
         internal static ConfigEntry<KeyboardShortcut> CompanionInteractionShortcut;
+        internal static ConfigEntry<KeyboardShortcut> CompanionSentryShortcut;
+        internal static ConfigEntry<KeyboardShortcut> CompanionRecallShortcut;
         internal static ConfigEntry<float> CompanionMovementSpeedMultiplier;
         internal static ConfigEntry<float> CompanionFollowDistance;
         internal static ConfigEntry<float> CompanionHealthMultiplier;
@@ -24,6 +26,10 @@ namespace HexDvergrAllies
 
         internal static void Init(ConfigFile config)
         {
+            CompanionRecallShortcut = config.Bind("Dvergr Companion", "RecallShortcut", new KeyboardShortcut(KeyCode.O), new ConfigDescription("Keyboard shortcut for Get over here. Recalls your hired Dvergr to your location and switches them to Companion mode.", null, new ConfigurationManagerAttributes { Order = 980 }));
+
+            CompanionSentryShortcut = config.Bind("Dvergr Companion", "SentryShortcut", new KeyboardShortcut(KeyCode.P, KeyCode.LeftControl), new ConfigDescription("Keyboard shortcut to toggle your hired Dvergr between Sentry and Companion mode. Sentry mode guards your current position.", null, new ConfigurationManagerAttributes { Order = 990 }));
+
             EnablePlayerDamageImmunity = config.Bind("General", "EnablePlayerDamageImmunity", true, new ConfigDescription("Prevents players from damaging Dvergr.", null, new ConfigurationManagerAttributes { Order = 100 }));
 
             AllowTemporaryHomestead = config.Bind("Dvergr Wards", "AllowTemporaryHomestead", true, new ConfigDescription("Allows players to place a workbench, stonecutter, wood portal, and stone portal inside Dvergr ward-protected areas. All other structures remain restricted.", null, new ConfigurationManagerAttributes { Order = 100 }));
@@ -32,7 +38,7 @@ namespace HexDvergrAllies
 
             CompanionMovementSpeedMultiplier = config.Bind("Dvergr Companion", "MovementSpeedMultiplier", 2.5f, new ConfigDescription("Movement speed multiplier for hired Dvergr companions.", new AcceptableValueRange<float>(1f, 5f), new ConfigurationManagerAttributes { Order = 900 }));
 
-            CompanionFollowDistance = config.Bind("Dvergr Companion", "FollowDistance", 2f, new ConfigDescription("Desired following distance in meters. Not implemented yet.", new AcceptableValueRange<float>(1f, 30f), new ConfigurationManagerAttributes { Order = 890, IsAdvanced = true }));
+            CompanionFollowDistance = config.Bind("Dvergr Companion", "FollowDistance", 2f, new ConfigDescription("Distance in meters at which your companion stops following you. Does not limit combat range.", new AcceptableValueRange<float>(1f, 30f), new ConfigurationManagerAttributes { Order = 890 }));
 
             CompanionHealthMultiplier = config.Bind("Dvergr Companion", "HealthMultiplier", 2f, new ConfigDescription("Maximum health multiplier for hired Dvergr companions.", new AcceptableValueRange<float>(1f, 10f), new ConfigurationManagerAttributes { Order = 800 }));
 

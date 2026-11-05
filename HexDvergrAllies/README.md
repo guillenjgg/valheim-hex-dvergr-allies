@@ -1,6 +1,6 @@
 # HexDvergrAllies
 
-> **Warning: Always backup your world before installing any mod. Early development version.** Expect bugs and rough edges. Things may change as development continues. More features and improvements are on the way!
+> **Warning: Always backup your world before installing any mod. Early development version.** Expect bugs and rough edges. Things will change as development continues. More features and improvements are on the way!
 
 Sucks having to kill them or steal from them. Now they're your homies.
 
@@ -10,7 +10,7 @@ Hire Dvergr to fight beside you, trade with them, and set up temporary homestead
 
 * Hire a Dvergr ally to fight beside you.
 * Trade for Dvergr extractors, soft tissue, and flametal.
-* Adjust companion settings like attack speed, damage, damage reduction, and more.
+* Adjust companion settings like follow distance, movement speed, health, attack speed, damage, and auto-healing.
 * Your ally follows you through portals.
 * They teleport back to you if they get stuck or fall too far behind.
 * Walk through your ally. No more getting stuck in a doorway.
@@ -19,10 +19,16 @@ Hire Dvergr to fight beside you, trade with them, and set up temporary homestead
 
 ### Ally Modes
 
+Press `Left Ctrl + P` to switch between Sentry and Companion mode. A center-screen message confirms the new mode. You can change the keybind under `SentryShortcut` in the config.
+
+Press `O` for "Get over here" to recall your ally and switch them to Companion mode. You can change this under `RecallShortcut` in the config.
+
 * **Companion:** Follows you around and fights beside you while you explore.
-* **Sentry:** Guards the spot where the Dvergr is standing when you activate the mode. Fights enemies within 20 meters of that spot.
+* **Sentry:** Guards the spot where you are standing when you activate the mode. Fights enemies within 20 meters of that spot.
 
 Use Sentry mode while you're harvesting soft tissue or flametal, for example.
+
+**Note:** Hired Dvergr switch back to Companion mode whenever you teleport. Set them back to Sentry mode afterward if you want them to stay put.
 
 ### Dvergr Types
 
@@ -35,14 +41,45 @@ Use Sentry mode while you're harvesting soft tissue or flametal, for example.
 ![HexDvergrAllies](https://raw.githubusercontent.com/guillenjgg/valheim-hex-mod-images/main/hexdvergrallies/hexdvergrallies_5.png)
 ![HexDvergrAllies](https://raw.githubusercontent.com/guillenjgg/valheim-hex-mod-images/main/hexdvergrallies/hexdvergrallies_6.png)
 
+## Known Issues
+
+* Localization is incomplete. Some text is still English only.
+* Dvergr can run away from your base, which gets annoying. Put them in Sentry mode outside to stop that.
+* Dvergr won't attack inside Sunken Crypts.
+
+
 ## Configuration
-* File watcher supported.
+
+Changes apply without restarting. Use Configuration Manager or edit the config file; the file watcher reloads saved changes.
+
+### Hotkeys
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| `UIShortcut` | `F9` | Opens or closes the ally command UI. |
+| `SentryShortcut` | `Left Ctrl + P` | Switches between Sentry and Companion mode. |
+| `RecallShortcut` | `O` | "Get over here": recalls your ally and switches them to Companion mode. |
+
+### Companion Settings
+
+* **FollowDistance:** Defaults to 2 meters. Controls how close your ally gets before they stop following. This doesn't limit how far they can move during combat.
+* **MovementSpeedMultiplier:** Defaults to 2.5x.
+* **HealthMultiplier:** Defaults to 2x maximum health.
+* **DamageTakenMultiplier:** Defaults to 0.5, meaning 50% less incoming damage.
+* **DamageDealtMultiplier:** Defaults to 1.5x damage.
+* **AttackSpeedMultiplier:** Defaults to 3x. Speeds up attack animations and cooldown recovery.
+* **EnableAutoHealing:** Enabled by default. Your ally heals to full at 50% health, with a 60-second cooldown. Adjust these with `AutoHealThreshold` and `AutoHealCooldown`.
+
+You can also toggle player damage protection for Dvergr and temporary homesteads in Dvergr towns. Debug logs are available under advanced settings.
+
+ServerSync is not supported yet. Settings aren't synced between players.
 
 ## Multiplayer Compatibility
 
 One Dvergr ally per player.
 
 Extractor purchases are tracked across the whole world, so everyone shares the same pricing. The first two purchases don't require sap. After that, each extractor costs 10 sap. Each purchase also requires a Mistlands trophy.
+
 
 ## Support & Feedback
 
@@ -51,4 +88,3 @@ Extractor purchases are tracked across the whole world, so everyone shares the s
 ## Source Control
 
 [View the source on GitHub](https://github.com/guillenjgg/valheim-hex-dvergr-allies)
-
