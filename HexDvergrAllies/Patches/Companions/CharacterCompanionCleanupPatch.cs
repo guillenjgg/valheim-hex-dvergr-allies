@@ -10,6 +10,8 @@ namespace HexDvergrAllies.Patches
         {
             DvergrCompanionBehaviorManager.RemoveCharacter(__instance);
             DvergrCompanionShipManager.RemoveCharacter(__instance);
+            DvergrCompanionDungeonTargeting.RemoveCharacter(__instance);
+            DvergrCompanionDungeonFollowManager.RemoveCharacter(__instance);
         }
     }
 }

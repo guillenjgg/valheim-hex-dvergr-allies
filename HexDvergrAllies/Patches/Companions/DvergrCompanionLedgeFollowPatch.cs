@@ -13,6 +13,11 @@ namespace HexDvergrAllies.Patches.Companions
         [HarmonyPostfix]
         private static void Postfix(MonsterAI __instance)
         {
+            if (DvergrCompanionDungeonFollowManager.IsDungeonFollow(__instance))
+            {
+                return;
+            }
+
             var character = __instance.GetComponent<Character>();
 
             if (!character || !DvergrCompanionState.IsHired(character))

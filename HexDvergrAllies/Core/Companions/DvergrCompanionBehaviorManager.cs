@@ -200,6 +200,7 @@ namespace HexDvergrAllies.Core.Companions
             if (!DvergrCompanionState.IsHired(character))
             {
                 RestoreAttackAnimation(character, state);
+
                 return;
             }
 
@@ -391,7 +392,12 @@ namespace HexDvergrAllies.Core.Companions
         private static void ApplyCombatCircling(MonsterAI monsterAI, CompanionBehaviorState state)
         {
             var interval = HexDvergrAlliesConfiguration.CompanionEnableCombatCircling.Value ? state.OriginalCircleTargetInterval : 0f;
-            if (Mathf.Approximately(monsterAI.m_circleTargetInterval, interval)) return;
+
+            if (Mathf.Approximately(monsterAI.m_circleTargetInterval, interval))
+            {
+                return;
+            }
+
             monsterAI.m_circleTargetInterval = interval;
             PauseTimerField(monsterAI) = 0f;
         }
