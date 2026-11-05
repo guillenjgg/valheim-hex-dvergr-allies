@@ -1,4 +1,4 @@
-﻿using HexDvergrAllies.Core.Companions;
+using HexDvergrAllies.Core.Companions;
 using HexDvergrAllies.Core.Trading;
 using UnityEngine;
 
@@ -11,6 +11,7 @@ namespace HexDvergrAllies.Core.Networking
         internal const string UnhireRpc = "HexDvergrUnhire";
         internal const string RenameRpc = "HexDvergrRename";
         internal const string SetModeRpc = "HexDvergrSetMode";
+        internal const string BloodMagicExperienceRpc = "HexDvergrBloodMagicExperience";
 
         internal const string PriceRequestRpc = "HexDvergrPriceRequest";
         internal const string PriceResponseRpc = "HexDvergrPriceResponse";
@@ -29,6 +30,7 @@ namespace HexDvergrAllies.Core.Networking
 
         internal static void RegisterRoutedRpcs()
         {
+            ZRoutedRpc.instance.Register<ZDOID, ZDOID>(BloodMagicExperienceRpc, DvergrCompanionDamageManager.RPC_BloodMagicExperience);
             ZRoutedRpc.instance.Register<ZDOID, ZDOID>(RemoteSetModeRpc, DvergrCompanionModeManager.RPC_RemoteSetMode);
             ZRoutedRpc.instance.Register<ZDOID, ZDOID, Vector3>(RemoteRecallRpc, DvergrCompanionRecallManager.RPC_RemoteRecall);
             ZRoutedRpc.instance.Register<ZDOID, ZDOID, string>(RemoteRenameRpc, DvergrCompanionNameManager.RPC_RemoteRename);

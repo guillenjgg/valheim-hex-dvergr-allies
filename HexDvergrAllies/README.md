@@ -9,6 +9,7 @@ Hire Dvergr to fight beside you, trade with them, and set up temporary homestead
 ## Features
 
 * Hire a Dvergr ally to fight beside you.
+* Earn Blood Magic experience when your hired ally damages a creature. You can turn this off in the config.
 * Trade for Dvergr extractors, soft tissue, and flametal.
 * Adjust companion settings like follow distance, movement speed, health, attack speed, damage, and auto-healing.
 * Your ally follows you through portals.
@@ -50,6 +51,8 @@ Use Sentry mode while you're harvesting soft tissue or flametal, for example.
 
 ## Configuration
 
+Your config is updated automatically when the mod starts. Existing values for current options are kept, new options get their defaults, and obsolete options are removed. Settings are saved in the current display order.
+
 Changes apply without restarting. Use Configuration Manager or edit the config file; the file watcher reloads saved changes.
 
 ### Hotkeys
@@ -63,11 +66,14 @@ Changes apply without restarting. Use Configuration Manager or edit the config f
 ### Companion Settings
 
 * **FollowDistance:** Defaults to 2 meters. Controls how close your ally gets before they stop following. This doesn't limit how far they can move during combat.
+* **TargetScanInterval:** Defaults to 1 second. Controls how often hired Dvergr scan for enemies in Companion and Sentry modes. Adjustable from 0.1 to 10 seconds; lower values mean more frequent scans. Changes take effect at the next normal scan reset. Attack cooldowns and special chase delays stay the same.
 * **MovementSpeedMultiplier:** Defaults to 2.5x.
 * **HealthMultiplier:** Defaults to 2x maximum health.
 * **DamageTakenMultiplier:** Defaults to 0.5, meaning 50% less incoming damage.
 * **DamageDealtMultiplier:** Defaults to 1.5x damage.
 * **AttackSpeedMultiplier:** Defaults to 3x. Speeds up attack animations and cooldown recovery.
+* **EnableBloodMagicExperience:** Enabled by default. Damaging hits from your hired Dvergr give you Blood Magic experience, including killing blows. Hits that do no health damage and hits against players or structures give no experience.
+* **BloodMagicExperienceFactor:** Defaults to 1. Adjusts the experience per damaging hit using normal skill progression, rather than adding whole skill levels.
 * **EnableAutoHealing:** Enabled by default. Your ally heals to full at 50% health, with a 60-second cooldown. Adjust these with `AutoHealThreshold` and `AutoHealCooldown`.
 
 You can also toggle player damage protection for Dvergr and temporary homesteads in Dvergr towns. Debug logs are available under advanced settings.

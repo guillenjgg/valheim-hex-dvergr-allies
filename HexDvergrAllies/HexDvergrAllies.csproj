@@ -96,6 +96,7 @@
     <Compile Include="Assets\AssetHelper.cs" />
     <Compile Include="Core\Companions\DvergrCompanionAttributes.cs" />
     <Compile Include="Core\Companions\DvergrCompanionBehaviorManager.cs" />
+    <Compile Include="Core\Companions\DvergrCompanionDamageManager.cs" />
     <Compile Include="Core\Companions\DvergrCompanionFollowManager.cs" />
     <Compile Include="Core\Companions\DvergrCompanionNameManager.cs" />
     <Compile Include="Core\Companions\DvergrCompanionRecallManager.cs" />
@@ -113,6 +114,7 @@
     <Compile Include="Core\Companions\DvergrCompanionSpawnerTargeting.cs" />
     <Compile Include="Core\Companions\DvergrCompanionState.cs" />
     <Compile Include="Core\HexLocalization\HexLocalizationManager.cs" />
+    <Compile Include="Core\HexConfigurationMigration.cs" />
     <Compile Include="Core\Monoscripts\DvergrCompanionComponent.cs" />
     <Compile Include="Core\PrefabHelper.cs" />
     <Compile Include="Core\UI\DvergrCompanionDragHandler.cs" />

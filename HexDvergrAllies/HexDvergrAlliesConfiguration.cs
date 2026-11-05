@@ -15,6 +15,9 @@ namespace HexDvergrAllies
         internal static ConfigEntry<KeyboardShortcut> CompanionRecallShortcut;
         internal static ConfigEntry<float> CompanionMovementSpeedMultiplier;
         internal static ConfigEntry<float> CompanionFollowDistance;
+        internal static ConfigEntry<float> CompanionTargetScanInterval;
+        internal static ConfigEntry<bool> CompanionEnableBloodMagicExperience;
+        internal static ConfigEntry<float> CompanionBloodMagicExperienceFactor;
         internal static ConfigEntry<float> CompanionHealthMultiplier;
         internal static ConfigEntry<float> CompanionDamageTakenMultiplier;
         internal static ConfigEntry<float> CompanionDamageDealtMultiplier;
@@ -26,6 +29,12 @@ namespace HexDvergrAllies
 
         internal static void Init(ConfigFile config)
         {
+            CompanionTargetScanInterval = config.Bind("Dvergr Companion", "TargetScanInterval", 1f, new ConfigDescription("Seconds between enemy scans for hired Dvergr in Companion and Sentry modes. Lower values scan more often. Does not change attack cooldowns or special delays after giving up a chase.", new AcceptableValueRange<float>(0.1f, 10f), new ConfigurationManagerAttributes { Order = 880 }));
+
+            CompanionEnableBloodMagicExperience = config.Bind("Dvergr Companion", "EnableBloodMagicExperience", true, new ConfigDescription("Hired Dvergr grant their owner Blood Magic experience when they deal health damage to a creature.", null, new ConfigurationManagerAttributes { Order = 1100 }));
+
+            CompanionBloodMagicExperienceFactor = config.Bind("Dvergr Companion", "BloodMagicExperienceFactor", 1f, new ConfigDescription("Blood Magic skill experience factor per damaging hit. Uses normal skill progression, not whole skill levels.", new AcceptableValueRange<float>(0f, 10f), new ConfigurationManagerAttributes { Order = 1090 }));
+
             CompanionRecallShortcut = config.Bind("Dvergr Companion", "RecallShortcut", new KeyboardShortcut(KeyCode.O), new ConfigDescription("Keyboard shortcut for Get over here. Recalls your hired Dvergr to your location and switches them to Companion mode.", null, new ConfigurationManagerAttributes { Order = 980 }));
 
             CompanionSentryShortcut = config.Bind("Dvergr Companion", "SentryShortcut", new KeyboardShortcut(KeyCode.P, KeyCode.LeftControl), new ConfigDescription("Keyboard shortcut to toggle your hired Dvergr between Sentry and Companion mode. Sentry mode guards your current position.", null, new ConfigurationManagerAttributes { Order = 990 }));

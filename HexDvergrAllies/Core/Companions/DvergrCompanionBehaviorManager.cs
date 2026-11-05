@@ -31,6 +31,15 @@ namespace HexDvergrAllies.Core.Companions
         private static readonly AccessTools.FieldRef<MonsterAI, Character> CombatTargetField = AccessTools.FieldRefAccess<MonsterAI, Character>("m_targetCreature");
         private static readonly System.Action<BaseAI, bool> SetAlertedMethod = AccessTools.MethodDelegate<System.Action<BaseAI, bool>>(AccessTools.Method(typeof(BaseAI), "SetAlerted", new[] { typeof(bool) }));
 
+        internal static float GetTargetScanInterval(float vanillaInterval, MonsterAI monsterAI)
+        {
+            var character = monsterAI.GetComponent<Character>();
+
+            return character && DvergrCompanionState.IsHired(character)
+                ? HexDvergrAlliesConfiguration.CompanionTargetScanInterval.Value
+                : vanillaInterval;
+        }
+
         internal static void CaptureState(Character character, MonsterAI monsterAI)
         {
             if (CompanionStates.ContainsKey(character))

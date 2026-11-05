@@ -2,6 +2,7 @@
 using BepInEx.Logging;
 using HarmonyLib;
 using HexDvergrAllies.Assets;
+using HexDvergrAllies.Core;
 using HexDvergrAllies.Core.HexLocalization;
 using HexDvergrAllies.Core.Trading;
 using System;
@@ -15,7 +16,7 @@ namespace HexDvergrAllies
     {
         internal const string PluginGuid = "com.hex.dvergr.allies";
         private const string PluginName = "HexDvergrAllies";
-        private const string PluginVersion = "0.0.1";
+        private const string PluginVersion = "0.0.2";
 
         private Harmony _harmonyInstance;
         private FileSystemWatcher _configFileWatcher;
@@ -33,6 +34,7 @@ namespace HexDvergrAllies
             Config.SaveOnConfigSet = false;
 
             HexDvergrAlliesConfiguration.Init(Config);
+            HexConfigurationMigration.Complete(Config);
             HexLocalizationManager.Initialize();
 
             Config.Save();
@@ -70,6 +72,10 @@ namespace HexDvergrAllies
             {
                 Log.LogDebug("Attempting to reload configuration...");
                 Config.Reload();
+                if (HexConfigurationMigration.Complete(Config))
+                {
+                    Config.Save();
+                }
             }
             catch (Exception exception)
             {
