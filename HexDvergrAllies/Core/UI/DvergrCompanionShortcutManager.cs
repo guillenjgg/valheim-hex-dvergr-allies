@@ -1,4 +1,5 @@
-﻿using HexDvergrAllies.Core.Companions;
+using HexDvergrAllies.Core.HexLocalization;
+using HexDvergrAllies.Core.Companions;
 using HarmonyLib;
 
 namespace HexDvergrAllies.Core.UI
@@ -23,7 +24,7 @@ namespace HexDvergrAllies.Core.UI
                     pendingZdo.m_uid == _pendingModeCompanion && DvergrCompanionState.GetMode(pendingZdo) == _pendingMode.Value)
                 {
                     player.Message(MessageHud.MessageType.Center, _pendingMode.Value == DvergrCompanionMode.Sentry
-                        ? "Sentry mode activated." : "Companion mode activated.");
+                        ? HexLocalizationManager.Localize("$hex_dvergr_sentry_activated") : HexLocalizationManager.Localize("$hex_dvergr_companion_activated"));
                     _pendingMode = null;
                 }
                 else if (UnityEngine.Time.time >= _modeMessageDeadline)

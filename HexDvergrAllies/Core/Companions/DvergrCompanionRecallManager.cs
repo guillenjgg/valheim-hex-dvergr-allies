@@ -44,9 +44,23 @@ namespace HexDvergrAllies.Core.Companions
                 return;
             }
 
+            var wasSentry = DvergrCompanionState.GetMode(companionZdo) == DvergrCompanionMode.Sentry;
             companionZdo.Set(DvergrCompanionState.ModeKey, (int)DvergrCompanionMode.Companion);
             companionZdo.Set(DvergrCompanionState.RecallPositionKey, destination);
             companionZdo.Set(DvergrCompanionState.PendingModeTeleportKey, true);
+            ZRoutedRpc.instance.InvokeRoutedRPC(sender, DvergrRpcManager.RecallAcceptedRpc, playerId, wasSentry);
+        }
+
+        internal static void RPC_RecallAccepted(long sender, ZDOID playerId, bool wasSentry)
+        {
+            var player = Player.m_localPlayer;
+            if (!player || player.GetZDOID() != playerId || sender != DvergrCompanionManager.GetServerPeerID(ZRoutedRpc.instance))
+            {
+                return;
+            }
+
+            var messageKey = wasSentry ? "$hex_dvergr_recall_companion_mode" : "$hex_dvergr_recall";
+            player.Message(MessageHud.MessageType.Center, Localization.instance.Localize(messageKey));
         }
     }
 }

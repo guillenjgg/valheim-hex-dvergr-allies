@@ -426,3 +426,7 @@ FodyWeavers.xsd
 
 # Official VS Code C# Dev Kit Extension exclusion
 #*.lscache
+
+# Version diagnostic source patches; keep build output folders ignored.
+!HexDvergrAllies/Patches/Debug/
+!HexDvergrAllies/Patches/Debug/**

@@ -9,6 +9,12 @@ namespace HexDvergrAllies.Core.HexLocalization
     {
         private const string EnglishResourceName = "HexDvergrAllies.Core.HexLocalization.English.csv";
 
+        internal static string Localize(string key, params object[] arguments)
+        {
+            var text = Localization.instance.Localize(key).Replace("\\n", "\n");
+            return arguments.Length == 0 ? text : string.Format(text, arguments);
+        }
+
         internal static void Initialize()
         {
             var modDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -45,7 +51,7 @@ namespace HexDvergrAllies.Core.HexLocalization
                 {
                     using (var reader = new StreamReader(stream))
                     {
-                        LoadCSV(reader.ReadToEnd(), language, "Embedded English");
+                        LoadCSV(reader.ReadToEnd(), "English", "Embedded English");
                     }
                 }
             }

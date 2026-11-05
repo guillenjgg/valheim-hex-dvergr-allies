@@ -1,4 +1,5 @@
-﻿
+using HexDvergrAllies.Core.HexLocalization;
+
 using HexDvergrAllies.Core.Companions;
 using TMPro;
 using UnityEngine;
@@ -125,7 +126,7 @@ namespace HexDvergrAllies.Core.UI
             titleRect.sizeDelta = new Vector2(400f, 40f);
 
             var titleText = title.GetComponent<TextMeshProUGUI>();
-            titleText.text = "Dvergr Companion";
+            titleText.text = HexLocalizationManager.Localize("$hex_dvergr_window_title");
             titleText.alignment = TextAlignmentOptions.Center;
 
             var titleDragHandler = title.AddComponent<DvergrCompanionDragHandler>();
@@ -204,7 +205,7 @@ namespace HexDvergrAllies.Core.UI
             _recallButton.onClick.AddListener(() => DvergrCompanionRecallManager.RequestRemoteRecall(Player.m_localPlayer));
 
             var recallText = recallButtonObject.GetComponentInChildren<TextMeshProUGUI>();
-            recallText.text = "Get over here";
+            recallText.text = HexLocalizationManager.Localize("$hex_dvergr_get_over_here");
 
             var unhireButtonObject = Object.Instantiate(modeButtonObject, panel.transform, false);
             unhireButtonObject.name = "BreakPactButton";
@@ -217,7 +218,7 @@ namespace HexDvergrAllies.Core.UI
             _unhireButton.onClick.AddListener(ConfirmRemoteUnhire);
 
             var unhireText = unhireButtonObject.GetComponentInChildren<TextMeshProUGUI>();
-            unhireText.text = "Break Pact";
+            unhireText.text = HexLocalizationManager.Localize("$hex_dvergr_break_pact");
 
             var nameInputObject = new GameObject("CompanionNameInput", typeof(RectTransform), typeof(Image), typeof(TMP_InputField));
             nameInputObject.transform.SetParent(panel.transform, false);
@@ -268,7 +269,7 @@ namespace HexDvergrAllies.Core.UI
             _renameButton.onClick.AddListener(RenameCompanion);
 
             var renameText = renameButtonObject.GetComponentInChildren<TextMeshProUGUI>();
-            renameText.text = "Rename";
+            renameText.text = HexLocalizationManager.Localize("$hex_dvergr_rename");
 
             var closeButtonObject = new GameObject("CloseButton", typeof(RectTransform), typeof(Image), typeof(Button));
             closeButtonObject.transform.SetParent(panel.transform, false);
@@ -330,13 +331,17 @@ namespace HexDvergrAllies.Core.UI
 
         private static void RefreshCompanionInfo()
         {
+            _recallButton.GetComponentInChildren<TextMeshProUGUI>().text = HexLocalizationManager.Localize("$hex_dvergr_get_over_here");
+            _renameButton.GetComponentInChildren<TextMeshProUGUI>().text = HexLocalizationManager.Localize("$hex_dvergr_rename");
+            _unhireButton.GetComponentInChildren<TextMeshProUGUI>().text = HexLocalizationManager.Localize("$hex_dvergr_break_pact");
+            _window.transform.Find("CompanionPanel/CompanionTitle").GetComponent<TextMeshProUGUI>().text = HexLocalizationManager.Localize("$hex_dvergr_window_title");
             var player = Player.m_localPlayer;
 
             if (!DvergrCompanionManager.TryGetHiredCompanionZDO(player, out var companionZdo))
             {
-                _descriptionText.text = "No hired Dvergr companion.";
+                _descriptionText.text = HexLocalizationManager.Localize("$hex_dvergr_no_hired_companion");
                 _modeButton.interactable = false;
-                _modeButtonText.text = "No Companion";
+                _modeButtonText.text = HexLocalizationManager.Localize("$hex_dvergr_no_companion");
                 _recallButton.interactable = false;
                 _renameButton.interactable = false;
                 _unhireButton.interactable = false;
@@ -347,11 +352,11 @@ namespace HexDvergrAllies.Core.UI
             }
 
             var name = companionZdo.GetString(NameKey, "");
-            var displayName = string.IsNullOrEmpty(name) ? "Dvergr" : name;
+            var displayName = string.IsNullOrEmpty(name) ? HexLocalizationManager.Localize("$hex_dvergr_default_name") : name;
             var mode = (DvergrCompanionMode)companionZdo.GetInt(ModeKey, 0);
 
-            _descriptionText.text = $"Mode: {mode}";
-            _modeButtonText.text = mode == DvergrCompanionMode.Sentry ? "Switch to Companion" : "Switch to Sentry";
+            _descriptionText.text = HexLocalizationManager.Localize("$hex_dvergr_mode_label", HexLocalizationManager.Localize(mode == DvergrCompanionMode.Sentry ? "$hex_dvergr_sentry_mode" : "$hex_dvergr_companion_mode"));
+            _modeButtonText.text = mode == DvergrCompanionMode.Sentry ? HexLocalizationManager.Localize("$hex_dvergr_switch_companion") : HexLocalizationManager.Localize("$hex_dvergr_switch_sentry");
 
             if (_nameEdited && _nameInput.text == displayName)
             {
@@ -406,8 +411,8 @@ namespace HexDvergrAllies.Core.UI
             }
 
             var popup = new YesNoPopup(
-                "Break Your Pact?",
-                "Release this Dvergr from your service?\n\nYour companion will return to its original home.",
+                HexLocalizationManager.Localize("$hex_dvergr_break_title"),
+                HexLocalizationManager.Localize("$hex_dvergr_break_description"),
                 () =>
                 {
                     UnifiedPopup.Pop();

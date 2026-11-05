@@ -16,6 +16,7 @@ namespace HexDvergrAllies
         internal static ConfigEntry<float> CompanionMovementSpeedMultiplier;
         internal static ConfigEntry<float> CompanionFollowDistance;
         internal static ConfigEntry<float> CompanionTargetScanInterval;
+        internal static ConfigEntry<bool> CompanionEnableCombatCircling;
         internal static ConfigEntry<bool> CompanionEnableBloodMagicExperience;
         internal static ConfigEntry<float> CompanionBloodMagicExperienceFactor;
         internal static ConfigEntry<float> CompanionHealthMultiplier;
@@ -29,6 +30,8 @@ namespace HexDvergrAllies
 
         internal static void Init(ConfigFile config)
         {
+            CompanionEnableCombatCircling = config.Bind("Dvergr Companion", "EnableCombatCircling", false, new ConfigDescription("Allow hired Dvergr to periodically stop attacking and circle their enemy. Does not change movement during weapon cooldowns.", null, new ConfigurationManagerAttributes { Order = 870 }));
+
             CompanionTargetScanInterval = config.Bind("Dvergr Companion", "TargetScanInterval", 1f, new ConfigDescription("Seconds between enemy scans for hired Dvergr in Companion and Sentry modes. Lower values scan more often. Does not change attack cooldowns or special delays after giving up a chase.", new AcceptableValueRange<float>(0.1f, 10f), new ConfigurationManagerAttributes { Order = 880 }));
 
             CompanionEnableBloodMagicExperience = config.Bind("Dvergr Companion", "EnableBloodMagicExperience", true, new ConfigDescription("Hired Dvergr grant their owner Blood Magic experience when they deal health damage to a creature.", null, new ConfigurationManagerAttributes { Order = 1100 }));

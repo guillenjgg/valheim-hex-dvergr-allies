@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using HexDvergrAllies.Core.Companions;
 using HexDvergrAllies.Core.Trading;
 
@@ -26,7 +26,7 @@ namespace HexDvergrAllies.Patches
 
             __instance.m_buyButton.interactable = canHire;
             __instance.m_buyButton.GetComponent<UITooltip>().m_text = alreadyHired
-                ? "You can only have one Dvergr companion at a time."
+                ? Localization.instance.Localize("$hex_dvergr_one_companion_only")
                 : canHire ? "" : Localization.instance.Localize("$msg_missingrequirement");
         }
     }

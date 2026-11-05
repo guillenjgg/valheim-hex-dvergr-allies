@@ -26,6 +26,7 @@ namespace HexDvergrAllies.Core.Networking
         internal const string RemoteUnhireCompletedRpc = "HexDvergrRemoteUnhireCompleted";
         internal const string RemoteSetModeRpc = "HexDvergrRemoteSetMode";
         internal const string RemoteRecallRpc = "HexDvergrRemoteRecall";
+        internal const string RecallAcceptedRpc = "HexDvergrRecallAccepted";
         internal const string RemoteRenameRpc = "HexDvergrRemoteRename";
 
         internal static void RegisterRoutedRpcs()
@@ -33,6 +34,7 @@ namespace HexDvergrAllies.Core.Networking
             ZRoutedRpc.instance.Register<ZDOID, ZDOID>(BloodMagicExperienceRpc, DvergrCompanionDamageManager.RPC_BloodMagicExperience);
             ZRoutedRpc.instance.Register<ZDOID, ZDOID>(RemoteSetModeRpc, DvergrCompanionModeManager.RPC_RemoteSetMode);
             ZRoutedRpc.instance.Register<ZDOID, ZDOID, Vector3>(RemoteRecallRpc, DvergrCompanionRecallManager.RPC_RemoteRecall);
+            ZRoutedRpc.instance.Register<ZDOID, bool>(RecallAcceptedRpc, DvergrCompanionRecallManager.RPC_RecallAccepted);
             ZRoutedRpc.instance.Register<ZDOID, ZDOID, string>(RemoteRenameRpc, DvergrCompanionNameManager.RPC_RemoteRename);
             ZRoutedRpc.instance.Register<ZDOID, ZDOID>(RemoteUnhireRpc, DvergrCompanionUnhireManager.RPC_RemoteUnhire);
             ZRoutedRpc.instance.Register<ZDOID>(ProcessRemoteUnhireRpc, DvergrCompanionUnhireManager.RPC_ProcessRemoteUnhire);

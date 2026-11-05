@@ -16,6 +16,7 @@ namespace HexDvergrAllies.Core.Companions
             internal float OriginalWalkSpeed;
             internal float OriginalRunSpeed;
             internal float OriginalMinAttackInterval;
+            internal float OriginalCircleTargetInterval;
             internal float OriginalMaxHealth;
             internal float OriginalAnimationSpeed;
 
@@ -27,6 +28,7 @@ namespace HexDvergrAllies.Core.Companions
         }
 
         private static readonly Dictionary<Character, CompanionBehaviorState> CompanionStates = new Dictionary<Character, CompanionBehaviorState>();
+        private static readonly AccessTools.FieldRef<MonsterAI, float> PauseTimerField = AccessTools.FieldRefAccess<MonsterAI, float>("m_pauseTimer");
         private static readonly AccessTools.FieldRef<Character, Animator> AnimatorField = AccessTools.FieldRefAccess<Character, Animator>("m_animator");
         private static readonly AccessTools.FieldRef<MonsterAI, Character> CombatTargetField = AccessTools.FieldRefAccess<MonsterAI, Character>("m_targetCreature");
         private static readonly System.Action<BaseAI, bool> SetAlertedMethod = AccessTools.MethodDelegate<System.Action<BaseAI, bool>>(AccessTools.Method(typeof(BaseAI), "SetAlerted", new[] { typeof(bool) }));
@@ -53,6 +55,7 @@ namespace HexDvergrAllies.Core.Companions
                 OriginalWalkSpeed = character.m_walkSpeed,
                 OriginalRunSpeed = character.m_runSpeed,
                 OriginalMinAttackInterval = monsterAI.m_minAttackInterval,
+                OriginalCircleTargetInterval = monsterAI.m_circleTargetInterval,
                 OriginalMaxHealth = character.GetMaxHealth()
             };
 
@@ -159,6 +162,7 @@ namespace HexDvergrAllies.Core.Companions
 
             ApplyMovementSpeed(character, state);
             ApplyAttackSpeed(monsterAI, state);
+            ApplyCombatCircling(monsterAI, state);
 
             var netView = character.GetComponent<ZNetView>();
 
@@ -260,6 +264,8 @@ namespace HexDvergrAllies.Core.Companions
                 if (monsterAI != null)
                 {
                     monsterAI.m_minAttackInterval = state.OriginalMinAttackInterval;
+                    monsterAI.m_circleTargetInterval = state.OriginalCircleTargetInterval;
+                    PauseTimerField(monsterAI) = 0f;
                 }
 
                 CompanionStates.Remove(character);
@@ -380,6 +386,19 @@ namespace HexDvergrAllies.Core.Companions
             }
 
             SetMaximumHealthPreservingPercentage(character, targetMaxHealth);
+        }
+
+        private static void ApplyCombatCircling(MonsterAI monsterAI, CompanionBehaviorState state)
+        {
+            var interval = HexDvergrAlliesConfiguration.CompanionEnableCombatCircling.Value ? state.OriginalCircleTargetInterval : 0f;
+            if (Mathf.Approximately(monsterAI.m_circleTargetInterval, interval)) return;
+            monsterAI.m_circleTargetInterval = interval;
+            PauseTimerField(monsterAI) = 0f;
+        }
+
+        internal static float GetAutoHealCooldownRemaining(Character character)
+        {
+            return CompanionStates.TryGetValue(character, out var state) ? Mathf.Max(0f, state.NextAutoHealTime - Time.time) : -1f;
         }
 
         private static void ApplyAutoHealing(Character character, CompanionBehaviorState state)

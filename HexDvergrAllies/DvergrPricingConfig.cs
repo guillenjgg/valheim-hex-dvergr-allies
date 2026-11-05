@@ -20,7 +20,7 @@ namespace HexDvergrAllies
         /// </summary>
         internal const int ForgePactCost = 2;
 
-        internal const string ForgePactCostDisplay = "2 Tasty Mead";
+        internal static string ForgePactCostDisplay => Core.HexLocalization.HexLocalizationManager.Localize("$hex_dvergr_pact_cost", ForgePactCost);
 
         /// <summary>
         /// Flametal received per Ashlands purchase.
@@ -32,6 +32,6 @@ namespace HexDvergrAllies
         /// </summary>
         internal const int AshlandsMoltenCoreCost = 1;
 
-        internal const string AshlandsFlametalCostDisplay = "1 Molten Core";
+        internal static string AshlandsFlametalCostDisplay => Core.HexLocalization.HexLocalizationManager.Localize("$hex_dvergr_flametal_cost", AshlandsMoltenCoreCost);
     }
 }

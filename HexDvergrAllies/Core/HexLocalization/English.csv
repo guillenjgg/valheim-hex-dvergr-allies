@@ -1,4 +1,4 @@
-﻿Context,English
+Context,English
 hex_dvergr_forge_pact,Forge a Pact
 hex_dvergr_break_pact,Break Pact
 hex_dvergr_rename,Rename
@@ -8,3 +8,34 @@ hex_dvergr_one_companion_only,You can only have one Dvergr companion at a time.
 hex_dvergr_fine_trade,A fine trade.
 hex_dvergr_enable_companion_mode,Enable Companion Mode
 hex_dvergr_enable_sentry_mode,Enable Sentry Mode
+hex_dvergr_recall,Your Dvergr is on the way.
+hex_dvergr_recall_companion_mode,Your Dvergr is on the way. Now in Companion mode.
+hex_dvergr_window_title,"Dvergr Companion"
+hex_dvergr_get_over_here,"Get over here"
+hex_dvergr_no_hired_companion,"No hired Dvergr companion."
+hex_dvergr_no_companion,"No Companion"
+hex_dvergr_switch_companion,"Switch to Companion"
+hex_dvergr_switch_sentry,"Switch to Sentry"
+hex_dvergr_break_title,"Break Your Pact?"
+hex_dvergr_break_description,"Release this Dvergr from your service?\n\nYour companion will return to its original home."
+hex_dvergr_invalid_name,"Invalid companion name."
+hex_dvergr_pact_established,"Forge Pact established."
+hex_dvergr_pact_refunded,"Unable to complete Forge Pact. Payment refunded."
+hex_dvergr_sentry_activated,"Sentry mode activated."
+hex_dvergr_companion_activated,"Companion mode activated."
+hex_dvergr_loading,"Loading..."
+hex_dvergr_forge_pact_name,"Forge Pact"
+hex_dvergr_default_name,"Dvergr"
+hex_dvergr_mode_label,"Mode: {0}"
+hex_dvergr_pact_cost,"{0} Tasty Mead"
+hex_dvergr_flametal_cost,"{0} Molten Core"
+hex_dvergr_trophy_price,"1 Trophy"
+hex_dvergr_trophy_sap_price,"1 Trophy + {0} Sap"
+hex_dvergr_currency_heading,"ACCEPTED CURRENCY"
+hex_dvergr_trophy_description,"1 Trophy = Seeker, Seeker Soldier, or Gjall"
+hex_dvergr_flametal_description,"{0} Molten Core = {1} Flametal"
+hex_dvergr_pact_tooltip,"Forge Pact: Hire this Dvergr for {0}."
+hex_dvergr_flametal_tooltip,"Trade {0} Molten Core for {1} Flametal."
+hex_dvergr_store_unavailable,Unable to open the Dvergr store.
+hex_dvergr_store_busy,This Dvergr is currently trading with another player.
+hex_dvergr_store_too_far,Too far away from the Dvergr.

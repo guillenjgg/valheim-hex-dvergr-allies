@@ -1,4 +1,5 @@
-﻿using HexDvergrAllies.Core.Companions;
+using HexDvergrAllies.Core.HexLocalization;
+using HexDvergrAllies.Core.Companions;
 using UnityEngine;
 
 namespace HexDvergrAllies.Core.Trading
@@ -162,7 +163,7 @@ namespace HexDvergrAllies.Core.Trading
                 return;
             }
 
-            trader.m_items.Add(new Trader.TradeItem { m_prefab = prefab.GetComponent<ItemDrop>(), m_stack = 1, m_price = 0, m_tooltip = $"Forge Pact: Hire this Dvergr for {DvergrPricingConfig.ForgePactCostDisplay}.", m_buyPlayerEffects = new EffectList() });
+            trader.m_items.Add(new Trader.TradeItem { m_prefab = prefab.GetComponent<ItemDrop>(), m_stack = 1, m_price = 0, m_tooltip = HexLocalizationManager.Localize("$hex_dvergr_pact_tooltip", DvergrPricingConfig.ForgePactCostDisplay), m_buyPlayerEffects = new EffectList() });
         }
 
         private static void AddMistlandsItems(Trader trader)
@@ -208,7 +209,7 @@ namespace HexDvergrAllies.Core.Trading
                 return;
             }
 
-            trader.m_items.Add(new Trader.TradeItem { m_prefab = itemDrop, m_stack = DvergrPricingConfig.AshlandsFlametalQuantity, m_price = 0, m_tooltip = $"Trade {DvergrPricingConfig.AshlandsMoltenCoreCost} Molten Core for {DvergrPricingConfig.AshlandsFlametalQuantity} Flametal.", m_buyPlayerEffects = new EffectList() });
+            trader.m_items.Add(new Trader.TradeItem { m_prefab = itemDrop, m_stack = DvergrPricingConfig.AshlandsFlametalQuantity, m_price = 0, m_tooltip = HexLocalizationManager.Localize("$hex_dvergr_flametal_tooltip", DvergrPricingConfig.AshlandsMoltenCoreCost, DvergrPricingConfig.AshlandsFlametalQuantity), m_buyPlayerEffects = new EffectList() });
 
             Plugin.Log.LogInfo($"[Dvergr Trader] Ashlands inventory initialized: FlametalNew={DvergrPricingConfig.AshlandsFlametalQuantity}, MoltenCore={DvergrPricingConfig.AshlandsMoltenCoreCost}");
         }

@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+using HexDvergrAllies.Core.HexLocalization;
+using HarmonyLib;
 using HexDvergrAllies.Assets;
 using HexDvergrAllies.Core.Trading;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ namespace HexDvergrAllies.Patches
         private static TMP_Text _paymentText;
         private static int _lastSapCost = -1;
         private static bool _lastHasPrice;
+        private static string _lastLanguage;
         private static Heightmap.Biome _lastBiome = Heightmap.Biome.None;
 
         [HarmonyPatch(typeof(StoreGui), "FillList")]
@@ -68,15 +70,18 @@ namespace HexDvergrAllies.Patches
 
             Heightmap.Biome biome = Heightmap.FindBiome(trader.transform.position);
             bool biomeChanged = biome != _lastBiome;
+            var language = Localization.instance.GetSelectedLanguage();
+            var languageChanged = language != _lastLanguage;
+            _lastLanguage = language;
 
-            if (biomeChanged)
+            if (biomeChanged || languageChanged)
             {
                 UpdatePaymentPanel(trader);
             }
 
             List<GameObject> itemList = ItemListField(__instance);
 
-            if (biomeChanged || _lastSapCost != DvergrTradeRpcManager.CurrentSapCost || _lastHasPrice != DvergrTradeRpcManager.HasCurrentPrice)
+            if (biomeChanged || languageChanged || _lastSapCost != DvergrTradeRpcManager.CurrentSapCost || _lastHasPrice != DvergrTradeRpcManager.HasCurrentPrice)
             {
                 UpdateItemPrices(trader, itemList);
             }
@@ -148,11 +153,11 @@ namespace HexDvergrAllies.Patches
 
             if (biome == Heightmap.Biome.AshLands)
             {
-                _paymentText.text = "<color=#D9A75D><b>ACCEPTED CURRENCY</b></color>\n" + $"<size=85%>{DvergrPricingConfig.AshlandsFlametalCostDisplay} = {DvergrPricingConfig.AshlandsFlametalQuantity} Flametal</size>";
+                _paymentText.text = "<color=#D9A75D><b>" + HexLocalizationManager.Localize("$hex_dvergr_currency_heading") + "</b></color>\n<size=85%>" + HexLocalizationManager.Localize("$hex_dvergr_flametal_description", DvergrPricingConfig.AshlandsMoltenCoreCost, DvergrPricingConfig.AshlandsFlametalQuantity) + "</size>";
             }
             else
             {
-                _paymentText.text = "<color=#D9A75D><b>ACCEPTED CURRENCY</b></color>\n" + "<size=85%>1 Trophy = Seeker, Seeker Soldier, or Gjall</size>";
+                _paymentText.text = "<color=#D9A75D><b>" + HexLocalizationManager.Localize("$hex_dvergr_currency_heading") + "</b></color>\n<size=85%>" + HexLocalizationManager.Localize("$hex_dvergr_trophy_description") + "</size>";
             }
         }
 
@@ -201,10 +206,10 @@ namespace HexDvergrAllies.Patches
                     TMP_Text priceText = ConfigureCustomPrice(item);
 
                     priceText.text = !_lastHasPrice
-                        ? "Loading..."
+                        ? HexLocalizationManager.Localize("$hex_dvergr_loading")
                         : _lastSapCost > 0
-                            ? $"1 Trophy + {_lastSapCost} Sap"
-                            : "1 Trophy";
+                            ? HexLocalizationManager.Localize("$hex_dvergr_trophy_sap_price", _lastSapCost)
+                            : HexLocalizationManager.Localize("$hex_dvergr_trophy_price");
                 }
             }
         }
@@ -225,7 +230,7 @@ namespace HexDvergrAllies.Patches
 
                 if (textComponent.text == localizedName || textComponent.text == sharedName || textComponent.text == "Tasty Mead")
                 {
-                    textComponent.text = "Forge Pact";
+                    textComponent.text = HexLocalizationManager.Localize("$hex_dvergr_forge_pact_name");
                     return;
                 }
             }
@@ -236,7 +241,7 @@ namespace HexDvergrAllies.Patches
 
                 if (objectName == "name" || objectName == "itemname" || objectName == "item_name")
                 {
-                    textComponent.text = "Forge Pact";
+                    textComponent.text = HexLocalizationManager.Localize("$hex_dvergr_forge_pact_name");
                     return;
                 }
             }
