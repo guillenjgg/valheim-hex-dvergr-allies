@@ -16,6 +16,9 @@ namespace HexDvergrAllies
         internal static ConfigEntry<float> CompanionMovementSpeedMultiplier;
         internal static ConfigEntry<float> CompanionFollowDistance;
         internal static ConfigEntry<float> CompanionTargetScanInterval;
+        internal static ConfigEntry<bool> CompanionEnableDungeonTargetFiltering;
+        internal static ConfigEntry<bool> CompanionEnableDungeonFollowRecovery;
+        internal static ConfigEntry<float> CompanionDungeonFollowRecoveryDelay;
         internal static ConfigEntry<bool> CompanionEnableCombatCircling;
         internal static ConfigEntry<bool> CompanionEnableBloodMagicExperience;
         internal static ConfigEntry<float> CompanionBloodMagicExperienceFactor;
@@ -30,6 +33,11 @@ namespace HexDvergrAllies
 
         internal static void Init(ConfigFile config)
         {
+            CompanionEnableDungeonFollowRecovery = config.Bind("Dvergr Companion", "EnableDungeonFollowRecovery", true, new ConfigDescription("Automatically recover a following companion separated by dungeon walls or floors. Does not affect outdoor following or Sentry mode.", null, new ConfigurationManagerAttributes { Order = 850 }));
+            CompanionDungeonFollowRecoveryDelay = config.Bind("Dvergr Companion", "DungeonFollowRecoveryDelay", 4f, new ConfigDescription("Seconds without progress before recovering a separated dungeon companion to a clear spot on your floor.", new AcceptableValueRange<float>(1f, 30f), new ConfigurationManagerAttributes { Order = 840 }));
+
+            CompanionEnableDungeonTargetFiltering = config.Bind("Dvergr Companion", "EnableDungeonTargetFiltering", true, new ConfigDescription("In dungeons, keep an actionable enemy target and ignore enemies that cannot be reached or attacked with a clear view. Prevents chasing noises through walls and floors.", null, new ConfigurationManagerAttributes { Order = 860 }));
+
             CompanionEnableCombatCircling = config.Bind("Dvergr Companion", "EnableCombatCircling", false, new ConfigDescription("Allow hired Dvergr to periodically stop attacking and circle their enemy. Does not change movement during weapon cooldowns.", null, new ConfigurationManagerAttributes { Order = 870 }));
 
             CompanionTargetScanInterval = config.Bind("Dvergr Companion", "TargetScanInterval", 1f, new ConfigDescription("Seconds between enemy scans for hired Dvergr in Companion and Sentry modes. Lower values scan more often. Does not change attack cooldowns or special delays after giving up a chase.", new AcceptableValueRange<float>(0.1f, 10f), new ConfigurationManagerAttributes { Order = 880 }));

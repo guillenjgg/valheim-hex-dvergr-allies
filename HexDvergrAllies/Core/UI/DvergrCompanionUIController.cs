@@ -29,6 +29,7 @@ namespace HexDvergrAllies.Core.UI
             if (IsVisible)
             {
                 Close();
+
                 return;
             }
 
@@ -348,6 +349,7 @@ namespace HexDvergrAllies.Core.UI
                 _nameInput.interactable = false;
                 _nameInput.SetTextWithoutNotify("");
                 _nameEdited = false;
+
                 return;
             }
 

@@ -54,6 +54,7 @@ namespace HexDvergrAllies.Core.Companions
         internal static void RPC_RecallAccepted(long sender, ZDOID playerId, bool wasSentry)
         {
             var player = Player.m_localPlayer;
+
             if (!player || player.GetZDOID() != playerId || sender != DvergrCompanionManager.GetServerPeerID(ZRoutedRpc.instance))
             {
                 return;

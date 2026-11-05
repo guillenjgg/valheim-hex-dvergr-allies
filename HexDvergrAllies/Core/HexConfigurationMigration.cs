@@ -25,6 +25,7 @@ namespace HexDvergrAllies.Core
                 .ThenBy(pair => pair.Key.Key, System.StringComparer.Ordinal).ToArray();
 
             entries.Clear();
+
             foreach (var entry in ordered)
             {
                 entries.Add(entry.Key, entry.Value);

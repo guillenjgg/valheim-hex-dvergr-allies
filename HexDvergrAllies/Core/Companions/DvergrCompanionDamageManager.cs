@@ -24,6 +24,7 @@ namespace HexDvergrAllies.Core.Companions
             if (DvergrCompanionBehaviorManager.IsImmuneToDamage(character, hit))
             {
                 hit.m_damage.m_damage = 0f;
+
                 return;
             }
 
@@ -69,6 +70,7 @@ namespace HexDvergrAllies.Core.Companions
                 }
 
                 var playerView = player.GetComponent<ZNetView>();
+
                 if (playerView && playerView.IsValid())
                 {
                     ZRoutedRpc.instance.InvokeRoutedRPC(playerView.GetZDO().GetOwner(),
@@ -82,6 +84,7 @@ namespace HexDvergrAllies.Core.Companions
         internal static void RPC_BloodMagicExperience(long sender, ZDOID targetId, ZDOID companionId)
         {
             var player = Player.m_localPlayer;
+
             if (!player || player.IsDead() || !HexDvergrAlliesConfiguration.CompanionEnableBloodMagicExperience.Value)
             {
                 return;
@@ -89,6 +92,7 @@ namespace HexDvergrAllies.Core.Companions
 
             var targetZdo = ZDOMan.instance.GetZDO(targetId);
             var companionZdo = ZDOMan.instance.GetZDO(companionId);
+
             if (targetZdo == null || targetZdo.GetOwner() != sender || companionZdo == null ||
                 !DvergrCompanionState.IsHired(companionZdo) ||
                 DvergrCompanionState.GetOwnerPlayerId(companionZdo) != player.GetPlayerID())
@@ -97,6 +101,7 @@ namespace HexDvergrAllies.Core.Companions
             }
 
             var factor = HexDvergrAlliesConfiguration.CompanionBloodMagicExperienceFactor.Value;
+
             if (factor > 0f)
             {
                 player.RaiseSkill(Skills.SkillType.BloodMagic, factor);

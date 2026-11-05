@@ -33,6 +33,7 @@ namespace HexDvergrAllies.Patches.Companions
             if (character == null || !DvergrCompanionState.IsHired(character))
             {
                 States.Remove(__instance);
+
                 return;
             }
 
@@ -41,12 +42,15 @@ namespace HexDvergrAllies.Patches.Companions
             if (DvergrCompanionShipManager.IsPassenger(character))
             {
                 States.Remove(__instance);
+
                 return;
             }
 
             if (DvergrCompanionSentryMode.IsActive(character))
             {
+                DvergrCompanionDungeonFollowManager.RemoveCharacter(character);
                 States.Remove(__instance);
+
                 return;
             }
 
@@ -55,6 +59,7 @@ namespace HexDvergrAllies.Patches.Companions
             if (nview == null || !nview.IsValid() || !nview.IsOwner())
             {
                 States.Remove(__instance);
+
                 return;
             }
 
@@ -63,27 +68,36 @@ namespace HexDvergrAllies.Patches.Companions
             if (followTarget == null)
             {
                 States.Remove(__instance);
+
                 return;
             }
 
             var distance = Vector3.Distance(character.transform.position, followTarget.transform.position);
 
+            if (DvergrCompanionDungeonFollowManager.Update(__instance))
+            {
+                return;
+            }
+
             if (distance >= ImmediateRecoveryDistance)
             {
                 Recover(character, followTarget, distance, "Distance limit");
                 States.Remove(__instance);
+
                 return;
             }
 
             if (__instance.GetTargetCreature() != null || __instance.GetStaticTarget() != null)
             {
                 States.Remove(__instance);
+
                 return;
             }
 
             if (distance < RecoveryDistance)
             {
                 States.Remove(__instance);
+
                 return;
             }
 
@@ -98,12 +112,14 @@ namespace HexDvergrAllies.Patches.Companions
                 };
 
                 States.Add(__instance, state);
+
                 return;
             }
 
             if (state.FollowTarget != followTarget)
             {
                 States.Remove(__instance);
+
                 return;
             }
 

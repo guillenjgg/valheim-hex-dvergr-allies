@@ -12,6 +12,7 @@ namespace HexDvergrAllies.Core.HexLocalization
         internal static string Localize(string key, params object[] arguments)
         {
             var text = Localization.instance.Localize(key).Replace("\\n", "\n");
+
             return arguments.Length == 0 ? text : string.Format(text, arguments);
         }
 

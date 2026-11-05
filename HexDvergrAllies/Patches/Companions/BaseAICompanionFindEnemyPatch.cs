@@ -16,6 +16,7 @@ namespace HexDvergrAllies.Patches
             }
 
             var character = monsterAI.GetComponent<Character>();
+            __result = DvergrCompanionDungeonTargeting.SelectTarget(monsterAI, __result);
 
             if (DvergrCompanionSentryMode.IsActive(character))
             {
