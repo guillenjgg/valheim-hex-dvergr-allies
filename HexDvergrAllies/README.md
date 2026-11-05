@@ -51,6 +51,8 @@ Use Sentry mode while you're harvesting soft tissue or flametal, for example.
 
 ## Configuration
 
+Your config is updated automatically when the mod starts. Existing values for current options are kept, new options get their defaults, and obsolete options are removed. Settings are saved in the current display order.
+
 Changes apply without restarting. Use Configuration Manager or edit the config file; the file watcher reloads saved changes.
 
 ### Hotkeys
@@ -64,6 +66,7 @@ Changes apply without restarting. Use Configuration Manager or edit the config f
 ### Companion Settings
 
 * **FollowDistance:** Defaults to 2 meters. Controls how close your ally gets before they stop following. This doesn't limit how far they can move during combat.
+* **TargetScanInterval:** Defaults to 1 second. Controls how often hired Dvergr scan for enemies in Companion and Sentry modes. Adjustable from 0.1 to 10 seconds; lower values mean more frequent scans. Changes take effect at the next normal scan reset. Attack cooldowns and special chase delays stay the same.
 * **MovementSpeedMultiplier:** Defaults to 2.5x.
 * **HealthMultiplier:** Defaults to 2x maximum health.
 * **DamageTakenMultiplier:** Defaults to 0.5, meaning 50% less incoming damage.
