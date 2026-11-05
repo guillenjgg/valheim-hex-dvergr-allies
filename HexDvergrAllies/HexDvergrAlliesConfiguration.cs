@@ -38,7 +38,7 @@ namespace HexDvergrAllies
 
             CompanionMovementSpeedMultiplier = config.Bind("Dvergr Companion", "MovementSpeedMultiplier", 2.5f, new ConfigDescription("Movement speed multiplier for hired Dvergr companions.", new AcceptableValueRange<float>(1f, 5f), new ConfigurationManagerAttributes { Order = 900 }));
 
-            CompanionFollowDistance = config.Bind("Dvergr Companion", "FollowDistance", 5f, new ConfigDescription("Desired following distance in meters. Not implemented yet.", new AcceptableValueRange<float>(1f, 30f), new ConfigurationManagerAttributes { Order = 890, IsAdvanced = true }));
+            CompanionFollowDistance = config.Bind("Dvergr Companion", "FollowDistance", 2f, new ConfigDescription("Desired following distance in meters. Not implemented yet.", new AcceptableValueRange<float>(1f, 30f), new ConfigurationManagerAttributes { Order = 890, IsAdvanced = true }));
 
             CompanionHealthMultiplier = config.Bind("Dvergr Companion", "HealthMultiplier", 2f, new ConfigDescription("Maximum health multiplier for hired Dvergr companions.", new AcceptableValueRange<float>(1f, 10f), new ConfigurationManagerAttributes { Order = 800 }));
 
@@ -46,7 +46,7 @@ namespace HexDvergrAllies
 
             CompanionDamageDealtMultiplier = config.Bind("Dvergr Companion", "DamageDealtMultiplier", 1.5f, new ConfigDescription("Outgoing damage multiplier for hired Dvergr companions. 1.5 means 50% more damage.", new AcceptableValueRange<float>(0f, 10f), new ConfigurationManagerAttributes { Order = 780 }));
 
-            CompanionAttackSpeedMultiplier = config.Bind("Dvergr Companion", "AttackSpeedMultiplier", 2.0f, new ConfigDescription("Attack cooldown speed multiplier. 2.0 means 100% faster cooldown recovery.", new AcceptableValueRange<float>(1f, 5f), new ConfigurationManagerAttributes { Order = 770 }));
+            CompanionAttackSpeedMultiplier = config.Bind("Dvergr Companion", "AttackSpeedMultiplier", 3.0f, new ConfigDescription("Attack cooldown speed multiplier. 2.0 means 100% faster cooldown recovery.", new AcceptableValueRange<float>(1f, 5f), new ConfigurationManagerAttributes { Order = 770 }));
 
             CompanionEnableAutoHealing = config.Bind("Dvergr Companion", "EnableAutoHealing", true, new ConfigDescription("Automatically heals hired Dvergr companions when their health reaches the configured threshold.", null, new ConfigurationManagerAttributes { Order = 700 }));
 

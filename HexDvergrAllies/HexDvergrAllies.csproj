@@ -17,7 +17,7 @@
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\..\..\..\AppData\Roaming\com.kesomannen.gale\valheim\profiles\Dev\BepInEx\plugins\HexDvergrAllies\</OutputPath>
+    <OutputPath>..\..\..\debug_builds\HexDvergrAllies\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>

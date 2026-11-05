@@ -27,10 +27,10 @@ namespace HexDvergrAllies.Patches
                 return;
             }
 
-            if (DvergrCompanionModeManager.ShouldSuppressAutomaticTargeting(__instance))
-            {
-                __result = null;
-            }
+            //if (DvergrCompanionModeManager.ShouldSuppressAutomaticTargeting(__instance))
+            //{
+            //    __result = null;
+            //}
         }
     }
 }
