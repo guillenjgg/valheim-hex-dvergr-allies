@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using HexDvergrAllies.Core.Companions;
 
 namespace HexDvergrAllies.Patches.Companions
@@ -6,36 +6,14 @@ namespace HexDvergrAllies.Patches.Companions
     [HarmonyPatch(typeof(Character), nameof(Character.ApplyDamage))]
     internal static class CharacterCompanionDamagePatch
     {
-        private static void Prefix(Character __instance, HitData hit)
+        private static void Prefix(Character __instance, HitData hit, out DvergrCompanionDamageManager.DamageState __state)
         {
-            var netView = __instance.GetComponent<ZNetView>();
+            DvergrCompanionDamageManager.BeforeDamage(__instance, hit, out __state);
+        }
 
-            if (netView == null || !netView.IsValid() || !netView.IsOwner())
-            {
-                return;
-            }
-
-            if (DvergrCompanionBehaviorManager.IsImmuneToDamage(__instance, hit))
-            {
-                hit.m_damage.m_damage = 0f;
-                return;
-            }
-
-            if (DvergrCompanionState.IsHired(__instance))
-            {
-                var damageTakenMultiplier = HexDvergrAlliesConfiguration.CompanionDamageTakenMultiplier.Value;
-                hit.ApplyModifier(damageTakenMultiplier);
-            }
-
-            var attacker = hit.GetAttacker();
-
-            if (attacker == null || !DvergrCompanionState.IsHired(attacker))
-            {
-                return;
-            }
-
-            var damageDealtMultiplier = HexDvergrAlliesConfiguration.CompanionDamageDealtMultiplier.Value;
-            hit.ApplyModifier(damageDealtMultiplier);
+        private static void Postfix(Character __instance, DvergrCompanionDamageManager.DamageState __state)
+        {
+            DvergrCompanionDamageManager.AfterDamage(__instance, __state);
         }
     }
 }

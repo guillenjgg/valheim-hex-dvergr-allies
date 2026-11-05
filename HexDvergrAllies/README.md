@@ -9,6 +9,7 @@ Hire Dvergr to fight beside you, trade with them, and set up temporary homestead
 ## Features
 
 * Hire a Dvergr ally to fight beside you.
+* Earn Blood Magic experience when your hired ally damages a creature. You can turn this off in the config.
 * Trade for Dvergr extractors, soft tissue, and flametal.
 * Adjust companion settings like follow distance, movement speed, health, attack speed, damage, and auto-healing.
 * Your ally follows you through portals.
@@ -68,6 +69,8 @@ Changes apply without restarting. Use Configuration Manager or edit the config f
 * **DamageTakenMultiplier:** Defaults to 0.5, meaning 50% less incoming damage.
 * **DamageDealtMultiplier:** Defaults to 1.5x damage.
 * **AttackSpeedMultiplier:** Defaults to 3x. Speeds up attack animations and cooldown recovery.
+* **EnableBloodMagicExperience:** Enabled by default. Damaging hits from your hired Dvergr give you Blood Magic experience, including killing blows. Hits that do no health damage and hits against players or structures give no experience.
+* **BloodMagicExperienceFactor:** Defaults to 1. Adjusts the experience per damaging hit using normal skill progression, rather than adding whole skill levels.
 * **EnableAutoHealing:** Enabled by default. Your ally heals to full at 50% health, with a 60-second cooldown. Adjust these with `AutoHealThreshold` and `AutoHealCooldown`.
 
 You can also toggle player damage protection for Dvergr and temporary homesteads in Dvergr towns. Debug logs are available under advanced settings.

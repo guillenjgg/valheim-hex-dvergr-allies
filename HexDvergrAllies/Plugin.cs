@@ -15,7 +15,7 @@ namespace HexDvergrAllies
     {
         internal const string PluginGuid = "com.hex.dvergr.allies";
         private const string PluginName = "HexDvergrAllies";
-        private const string PluginVersion = "0.0.1";
+        private const string PluginVersion = "0.0.2";
 
         private Harmony _harmonyInstance;
         private FileSystemWatcher _configFileWatcher;
