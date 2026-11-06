@@ -430,3 +430,7 @@ FodyWeavers.xsd
 # Version diagnostic source patches; keep build output folders ignored.
 !HexDvergrAllies/Patches/Debug/
 !HexDvergrAllies/Patches/Debug/**
+
+# Local verification notes and scripts (not part of the mod).
+/tests/
+/docs/starter-encounter-testing.md

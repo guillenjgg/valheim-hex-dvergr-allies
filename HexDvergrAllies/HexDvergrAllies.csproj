@@ -199,6 +199,15 @@
     <Compile Include="Patches\Combat\WearNTearRPCDamagePatch.cs" />
     <Compile Include="Patches\Networking\ZRoutedRpcRegistrationPatch.cs" />
     <Compile Include="Patches\UI\PlayerControllerCompanionUIPatch.cs" />
+    <Compile Include="Core\Features\Progression\DvergrStarterEncounterManager.cs" />
+    <Compile Include="Core\Features\Progression\DvergrStarterEncounter.cs" />
+    <Compile Include="Core\Features\Progression\DvergrStarterCharacterState.cs" />
+    <Compile Include="Core\Features\Progression\DvergrStarterEligibility.cs" />
+    <Compile Include="Core\Features\Progression\DvergrStarterTerrainRules.cs" />
+    <Compile Include="Core\Features\Progression\DvergrStarterWorldAccess.cs" />
+    <Compile Include="Core\Features\Progression\DvergrStarterMapRefreshGuard.cs" />
+    <Compile Include="Patches\Networking\ZoneSystemStarterKeyMapPatch.cs" />
+    <Compile Include="Core\UI\DvergrTraderDisplayManager.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

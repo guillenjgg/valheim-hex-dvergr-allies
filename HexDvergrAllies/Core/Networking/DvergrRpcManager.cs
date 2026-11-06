@@ -31,6 +31,8 @@ namespace HexDvergrAllies.Core.Networking
 
         internal static void RegisterRoutedRpcs()
         {
+            ZRoutedRpc.instance.Register<ZDOID, bool>(Features.Progression.DvergrStarterEncounterManager.RegisterRpc, Features.Progression.DvergrStarterEncounterManager.OnRegister);
+            ZRoutedRpc.instance.Register<ZDOID, ZDOID>(Features.Progression.DvergrStarterEncounterManager.AcceptedRpc, Features.Progression.DvergrStarterEncounterManager.OnAccepted);
             ZRoutedRpc.instance.Register<ZDOID, ZDOID>(BloodMagicExperienceRpc, DvergrCompanionDamageManager.RPC_BloodMagicExperience);
             ZRoutedRpc.instance.Register<ZDOID, ZDOID>(RemoteSetModeRpc, DvergrCompanionModeManager.RPC_RemoteSetMode);
             ZRoutedRpc.instance.Register<ZDOID, ZDOID, Vector3>(RemoteRecallRpc, DvergrCompanionRecallManager.RPC_RemoteRecall);

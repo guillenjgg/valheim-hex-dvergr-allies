@@ -39,3 +39,7 @@ hex_dvergr_flametal_tooltip,"Trade {0} Molten Core for {1} Flametal."
 hex_dvergr_store_unavailable,Unable to open the Dvergr store.
 hex_dvergr_store_busy,This Dvergr is currently trading with another player.
 hex_dvergr_store_too_far,Too far away from the Dvergr.
+hex_dvergr_starter_camp,Dvergr camp
+hex_dvergr_starter_free,Free
+hex_dvergr_starter_rejected,The pact could not be established.
+hex_dvergr_starter_offer,This survivor offers a free pact. You can have one companion at a time.

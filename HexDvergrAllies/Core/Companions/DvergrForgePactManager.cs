@@ -38,9 +38,9 @@ namespace HexDvergrAllies.Core.Companions
 
             var paymentName = DvergrTraderManager.GetForgePactPaymentName();
             var inventory = player.GetInventory();
-            var cost = DvergrPricingConfig.ForgePactCost;
+            var cost = Core.Features.Progression.DvergrStarterEncounterManager.PactCost(character);
 
-            if (string.IsNullOrEmpty(paymentName) || inventory.CountItems(paymentName) < cost)
+            if (cost > 0 && (string.IsNullOrEmpty(paymentName) || inventory.CountItems(paymentName) < cost))
             {
                 return;
             }
@@ -53,7 +53,10 @@ namespace HexDvergrAllies.Core.Companions
             _pendingInventory = inventory;
             _pendingCost = cost;
 
-            inventory.RemoveItem(paymentName, cost);
+            if (cost > 0)
+            {
+                inventory.RemoveItem(paymentName, cost);
+            }
 
             if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
             {
@@ -86,6 +89,11 @@ namespace HexDvergrAllies.Core.Companions
             {
                 if (player)
                 {
+                    if (Features.Progression.DvergrStarterCharacterState.IsStarter(character))
+                    {
+                        Features.Progression.DvergrStarterCharacterState.SaveLocalCompletion(player);
+                    }
+
                     player.Message(MessageHud.MessageType.Center, HexLocalizationManager.Localize("$hex_dvergr_pact_established"));
                 }
 
@@ -98,8 +106,11 @@ namespace HexDvergrAllies.Core.Companions
             {
                 if (player)
                 {
-                    inventory.AddItem(PrefabHelper.MeadTasty, cost, 1, 0, 0L, "", false, false);
-                    player.Message(MessageHud.MessageType.Center, HexLocalizationManager.Localize("$hex_dvergr_pact_refunded"));
+                    if (cost > 0)
+                    {
+                        inventory.AddItem(PrefabHelper.MeadTasty, cost, 1, 0, 0L, "", false, false);
+                    }
+                    player.Message(MessageHud.MessageType.Center, HexLocalizationManager.Localize(cost > 0 ? "$hex_dvergr_pact_refunded" : "$hex_dvergr_starter_rejected"));
                 }
 
                 if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
@@ -123,7 +134,8 @@ namespace HexDvergrAllies.Core.Companions
                 return;
             }
 
-            var success = TryHire(character, playerId);
+            var playerZdo = ZDOMan.instance.GetZDO(playerId);
+            var success = playerZdo != null && playerZdo.GetOwner() == sender && TryHire(character, playerId);
             nview.InvokeRPC(sender, DvergrRpcManager.HireResultRpc, playerId, requestId, success);
         }
 
@@ -159,7 +171,7 @@ namespace HexDvergrAllies.Core.Companions
         {
             var player = DvergrCompanionManager.ResolvePlayer(playerId);
 
-            if (!player || !DvergrInteractionHelper.IsWithinRange(player, character))
+            if (!player || !DvergrInteractionHelper.IsWithinRange(player, character) || !Features.Progression.DvergrStarterCharacterState.CanHire(player, character))
             {
                 return false;
             }
@@ -203,6 +215,7 @@ namespace HexDvergrAllies.Core.Companions
 
             monsterAI.ResetPatrolPoint();
             monsterAI.SetFollowTarget(player.gameObject);
+            Features.Progression.DvergrStarterCharacterState.OnPactAccepted(player, character);
 
             if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
             {

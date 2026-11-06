@@ -104,6 +104,16 @@ namespace HexDvergrAllies.Core.Trading
                 return false;
             }
 
+            if (!Features.Progression.DvergrStarterCharacterState.CanHire(player, character))
+            {
+                return false;
+            }
+
+            if (Features.Progression.DvergrStarterCharacterState.HasFreePact(player, character))
+            {
+                return true;
+            }
+
             string paymentName = GetForgePactPaymentName();
 
             if (string.IsNullOrEmpty(paymentName))
@@ -163,7 +173,7 @@ namespace HexDvergrAllies.Core.Trading
                 return;
             }
 
-            trader.m_items.Add(new Trader.TradeItem { m_prefab = prefab.GetComponent<ItemDrop>(), m_stack = 1, m_price = 0, m_tooltip = HexLocalizationManager.Localize("$hex_dvergr_pact_tooltip", DvergrPricingConfig.ForgePactCostDisplay), m_buyPlayerEffects = new EffectList() });
+            trader.m_items.Add(new Trader.TradeItem { m_prefab = prefab.GetComponent<ItemDrop>(), m_stack = 1, m_price = 0, m_tooltip = HexLocalizationManager.Localize("$hex_dvergr_pact_tooltip", Core.Features.Progression.DvergrStarterEncounterManager.PactPrice(trader.GetComponent<Character>())), m_buyPlayerEffects = new EffectList() });
         }
 
         private static void AddMistlandsItems(Trader trader)

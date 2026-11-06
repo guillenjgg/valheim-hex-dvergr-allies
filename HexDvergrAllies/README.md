@@ -18,6 +18,16 @@ Hire Dvergr to fight beside you, trade with them, and set up temporary homestead
 * They teleport aboard your ship when you board.
 * Press `F9` to open the ally command UI. Switch modes, rename your ally, recall them, or break your pact. The keybind is configurable.
 
+### Your First Dvergr
+
+Each character gets a starter Dvergr camp near the world's starting stones. Look for **Dvergr camp** on your map. It has a small roofed shelter, a fire, and a Dvergr offering that character one free pact. If the site has a usable coast, it also gets a shipwreck.
+
+The server searches 60–200 meters from the starting stones and creates the encounter automatically. You don't have to approach it to trigger spawning. The marker appears after placement succeeds. Trees, rocks, player buildings, and protected locations are left alone; the search skips blocked sites. If no site fits within 200 meters, the log explains why instead of sending you farther away.
+
+Hiring your starter ends the introduction and removes its camp marker. Completion is saved with your character and carries across worlds. Another character gets their own encounter and cannot hire your starter. You can still only have one companion at a time. Other Dvergr charge normally, and releasing your starter does not grant another free pact.
+
+Already-hired survivors from the old shared encounter count as a completed introduction. Existing camps and companions are left in place. Install the mod on the server and every player who needs its features.
+
 ### Ally Modes
 
 Press `Left Ctrl + P` to switch between Sentry and Companion mode. A center-screen message confirms the new mode. You can change the keybind under `SentryShortcut` in the config.

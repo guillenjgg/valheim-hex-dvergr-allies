@@ -46,6 +46,7 @@ namespace HexDvergrAllies
             _harmonyInstance.PatchAll(Assembly.GetExecutingAssembly());
 
             DvergrTradeTerminalCommands.Register();
+            gameObject.AddComponent<Core.Features.Progression.DvergrStarterEncounterManager>();
 
             Log.LogInfo($"{PluginName} v{PluginVersion} loaded.");
         }
