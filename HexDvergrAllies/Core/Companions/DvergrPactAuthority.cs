@@ -170,7 +170,7 @@ namespace HexDvergrAllies.Core.Companions
 
             try
             {
-                if (HasCompanionOrPendingPact(characterId) || (companion.GetBool(DvergrStarterCharacterState.StarterKey, false) && !DvergrStarterEligibility.CanHire(characterId, companion.GetLong(DvergrStarterCharacterState.CharacterKey, 0L), ZoneSystem.instance.GetGlobalKey(DvergrStarterCharacterState.DoneKey(characterId)) || player.GetBool(DvergrStarterCharacterState.CompletedKey, false), companion.GetBool(DvergrStarterCharacterState.ConsumedKey, false))))
+                if (HasCompanionOrPendingPact(characterId) || (companion.GetBool(DvergrStarterCharacterState.StarterKey, false) && !DvergrStarterEligibility.CanHire(characterId, companion.GetLong(DvergrStarterCharacterState.CharacterKey, 0L), ZoneSystem.instance.GetGlobalKey(DvergrStarterCharacterState.DoneKey(characterId)), companion.GetBool(DvergrStarterCharacterState.ConsumedKey, false))))
                 {
                     Reply(sender, playerId, companionId, requestId, false);
                     return;

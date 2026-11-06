@@ -9,7 +9,6 @@ namespace HexDvergrAllies.Core.Features.Progression
         internal const string StarterKey = "hex_starter_dvergr";
         internal const string CharacterKey = "hex_starter_character";
         internal const string ConsumedKey = "hex_starter_consumed";
-        internal const string CompletedKey = "hex_starter_intro_complete";
 
         internal static string WorldPrefix(long characterId)
         {
@@ -28,10 +27,7 @@ namespace HexDvergrAllies.Core.Features.Progression
                 return false;
             }
 
-            var view = player.GetComponent<ZNetView>();
-            var localComplete = player == Player.m_localPlayer && player.m_customData.ContainsKey(CompletedKey);
-
-            return localComplete || (ZoneSystem.instance && ZoneSystem.instance.GetGlobalKey(DoneKey(player.GetPlayerID()))) || (view && view.IsValid() && view.GetZDO().GetBool(CompletedKey, false));
+            return ZoneSystem.instance && ZoneSystem.instance.GetGlobalKey(DoneKey(player.GetPlayerID()));
         }
 
         internal static bool HasAcceptedStarter(Player player)
@@ -46,22 +42,6 @@ namespace HexDvergrAllies.Core.Features.Progression
             var intendedCharacter = companion.GetLong(CharacterKey, 0L);
 
             return intendedCharacter == 0L || intendedCharacter == player.GetPlayerID();
-        }
-
-        internal static void SaveLocalCompletion(Player player)
-        {
-            if (!player || player != Player.m_localPlayer)
-            {
-                return;
-            }
-
-            player.m_customData[CompletedKey] = "1";
-            var view = player.GetComponent<ZNetView>();
-
-            if (view && view.IsValid() && view.IsOwner())
-            {
-                view.GetZDO().Set(CompletedKey, true);
-            }
         }
 
         internal static bool IsStarter(Character character)

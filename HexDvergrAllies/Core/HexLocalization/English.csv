@@ -52,3 +52,5 @@ hex_dvergr_fallen_brother_tooltip,Trade {0} allowed enemy trophies for one falle
 hex_dvergr_accepted_trophies,Accepted Trophies:
 hex_dvergr_accepted_trophy_names,Seeker\nSeeker Soldier\nGjall
 hex_dvergr_starter_journey,"Begin a journey with a friend, and grow stronger together."
+hex_dvergr_test_kill,Kill starter
+hex_dvergr_test_reset,Respawn starter (reset pact)

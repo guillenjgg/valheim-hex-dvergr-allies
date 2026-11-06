@@ -7,7 +7,7 @@
 - Add 2 blue jute for 500 coins and 1 fallen brother trophy for 4 allowed enemy trophies to normal Mistlands stores.
 - Give each character a starter camp 60–200 meters from the starting stones, with a shelter, fire, and personal Dvergr.
 - Add a shipwreck when a nearby coastal site can support it; land camps do not need a coast.
-- Save introduction completion with the character after an accepted free pact. Hide its camp marker and prevent another free introduction across worlds.
+- Save introduction completion per character, per world after an accepted free pact. Hide its camp marker and prevent repeat introductions in that world; starters do not travel between worlds.
 - Use the Dvergr portrait for personal map/minimap pins. Keep the map open during encounter updates.
 - Keep normal paid pacts, the one-companion rule, and existing companion behavior.
 

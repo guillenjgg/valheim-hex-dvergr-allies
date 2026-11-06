@@ -20,11 +20,11 @@ Hire Dvergr to fight beside you, trade with them, and set up temporary homestead
 
 ### Your First Dvergr
 
-Each character gets a starter Dvergr camp near the world's starting stones. Look for **Dvergr camp** on your map. It has a small roofed shelter, a fire, and a Dvergr offering that character one free pact. If the site has a usable coast, it also gets a shipwreck.
+Each character gets a separate starter Dvergr camp in each world near the world's starting stones. Look for **Dvergr camp** on your map. It has a small roofed shelter, a fire, and a Dvergr offering that character one free pact. If the site has a usable coast, it also gets a shipwreck.
 
 The server searches 60–200 meters from the starting stones and creates the encounter automatically. You don't have to approach it to trigger spawning. The marker appears after placement succeeds. Trees, rocks, player buildings, and protected locations are left alone; the search skips blocked sites. If no site fits within 200 meters, the log explains why instead of sending you farther away.
 
-Hiring your starter ends the introduction and removes its camp marker. Completion is saved with your character and carries across worlds. Another character gets their own encounter and cannot hire your starter. You can still only have one companion at a time. Other Dvergr charge normally, and releasing your starter does not grant another free pact.
+Hiring your starter ends the introduction and removes its camp marker. Completion is saved for that character in that world. Your starter stays in that world; entering another world begins a separate companion journey. Another character gets their own encounter and cannot hire your starter. You can still only have one companion at a time. Other Dvergr charge normally, and releasing your starter does not grant another free pact.
 
 The starter only offers the introduction pact. They do not buy or sell items. Already have a hired Mistlands or Ashlands Dvergr? The camp still appears, but its pact stays blocked until you no longer own a companion—even if that companion is far away after a reload. Owning a normal Dvergr does not complete the introduction.
 
@@ -32,7 +32,9 @@ The starter is immune to damage until hired. After the first pact, normal compan
 
 Already-hired survivors from the old shared encounter count as a completed introduction. Existing camps and companions are left in place. Install the mod on the server and every player who needs its features.
 
-### New Mistlands Stock
+Temporary testing buttons are available under **Debug** in BepInEx Configuration Manager: **Kill starter** kills your loaded starter; **Respawn starter (reset pact)** removes your starter and restores the free pact at the existing camp. Both work only for the local host. Reset affects only your character in the current world and keeps camp structures.
+
+## New Mistlands Stock
 
 Normal Mistlands Dvergr sell **2 blue jute for 500 coins** and **1 fallen brother trophy for 4 allowed enemy trophies**. You can mix trophies from the same allowed list used for extractors. This trophy purchase does not need Sap or change the world's extractor purchase count. The starter Dvergr does not offer this stock.
 

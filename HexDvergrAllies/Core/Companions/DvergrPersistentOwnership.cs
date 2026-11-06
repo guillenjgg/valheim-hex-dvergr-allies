@@ -49,6 +49,21 @@ namespace HexDvergrAllies.Core.Companions
             return objects.Values;
         }
 
+        internal static List<ZDO> GetStarters(long characterId)
+        {
+            var starters = new List<ZDO>();
+
+            foreach (var zdo in GetRecords())
+            {
+                if (zdo.IsValid() && DvergrPrefabs.Contains(zdo.GetPrefab()) && zdo.GetBool(Features.Progression.DvergrStarterCharacterState.StarterKey, false) && zdo.GetLong(Features.Progression.DvergrStarterCharacterState.CharacterKey, 0L) == characterId)
+                {
+                    starters.Add(zdo);
+                }
+            }
+
+            return starters;
+        }
+
         internal static bool HasCompanion(long characterId)
         {
             if (!ReferenceEquals(_indexedWorld, ZDOMan.instance))

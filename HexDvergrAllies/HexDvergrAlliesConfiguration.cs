@@ -74,6 +74,30 @@ namespace HexDvergrAllies
 
             CompanionAutoHealCooldown = config.Bind("Dvergr Companion", "AutoHealCooldown", 60f, new ConfigDescription("Minimum number of seconds between automatic heals for each companion.", new AcceptableValueRange<float>(0f, 3600f), new ConfigurationManagerAttributes { Order = 680 }));
 
+            config.Bind("Debug", "StarterTestKill", false, new ConfigDescription("Temporary host-only test control: kill your loaded starter, bypassing pre-hire immunity.", null, new ConfigurationManagerAttributes
+            {
+                HideDefaultButton = true,
+                CustomDrawer = _ =>
+                {
+                    if (GUILayout.Button(Core.HexLocalization.HexLocalizationManager.Localize("$hex_dvergr_test_kill")))
+                    {
+                        Core.Features.Progression.DvergrStarterEncounterManager.RequestTestControl(false);
+                    }
+                }
+            }));
+
+            config.Bind("Debug", "StarterTestReset", false, new ConfigDescription("Temporary host-only test control: remove your starter and restore the free pact at the existing camp in this world. Keeps camp structures.", null, new ConfigurationManagerAttributes
+            {
+                HideDefaultButton = true,
+                CustomDrawer = _ =>
+                {
+                    if (GUILayout.Button(Core.HexLocalization.HexLocalizationManager.Localize("$hex_dvergr_test_reset")))
+                    {
+                        Core.Features.Progression.DvergrStarterEncounterManager.RequestTestControl(true);
+                    }
+                }
+            }));
+
             EnableDebugLogs = config.Bind("Debug", "EnableDebugLogs", false, new ConfigDescription("Logs Dvergr damage events, status effects, and AI states.", null, new ConfigurationManagerAttributes { Order = 100, IsAdvanced = true }));
 
             CompanionUIShortcut = config.Bind("Dvergr Companion", "UIShortcut", new KeyboardShortcut(KeyCode.F9), new ConfigDescription("Keyboard shortcut to open or close the Dvergr Companion Management UI.", null, new ConfigurationManagerAttributes { Order = 1010 }));

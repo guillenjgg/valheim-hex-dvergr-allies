@@ -26,6 +26,7 @@ namespace HexDvergrAllies.Core.Features.Progression
         private Minimap.PinData _pin;
         private long _pinCharacter;
         private float _nextRegistration;
+        private int _testAction;
 
         internal static bool IsStarter(Character character) => DvergrStarterCharacterState.IsStarter(character);
         internal static bool HasFreePact(Character character) => DvergrStarterCharacterState.HasFreePact(Player.m_localPlayer, character);
@@ -55,6 +56,7 @@ namespace HexDvergrAllies.Core.Features.Progression
                 _legacyIndex = 0;
                 _legacyScanComplete = false;
                 _nextRegistration = 0f;
+                _testAction = 0;
             }
 
             if (!world || !ZNet.instance || !ZNetScene.instance || !Game.instance || ZDOMan.instance == null || ZRoutedRpc.instance == null || WorldGenerator.instance == null)
@@ -62,6 +64,7 @@ namespace HexDvergrAllies.Core.Features.Progression
                 return;
             }
 
+            UpdateTestControls();
             DvergrPactAuthority.Update();
             var player = Player.m_localPlayer;
 
@@ -70,16 +73,10 @@ namespace HexDvergrAllies.Core.Features.Progression
                 _nextRegistration = Time.time + 5f;
                 var completed = DvergrStarterCharacterState.HasCompleted(player) || DvergrStarterCharacterState.HasAcceptedStarter(player);
 
-                if (completed)
-                {
-                    DvergrStarterCharacterState.SaveLocalCompletion(player);
-                }
-
                 var view = player.GetComponent<ZNetView>();
 
                 if (view && view.IsValid() && view.IsOwner())
                 {
-                    view.GetZDO().Set(DvergrStarterCharacterState.CompletedKey, completed);
                     ZRoutedRpc.instance.InvokeRoutedRPC(DvergrCompanionManager.GetServerPeerID(ZRoutedRpc.instance), RegisterRpc, player.GetZDOID(), completed);
                 }
             }
@@ -183,6 +180,79 @@ namespace HexDvergrAllies.Core.Features.Progression
             }
         }
 
+        internal static void RequestTestControl(bool reset)
+        {
+            if (_instance && ZNet.instance && ZNet.instance.IsServer() && Player.m_localPlayer)
+            {
+                _instance._testAction = reset ? 2 : 1;
+            }
+        }
+
+        private void UpdateTestControls()
+        {
+            var action = _testAction;
+            _testAction = 0;
+            var player = Player.m_localPlayer;
+
+            if (action == 0 || !ZNet.instance.IsServer() || !player || player.IsDead() || player.GetPlayerID() == 0L || DvergrForgePactManager.IsHirePending)
+            {
+                return;
+            }
+
+            var reset = action == 2;
+
+            var characterId = player.GetPlayerID();
+            var starters = DvergrPersistentOwnership.GetStarters(characterId);
+
+            foreach (var zdo in starters)
+            {
+                var instance = ZNetScene.instance.FindInstance(zdo.m_uid);
+                var character = instance ? instance.GetComponent<Character>() : null;
+
+                if (!reset)
+                {
+                    if (character)
+                    {
+                        character.GetComponent<ZNetView>().ClaimOwnership();
+                        character.SetHealth(0f);
+                    }
+
+                    continue;
+                }
+
+                if (character)
+                {
+                    character.GetComponent<ZNetView>().ClaimOwnership();
+                    DvergrCompanionManager.OnCompanionDeath(character);
+                    ZNetScene.instance.Destroy(instance);
+                }
+                else
+                {
+                    zdo.SetOwner(DvergrCompanionManager.GetServerPeerID(ZRoutedRpc.instance));
+                    ZDOMan.instance.DestroyZDO(zdo);
+                }
+            }
+
+            if (!reset)
+            {
+                Plugin.Log.LogInfo("[Starter Test] Kill requested for loaded starters belonging to character " + characterId);
+                return;
+            }
+
+            DvergrForgePactManager.ResetSessionState();
+            var prefix = DvergrStarterCharacterState.WorldPrefix(characterId);
+            _world.RemoveGlobalKey(DvergrStarterCharacterState.DoneKey(characterId));
+            _world.RemoveGlobalKey(prefix + "built");
+            _world.RemoveGlobalKey(prefix + "slot_dvergr");
+            _registered[characterId] = false;
+            _legacyCompleted.Remove(characterId);
+            _legacyDvergr.RemoveAll(zdo => zdo.GetLong(DvergrStarterCharacterState.CharacterKey, 0L) == characterId);
+            _recoverAt.Remove(characterId);
+            _encounters[characterId] = new DvergrStarterEncounter(characterId);
+            RemovePin();
+            Plugin.Log.LogInfo("[Starter Test] Introduction reset at existing camp for character " + characterId);
+        }
+
         internal static void OnRegister(long sender, ZDOID playerId, bool completed)
         {
             if (!_instance || !ZNet.instance || !ZNet.instance.IsServer())
@@ -200,7 +270,8 @@ namespace HexDvergrAllies.Core.Features.Progression
 
             bool previous;
             _instance._registered.TryGetValue(characterId, out previous);
-            _instance._registered[characterId] = previous || completed;
+            // Completion belongs to this world; never import a client profile flag.
+            _instance._registered[characterId] = previous || ZoneSystem.instance.GetGlobalKey(DvergrStarterCharacterState.DoneKey(characterId));
         }
 
         internal static void OnAccepted(long sender, ZDOID playerId, ZDOID companionId)

@@ -9,6 +9,8 @@ namespace HexDvergrAllies.Core.Companions
 {
     internal static class DvergrForgePactManager
     {
+        internal static bool IsHirePending => _hirePending;
+
         private static bool _hirePending;
         private static long _pendingRequestId;
         private static ZDOID _pendingCompanionId;
@@ -16,7 +18,6 @@ namespace HexDvergrAllies.Core.Companions
         private static Player _pendingPlayer;
         private static Inventory _pendingInventory;
         private static int _pendingCost;
-        private static bool _pendingStarter;
 
         internal static void ResetSessionState()
         {
@@ -29,7 +30,6 @@ namespace HexDvergrAllies.Core.Companions
             _pendingPlayer = null;
             _pendingInventory = null;
             _pendingCost = 0;
-            _pendingStarter = false;
         }
 
         internal static void RequestForgePact(Player player, Character character)
@@ -67,7 +67,6 @@ namespace HexDvergrAllies.Core.Companions
             _pendingPlayer = player;
             _pendingInventory = inventory;
             _pendingCost = cost;
-            _pendingStarter = Features.Progression.DvergrStarterCharacterState.IsStarter(character);
 
             if (cost > 0)
             {
@@ -103,11 +102,6 @@ namespace HexDvergrAllies.Core.Companions
             {
                 if (player)
                 {
-                    if (_pendingStarter)
-                    {
-                        Features.Progression.DvergrStarterCharacterState.SaveLocalCompletion(player);
-                    }
-
                     player.Message(MessageHud.MessageType.Center, HexLocalizationManager.Localize("$hex_dvergr_pact_established"));
                 }
 
