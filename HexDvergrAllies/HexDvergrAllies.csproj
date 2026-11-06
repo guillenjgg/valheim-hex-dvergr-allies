@@ -105,6 +105,8 @@
     <Compile Include="Core\Companions\DvergrCompanionUnhireManager.cs" />
     <Compile Include="Core\Networking\DvergrRpcManager.cs" />
     <Compile Include="Core\Companions\DvergrForgePactManager.cs" />
+    <Compile Include="Core\Companions\DvergrPactAuthority.cs" />
+    <Compile Include="Core\Companions\DvergrPersistentOwnership.cs" />
     <Compile Include="Core\Companions\DvergrCompanionManager.cs" />
     <Compile Include="Core\Companions\DvergrCompanionMode.cs" />
     <Compile Include="Core\Companions\DvergrCompanionModeManager.cs" />
@@ -126,6 +128,9 @@
     <Compile Include="Core\UI\DvergrInteractionHelper.cs" />
     <Compile Include="DvergrPricingConfig.cs" />
     <Compile Include="Core\Trading\DvergrTraderManager.cs" />
+    <Compile Include="Core\Trading\DvergrMistlandsStoreManager.cs" />
+    <Compile Include="Core\Trading\DvergrTradeAffordability.cs" />
+    <Compile Include="Core\Trading\DvergrTradePurchaseController.cs" />
     <Compile Include="Core\Trading\DvergrTradeRpcManager.cs" />
     <Compile Include="Core\Trading\DvergrTradeSessionManager.cs" />
     <Compile Include="Core\Trading\DvergrTradeTerminalCommands.cs" />
@@ -203,6 +208,8 @@
     <Compile Include="Core\Features\Progression\DvergrStarterEncounter.cs" />
     <Compile Include="Core\Features\Progression\DvergrStarterCharacterState.cs" />
     <Compile Include="Core\Features\Progression\DvergrStarterEligibility.cs" />
+    <Compile Include="Core\Features\Progression\DvergrStarterVendorService.cs" />
+    <Compile Include="Patches\StoreGui\StoreGuiStarterVendorPatch.cs" />
     <Compile Include="Core\Features\Progression\DvergrStarterTerrainRules.cs" />
     <Compile Include="Core\Features\Progression\DvergrStarterWorldAccess.cs" />
     <Compile Include="Core\Features\Progression\DvergrStarterMapRefreshGuard.cs" />

@@ -71,6 +71,18 @@ namespace HexDvergrAllies.Core.Features.Progression
             return view && view.IsValid() && view.GetZDO().GetBool(StarterKey, false);
         }
 
+        internal static bool IsProtected(Character character)
+        {
+            if (!IsStarter(character))
+            {
+                return false;
+            }
+
+            var zdo = character.GetComponent<ZNetView>().GetZDO();
+
+            return !DvergrCompanionState.IsHired(zdo) && !zdo.GetBool(ConsumedKey, false);
+        }
+
         internal static bool CanHire(Player player, Character character)
         {
             if (!IsStarter(character))

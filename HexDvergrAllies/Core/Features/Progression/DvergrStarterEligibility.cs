@@ -11,7 +11,7 @@ namespace HexDvergrAllies.Core.Features.Progression
 
         internal static bool CanHire(long characterId, long intendedCharacter, bool introductionComplete, bool pactConsumed)
         {
-            return characterId != 0L && intendedCharacter == characterId && (pactConsumed || !introductionComplete);
+            return characterId != 0L && intendedCharacter == characterId && !pactConsumed && !introductionComplete;
         }
     }
 }

@@ -9,7 +9,8 @@ namespace HexDvergrAllies.Core.Trading
     internal enum DvergrPurchaseType
     {
         Extractor = 1,
-        Flametal = 2
+        Flametal = 2,
+        FallenBrother = 3
     }
 
     internal static class DvergrTradeRpcManager
@@ -276,7 +277,7 @@ namespace HexDvergrAllies.Core.Trading
                 }
                 else
                 {
-                    Plugin.Log.LogInfo("[Dvergr Trade] Flametal purchase finalized. Extractor counter unchanged.");
+                    Plugin.Log.LogInfo($"[Dvergr Trade] {(DvergrPurchaseType)purchaseType} purchase finalized. Extractor counter unchanged.");
                 }
             }
             else
@@ -308,12 +309,12 @@ namespace HexDvergrAllies.Core.Trading
 
         private static bool IsValidPurchaseType(int purchaseType)
         {
-            return purchaseType == (int)DvergrPurchaseType.Extractor || purchaseType == (int)DvergrPurchaseType.Flametal;
+            return purchaseType == (int)DvergrPurchaseType.Extractor || purchaseType == (int)DvergrPurchaseType.Flametal || purchaseType == (int)DvergrPurchaseType.FallenBrother;
         }
 
         private static bool IsValidTraderPurchase(ZDO traderZdo, int purchaseType)
         {
-            if (traderZdo == null || !IsValidPurchaseType(purchaseType))
+            if (traderZdo == null || traderZdo.GetBool(Features.Progression.DvergrStarterCharacterState.StarterKey, false) || !IsValidPurchaseType(purchaseType))
             {
                 return false;
             }
@@ -328,7 +329,7 @@ namespace HexDvergrAllies.Core.Trading
 
             Heightmap.Biome biome = Heightmap.FindBiome(traderZdo.GetPosition());
 
-            if (purchaseType == (int)DvergrPurchaseType.Extractor)
+            if (purchaseType == (int)DvergrPurchaseType.Extractor || purchaseType == (int)DvergrPurchaseType.FallenBrother)
             {
                 return biome == Heightmap.Biome.Mistlands;
             }
@@ -417,7 +418,7 @@ namespace HexDvergrAllies.Core.Trading
             GameObject traderObject = ZNetScene.instance.FindInstance(traderZdoId);
             Trader trader = traderObject ? traderObject.GetComponent<Trader>() : null;
 
-            if (!trader || !DvergrTraderManager.IsDvergrTrader(trader))
+            if (!trader || !DvergrTraderManager.IsDvergrTrader(trader) || Features.Progression.DvergrStarterVendorService.IsStarter(trader))
             {
                 Plugin.Log.LogWarning("[Dvergr Trade] Client purchase failed: Trader unavailable.");
                 return false;
@@ -433,6 +434,11 @@ namespace HexDvergrAllies.Core.Trading
                 }
 
                 return ExecuteFlametalPurchase(player);
+            }
+
+            if (purchaseType == DvergrPurchaseType.FallenBrother && biome == Heightmap.Biome.Mistlands)
+            {
+                return DvergrMistlandsStoreManager.PurchaseFallenBrother(player);
             }
 
             if (purchaseType == DvergrPurchaseType.Extractor && biome == Heightmap.Biome.Mistlands)

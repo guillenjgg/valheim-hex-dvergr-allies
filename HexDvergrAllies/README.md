@@ -10,7 +10,7 @@ Hire Dvergr to fight beside you, trade with them, and set up temporary homestead
 
 * Hire a Dvergr ally to fight beside you.
 * Earn Blood Magic experience when your hired ally damages a creature. You can turn this off in the config.
-* Trade for Dvergr extractors, soft tissue, and flametal.
+* Trade for Dvergr extractors, soft tissue, blue jute, fallen brother trophies, and flametal.
 * Adjust companion settings like follow distance, movement speed, health, attack speed, damage, and auto-healing.
 * Your ally follows you through portals.
 * They teleport back to you if they get stuck or fall too far behind.
@@ -26,7 +26,15 @@ The server searches 60–200 meters from the starting stones and creates the enc
 
 Hiring your starter ends the introduction and removes its camp marker. Completion is saved with your character and carries across worlds. Another character gets their own encounter and cannot hire your starter. You can still only have one companion at a time. Other Dvergr charge normally, and releasing your starter does not grant another free pact.
 
+The starter only offers the introduction pact. They do not buy or sell items. Already have a hired Mistlands or Ashlands Dvergr? The camp still appears, but its pact stays blocked until you no longer own a companion—even if that companion is far away after a reload. Owning a normal Dvergr does not complete the introduction.
+
+The starter is immune to damage until hired. After the first pact, normal companion damage rules apply, including after release. There are no replacement starters or repeat pacts after hiring.
+
 Already-hired survivors from the old shared encounter count as a completed introduction. Existing camps and companions are left in place. Install the mod on the server and every player who needs its features.
+
+### New Mistlands Stock
+
+Normal Mistlands Dvergr sell **2 blue jute for 500 coins** and **1 fallen brother trophy for 4 allowed enemy trophies**. You can mix trophies from the same allowed list used for extractors. This trophy purchase does not need Sap or change the world's extractor purchase count. The starter Dvergr does not offer this stock.
 
 ### Ally Modes
 

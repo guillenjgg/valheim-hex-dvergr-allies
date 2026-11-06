@@ -72,7 +72,9 @@ namespace HexDvergrAllies
             try
             {
                 Log.LogDebug("Attempting to reload configuration...");
+
                 Config.Reload();
+
                 if (HexConfigurationMigration.Complete(Config))
                 {
                     Config.Save();
@@ -86,6 +88,8 @@ namespace HexDvergrAllies
 
         private void OnDestroy()
         {
+            Log.LogInfo($"{PluginName} v{PluginVersion} unloaded.");
+
             if (_configFileWatcher != null)
             {
                 _configFileWatcher.EnableRaisingEvents = false;
@@ -100,8 +104,6 @@ namespace HexDvergrAllies
 
             _harmonyInstance?.UnpatchSelf();
             _harmonyInstance = null;
-
-            Log.LogInfo($"{PluginName} v{PluginVersion} unloaded.");
 
             HexLocalizationManager.Shutdown();
 

@@ -63,13 +63,14 @@ namespace HexDvergrAllies.Core.UI
                 CreatePaymentPanel(__instance);
             }
 
+            Features.Progression.DvergrStarterVendorService.Update(trader);
             Heightmap.Biome biome = Heightmap.FindBiome(trader.transform.position);
             bool biomeChanged = biome != _lastBiome;
             var language = Localization.instance.GetSelectedLanguage();
             var languageChanged = language != _lastLanguage;
             _lastLanguage = language;
 
-            if (biomeChanged || languageChanged)
+            if (biomeChanged || languageChanged || Features.Progression.DvergrStarterVendorService.IsStarter(trader))
             {
                 UpdatePaymentPanel(trader);
             }
@@ -146,9 +147,9 @@ namespace HexDvergrAllies.Core.UI
             Heightmap.Biome biome = Heightmap.FindBiome(trader.transform.position);
             _lastBiome = biome;
 
-            if (Core.Features.Progression.DvergrStarterEncounterManager.HasFreePact(trader.GetComponent<Character>()))
+            if (Features.Progression.DvergrStarterVendorService.IsStarter(trader))
             {
-                _paymentText.text = HexLocalizationManager.Localize("$hex_dvergr_starter_offer");
+                _paymentText.text = Features.Progression.DvergrStarterVendorService.Description(trader);
             }
             else if (biome == Heightmap.Biome.AshLands)
             {
@@ -156,7 +157,7 @@ namespace HexDvergrAllies.Core.UI
             }
             else
             {
-                _paymentText.text = "<color=#D9A75D><b>" + HexLocalizationManager.Localize("$hex_dvergr_currency_heading") + "</b></color>\n<size=85%>" + HexLocalizationManager.Localize("$hex_dvergr_trophy_description") + "</size>";
+                _paymentText.text = "<color=#D9A75D><b>" + HexLocalizationManager.Localize("$hex_dvergr_accepted_trophies") + "</b></color>\n<size=85%>" + HexLocalizationManager.Localize("$hex_dvergr_accepted_trophy_names") + "</size>";
             }
         }
 
@@ -180,12 +181,21 @@ namespace HexDvergrAllies.Core.UI
 
                 if (DvergrTraderManager.IsForgePact(tradeItem))
                 {
-                    tradeItem.m_tooltip = HexLocalizationManager.Localize("$hex_dvergr_pact_tooltip", Core.Features.Progression.DvergrStarterEncounterManager.PactPrice(trader.GetComponent<Character>()));
-                    SetForgePactName(item, tradeItem);
+                    tradeItem.m_tooltip = Features.Progression.DvergrStarterVendorService.PactTooltip(trader.GetComponent<Character>());
+                    SetTradeItemName(item, tradeItem, "$hex_dvergr_forge_pact_name");
                     SetForgePactIcon(item);
+                    Features.Progression.DvergrStarterVendorService.UpdatePactTooltip(trader, itemList[i]);
 
                     TMP_Text priceText = ConfigureCustomPrice(item);
                     priceText.text = Core.Features.Progression.DvergrStarterEncounterManager.PactPrice(trader.GetComponent<Character>());
+                    continue;
+                }
+
+                if (DvergrMistlandsStoreManager.IsFallenBrother(tradeItem))
+                {
+                    SetTradeItemName(item, tradeItem, "$hex_dvergr_fallen_brother_name");
+                    TMP_Text priceText = ConfigureCustomPrice(item);
+                    priceText.text = DvergrPricingConfig.FallenBrotherCostDisplay;
                     continue;
                 }
 
@@ -196,7 +206,7 @@ namespace HexDvergrAllies.Core.UI
                     continue;
                 }
 
-                if (tradeItem.m_prefab.gameObject.name == "Softtissue")
+                if (DvergrMistlandsStoreManager.IsCoinPurchase(tradeItem))
                 {
                     continue;
                 }
@@ -214,7 +224,7 @@ namespace HexDvergrAllies.Core.UI
             }
         }
 
-        private static void SetForgePactName(Transform item, Trader.TradeItem tradeItem)
+        private static void SetTradeItemName(Transform item, Trader.TradeItem tradeItem, string localizationKey)
         {
             string sharedName = tradeItem.m_prefab.m_itemData.m_shared.m_name;
             string localizedName = Localization.instance.Localize(sharedName);
@@ -230,7 +240,7 @@ namespace HexDvergrAllies.Core.UI
 
                 if (textComponent.text == localizedName || textComponent.text == sharedName || textComponent.text == "Tasty Mead")
                 {
-                    textComponent.text = HexLocalizationManager.Localize("$hex_dvergr_forge_pact_name");
+                    textComponent.text = HexLocalizationManager.Localize(localizationKey);
                     return;
                 }
             }
@@ -241,7 +251,7 @@ namespace HexDvergrAllies.Core.UI
 
                 if (objectName == "name" || objectName == "itemname" || objectName == "item_name")
                 {
-                    textComponent.text = HexLocalizationManager.Localize("$hex_dvergr_forge_pact_name");
+                    textComponent.text = HexLocalizationManager.Localize(localizationKey);
                     return;
                 }
             }
@@ -293,7 +303,7 @@ namespace HexDvergrAllies.Core.UI
         {
             List<Trader.TradeItem> tradeItems = trader.GetAvailableItems();
 
-            bool canAffordExtractor = HexDvergrAllies.Patches.StoreGuiCanAffordPatch.CanAffordExtractor();
+            bool canAffordExtractor = DvergrTradeAffordability.CanAffordExtractor();
             bool canAffordFlametal = DvergrTraderManager.CanAffordAshlandsFlametal(Player.m_localPlayer);
 
             Character character = trader.GetComponent<Character>();
@@ -308,7 +318,7 @@ namespace HexDvergrAllies.Core.UI
                     continue;
                 }
 
-                if (tradeItem.m_prefab.gameObject.name == "Softtissue")
+                if (DvergrMistlandsStoreManager.IsCoinPurchase(tradeItem))
                 {
                     continue;
                 }
@@ -318,6 +328,10 @@ namespace HexDvergrAllies.Core.UI
                 if (DvergrTraderManager.IsForgePact(tradeItem))
                 {
                     canAfford = canAffordForgePact;
+                }
+                else if (DvergrMistlandsStoreManager.IsFallenBrother(tradeItem))
+                {
+                    canAfford = DvergrMistlandsStoreManager.CanAffordFallenBrother(Player.m_localPlayer);
                 }
                 else if (DvergrTraderManager.IsAshlandsFlametal(tradeItem))
                 {

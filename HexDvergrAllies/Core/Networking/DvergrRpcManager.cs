@@ -31,6 +31,13 @@ namespace HexDvergrAllies.Core.Networking
 
         internal static void RegisterRoutedRpcs()
         {
+            ZRoutedRpc.instance.Register<ZDOID, ZDOID, long>(DvergrPactAuthority.RequestRpc, DvergrPactAuthority.OnRequest);
+            ZRoutedRpc.instance.Register<ZDOID, ZDOID, long, long>(DvergrPactAuthority.CommitRpc, DvergrPactAuthority.OnCommit);
+            ZRoutedRpc.instance.Register<ZDOID, ZDOID, long, bool>(DvergrPactAuthority.AcknowledgeRpc, DvergrPactAuthority.OnAcknowledge);
+            ZRoutedRpc.instance.Register<ZDOID, ZDOID, long, bool>(DvergrPactAuthority.ResultRpc, DvergrForgePactManager.OnAuthoritativeResult);
+            ZRoutedRpc.instance.Register<ZDOID, ZDOID>(Features.Progression.DvergrStarterVendorService.QueryRpc, Features.Progression.DvergrStarterVendorService.OnQuery);
+            ZRoutedRpc.instance.Register<ZDOID, int>(Features.Progression.DvergrStarterVendorService.StatusRpc, Features.Progression.DvergrStarterVendorService.OnStatus);
+            ZRoutedRpc.instance.Register<ZDOID, long>(Features.Progression.DvergrStarterEncounterManager.DeathRpc, Features.Progression.DvergrStarterEncounterManager.OnDeathReported);
             ZRoutedRpc.instance.Register<ZDOID, bool>(Features.Progression.DvergrStarterEncounterManager.RegisterRpc, Features.Progression.DvergrStarterEncounterManager.OnRegister);
             ZRoutedRpc.instance.Register<ZDOID, ZDOID>(Features.Progression.DvergrStarterEncounterManager.AcceptedRpc, Features.Progression.DvergrStarterEncounterManager.OnAccepted);
             ZRoutedRpc.instance.Register<ZDOID, ZDOID>(BloodMagicExperienceRpc, DvergrCompanionDamageManager.RPC_BloodMagicExperience);
@@ -53,8 +60,6 @@ namespace HexDvergrAllies.Core.Networking
 
         internal static void RegisterCharacterRpcs(ZNetView nview, Character character)
         {
-            nview.Register<ZDOID, long>(HireRpc, (sender, playerId, requestId) => DvergrForgePactManager.Hire(character, sender, playerId, requestId));
-            nview.Register<ZDOID, long, bool>(HireResultRpc, (sender, playerId, requestId, success) => DvergrForgePactManager.OnHireResult(character, sender, playerId, requestId, success));
             nview.Register<ZDOID>(UnhireRpc, (sender, playerId) => DvergrCompanionUnhireManager.Unhire(character, sender, playerId));
             nview.Register<ZDOID, string>(RenameRpc, (sender, playerId, name) => DvergrCompanionNameManager.Rename(character, sender, playerId, name));
             nview.Register<ZDOID>(SetModeRpc, (sender, playerId) => DvergrCompanionModeManager.SetMode(character, sender, playerId));

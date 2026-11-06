@@ -10,12 +10,15 @@ namespace HexDvergrAllies.Core.Features.Progression
     internal sealed class DvergrStarterEncounterManager : MonoBehaviour
     {
         internal const string RegisterRpc = "HexDvergrStarterRegister";
+        internal const string DeathRpc = "HexDvergrStarterDeath";
         internal const string AcceptedRpc = "HexDvergrStarterAccepted";
         private static DvergrStarterEncounterManager _instance;
         private readonly Dictionary<long, bool> _registered = new Dictionary<long, bool>();
         private readonly Dictionary<long, DvergrStarterEncounter> _encounters = new Dictionary<long, DvergrStarterEncounter>();
         private readonly List<ZDO> _legacyDvergr = new List<ZDO>();
         private readonly HashSet<long> _legacyCompleted = new HashSet<long>();
+        private readonly HashSet<long> _reconciled = new HashSet<long>();
+        private readonly Dictionary<long, float> _recoverAt = new Dictionary<long, float>();
         private int _legacyIndex;
         private bool _legacyScanComplete;
         private ZoneSystem _world;
@@ -26,8 +29,8 @@ namespace HexDvergrAllies.Core.Features.Progression
 
         internal static bool IsStarter(Character character) => DvergrStarterCharacterState.IsStarter(character);
         internal static bool HasFreePact(Character character) => DvergrStarterCharacterState.HasFreePact(Player.m_localPlayer, character);
-        internal static int PactCost(Character character) => HasFreePact(character) ? 0 : DvergrPricingConfig.ForgePactCost;
-        internal static string PactPrice(Character character) => HasFreePact(character) ? HexLocalizationManager.Localize("$hex_dvergr_starter_free") : DvergrPricingConfig.ForgePactCostDisplay;
+        internal static int PactCost(Character character) => IsStarter(character) ? 0 : DvergrPricingConfig.ForgePactCost;
+        internal static string PactPrice(Character character) => IsStarter(character) ? HexLocalizationManager.Localize("$hex_dvergr_starter_free") : DvergrPricingConfig.ForgePactCostDisplay;
 
         private void Awake()
         {
@@ -41,11 +44,14 @@ namespace HexDvergrAllies.Core.Features.Progression
             if (_world != world)
             {
                 RemovePin();
+                DvergrForgePactManager.ResetSessionState();
                 _world = world;
                 _registered.Clear();
                 _encounters.Clear();
                 _legacyDvergr.Clear();
                 _legacyCompleted.Clear();
+                _reconciled.Clear();
+                _recoverAt.Clear();
                 _legacyIndex = 0;
                 _legacyScanComplete = false;
                 _nextRegistration = 0f;
@@ -56,6 +62,7 @@ namespace HexDvergrAllies.Core.Features.Progression
                 return;
             }
 
+            DvergrPactAuthority.Update();
             var player = Player.m_localPlayer;
 
             if (player && player.GetPlayerID() != 0L && Time.time >= _nextRegistration)
@@ -100,9 +107,21 @@ namespace HexDvergrAllies.Core.Features.Progression
 
                 foreach (var zdo in _legacyDvergr)
                 {
-                    if (zdo.GetBool(DvergrStarterCharacterState.StarterKey, false) && DvergrCompanionState.IsHired(zdo))
+                    if (!zdo.GetBool(DvergrStarterCharacterState.StarterKey, false))
+                    {
+                        continue;
+                    }
+
+                    if (DvergrCompanionState.IsHired(zdo))
                     {
                         _legacyCompleted.Add(DvergrCompanionState.GetOwnerPlayerId(zdo));
+                    }
+
+                    var assigned = zdo.GetLong(DvergrStarterCharacterState.CharacterKey, 0L);
+
+                    if (zdo.GetBool(DvergrStarterCharacterState.ConsumedKey, false))
+                    {
+                        _legacyCompleted.Add(assigned);
                     }
                 }
             }
@@ -121,6 +140,35 @@ namespace HexDvergrAllies.Core.Features.Progression
                 else if (!world.GetGlobalKey(doneKey) && !_encounters.ContainsKey(character.Key))
                 {
                     _encounters.Add(character.Key, new DvergrStarterEncounter(character.Key));
+                }
+
+                if (_reconciled.Add(character.Key) && !world.GetGlobalKey(doneKey) && world.GetGlobalKey(DvergrStarterCharacterState.WorldPrefix(character.Key) + "built") && !DvergrPersistentOwnership.HasLivingStarter(character.Key))
+                {
+                    _recoverAt[character.Key] = Time.time + 5f;
+                }
+            }
+
+            var recover = new List<long>();
+
+            foreach (var pending in _recoverAt)
+            {
+                if (Time.time >= pending.Value)
+                {
+                    recover.Add(pending.Key);
+                }
+            }
+
+            foreach (var characterId in recover)
+            {
+                _recoverAt.Remove(characterId);
+
+                if (!world.GetGlobalKey(DvergrStarterCharacterState.DoneKey(characterId)) && !DvergrPersistentOwnership.HasLivingStarter(characterId))
+                {
+                    var prefix = DvergrStarterCharacterState.WorldPrefix(characterId);
+                    world.RemoveGlobalKey(prefix + "built");
+                    world.RemoveGlobalKey(prefix + "slot_dvergr");
+                    _encounters[characterId] = new DvergrStarterEncounter(characterId);
+                    Plugin.Log.LogInfo($"[Starter Encounter] Recovering missing unhired starter for character {characterId}; existing camp pieces are retained.");
                 }
             }
 
@@ -177,8 +225,63 @@ namespace HexDvergrAllies.Core.Features.Progression
                 return;
             }
 
-            ZoneSystem.instance.SetGlobalKey(DvergrStarterCharacterState.DoneKey(characterId));
-            Plugin.Log.LogInfo($"[Starter Encounter] Introduction completed for character {characterId} after accepted pact.");
+            RecordCompletion(characterId);
+        }
+
+        internal static void RecordCompletion(long characterId)
+        {
+            if (!ZNet.instance || !ZNet.instance.IsServer() || !ZoneSystem.instance || characterId == 0L)
+            {
+                return;
+            }
+
+            var key = DvergrStarterCharacterState.DoneKey(characterId);
+
+            if (!ZoneSystem.instance.GetGlobalKey(key))
+            {
+                ZoneSystem.instance.SetGlobalKey(key);
+                Plugin.Log.LogInfo($"[Starter Encounter] Introduction completed for character {characterId} after accepted pact.");
+            }
+        }
+
+        internal static void OnCharacterDeath(Character character)
+        {
+            if (!DvergrStarterCharacterState.IsStarter(character))
+            {
+                return;
+            }
+
+            var view = character.GetComponent<ZNetView>();
+            var zdo = view.GetZDO();
+
+            if (!view.IsOwner() || DvergrCompanionState.IsHired(zdo) || zdo.GetBool(DvergrStarterCharacterState.ConsumedKey, false))
+            {
+                return;
+            }
+
+            ZRoutedRpc.instance.InvokeRoutedRPC(DvergrCompanionManager.GetServerPeerID(ZRoutedRpc.instance), DeathRpc, zdo.m_uid, zdo.GetLong(DvergrStarterCharacterState.CharacterKey, 0L));
+        }
+
+        internal static void OnDeathReported(long sender, ZDOID companionId, long characterId)
+        {
+            if (!_instance || !ZNet.instance || !ZNet.instance.IsServer() || !_instance._registered.ContainsKey(characterId) || characterId == 0L)
+            {
+                return;
+            }
+
+            var zdo = ZDOMan.instance.GetZDO(companionId);
+
+            if (zdo != null && (zdo.GetOwner() != sender || !zdo.GetBool(DvergrStarterCharacterState.StarterKey, false) || zdo.GetLong(DvergrStarterCharacterState.CharacterKey, 0L) != characterId || DvergrCompanionState.IsHired(zdo) || zdo.GetBool(DvergrStarterCharacterState.ConsumedKey, false)))
+            {
+                return;
+            }
+
+            if (!_instance._recoverAt.ContainsKey(characterId))
+            {
+                // Recheck persistent records after vanilla has removed the corpse.
+                // A late report cannot create a duplicate living starter.
+                _instance._recoverAt.Add(characterId, Time.time + 5f);
+            }
         }
 
         private static long ConnectedCharacterId(ZDOID playerId)

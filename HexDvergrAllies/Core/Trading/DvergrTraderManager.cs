@@ -33,6 +33,11 @@ namespace HexDvergrAllies.Core.Trading
 
             AddForgePact(trader);
 
+            if (Features.Progression.DvergrStarterCharacterState.IsStarter(dvergr))
+            {
+                return;
+            }
+
             switch (biome)
             {
                 case Heightmap.Biome.Mistlands:
@@ -97,6 +102,11 @@ namespace HexDvergrAllies.Core.Trading
             if (!player || !character)
             {
                 return false;
+            }
+
+            if (Features.Progression.DvergrStarterCharacterState.IsStarter(character))
+            {
+                return Features.Progression.DvergrStarterVendorService.IsAvailable(player, character);
             }
 
             if (DvergrCompanionState.IsHired(character) || DvergrCompanionManager.HasHiredCompanion(player))
@@ -173,11 +183,12 @@ namespace HexDvergrAllies.Core.Trading
                 return;
             }
 
-            trader.m_items.Add(new Trader.TradeItem { m_prefab = prefab.GetComponent<ItemDrop>(), m_stack = 1, m_price = 0, m_tooltip = HexLocalizationManager.Localize("$hex_dvergr_pact_tooltip", Core.Features.Progression.DvergrStarterEncounterManager.PactPrice(trader.GetComponent<Character>())), m_buyPlayerEffects = new EffectList() });
+            trader.m_items.Add(new Trader.TradeItem { m_prefab = prefab.GetComponent<ItemDrop>(), m_stack = 1, m_price = 0, m_tooltip = Features.Progression.DvergrStarterVendorService.PactTooltip(trader.GetComponent<Character>()), m_buyPlayerEffects = new EffectList() });
         }
 
         private static void AddMistlandsItems(Trader trader)
         {
+            DvergrMistlandsStoreManager.AddOffers(trader);
             GameObject needlePrefab = ObjectDB.instance.GetItemPrefab(PrefabHelper.DvergrNeedle);
 
             if (needlePrefab)
