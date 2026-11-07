@@ -72,3 +72,8 @@ hex_dvergr_compendium_start,Available from the beginning.
 hex_dvergr_compendium_unlock,Unlocked by defeating {0}.
 hex_dvergr_compendium_stats,Maximum health: {0:0}\nArbalest pierce damage: {1:0}\nMelee blunt damage: {2:0}
 hex_dvergr_compendium_damage_note,Damage values are base weapon values. Attack variation and difficulty modify outgoing damage; armor and resistances affect the damage received. Movement and other companion settings remain the same at every tier. Normal hired Dvergr do not use starter progression.
+hex_dvergr_revive_prompt,[<color=yellow><b>$KEY_Use</b></color>] Revive your companion
+hex_dvergr_revive_owner_only,Only this companion's owner can revive them.
+hex_dvergr_revived,Your companion is back at full health.
+hex_dvergr_revive_blocked,You must release your other companion before reviving this one. If a pact is still being processed try again shortly.
+hex_dvergr_revive_failed,Your companion could not be revived. Stay near the tombstone and try again.

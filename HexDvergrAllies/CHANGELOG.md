@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Add owner-only starter tombstone revival at full health, preserving identity, name and progression; normal companions and player graves retain their existing behavior.
 - Add a native Dvergr Companion Compendium entry with starter stats and boss unlocks; simplify overhead level display to a number.
 - Add code-defined starter biome balance profiles with a 200-health, 40-pierce Meadows baseline, isolated from normal companion stat multipliers. Advance from the owning character's highest credited boss and show the starter level, with a level-up effect for new hired tiers.
 - Give the starter a pact-only store with no buying or selling, plus a localized explanation when another companion blocks hiring.

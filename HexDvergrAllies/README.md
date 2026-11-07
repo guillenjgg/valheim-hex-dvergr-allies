@@ -28,7 +28,7 @@ Hiring your starter ends the introduction and removes its camp marker. Completio
 
 The starter only offers the introduction pact. They do not buy or sell items. Already have a hired Mistlands or Ashlands Dvergr? The camp still appears, but its pact stays blocked until you no longer own a companion—even if that companion is far away after a reload. Owning a normal Dvergr does not complete the introduction.
 
-The starter is immune to damage until hired. After the first pact, normal companion damage rules apply, including after release. There are no replacement starters or repeat pacts after hiring.
+The starter is immune to damage until hired. After the first pact, normal companion damage rules apply, including after release. If your hired starter dies, they leave a personal tombstone at the death location. Interact with it to revive them for free at full health, preserving their name, identity and tier. Only the owning character can revive them, and another hired companion or pending pact blocks revival. The tombstone stays in that world across reloads and is consumed only after successful revival. Breaking the pact does not create a revival tombstone. Normal Dvergr and player tombstones keep their existing behavior.
 
 Already-hired survivors from the old shared encounter count as a completed introduction. Existing camps and companions are left in place. Install the mod on the server and every player who needs its features.
 

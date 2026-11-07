@@ -240,6 +240,12 @@ namespace HexDvergrAllies.Core.Features.Progression
                 return;
             }
 
+            foreach (var tombstone in DvergrPersistentOwnership.GetStarterTombstones(characterId))
+            {
+                tombstone.SetOwner(DvergrCompanionManager.GetServerPeerID(ZRoutedRpc.instance));
+                ZDOMan.instance.DestroyZDO(tombstone);
+            }
+
             DvergrForgePactManager.ResetSessionState();
             var prefix = DvergrStarterCharacterState.WorldPrefix(characterId);
             _world.RemoveGlobalKey(DvergrStarterCharacterState.DoneKey(characterId));

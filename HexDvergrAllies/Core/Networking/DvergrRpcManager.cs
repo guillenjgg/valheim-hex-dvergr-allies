@@ -31,6 +31,8 @@ namespace HexDvergrAllies.Core.Networking
 
         internal static void RegisterRoutedRpcs()
         {
+            ZRoutedRpc.instance.Register<ZDOID, ZDOID>(Features.Progression.DvergrStarterRevivalManager.RequestRpc, Features.Progression.DvergrStarterRevivalManager.OnRequest);
+            ZRoutedRpc.instance.Register<int>(Features.Progression.DvergrStarterRevivalManager.ResultRpc, Features.Progression.DvergrStarterRevivalManager.OnResult);
             ZRoutedRpc.instance.Register<ZDOID, int>(Features.Progression.DvergrStarterProgressionService.ReportRpc, Features.Progression.DvergrStarterProgressionService.OnReport);
             ZRoutedRpc.instance.Register<ZDOID, long, int>(Features.Progression.DvergrStarterProgressionService.ApplyRpc, Features.Progression.DvergrStarterProgressionService.OnApply);
             ZRoutedRpc.instance.Register<ZDOID, ZDOID, long>(DvergrPactAuthority.RequestRpc, DvergrPactAuthority.OnRequest);

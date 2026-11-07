@@ -64,6 +64,21 @@ namespace HexDvergrAllies.Core.Companions
             return starters;
         }
 
+        internal static List<ZDO> GetStarterTombstones(long characterId)
+        {
+            var tombstones = new List<ZDO>();
+
+            foreach (var zdo in GetRecords())
+            {
+                if (zdo.IsValid() && zdo.GetBool(Features.Progression.DvergrStarterRevivalManager.TombstoneKey, false) && zdo.GetLong(Features.Progression.DvergrStarterCharacterState.CharacterKey, 0L) == characterId)
+                {
+                    tombstones.Add(zdo);
+                }
+            }
+
+            return tombstones;
+        }
+
         internal static bool HasCompanion(long characterId)
         {
             if (!ReferenceEquals(_indexedWorld, ZDOMan.instance))

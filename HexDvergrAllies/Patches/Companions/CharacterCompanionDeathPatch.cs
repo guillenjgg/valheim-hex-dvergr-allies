@@ -8,6 +8,7 @@ namespace HexDvergrAllies.Patches
     {
         private static void Prefix(Character __instance)
         {
+            Core.Features.Progression.DvergrStarterRevivalManager.OnDeath(__instance);
             Core.Features.Progression.DvergrStarterEncounterManager.OnCharacterDeath(__instance);
             DvergrCompanionManager.OnCompanionDeath(__instance);
         }

@@ -212,6 +212,8 @@
     <Compile Include="Core\Features\Progression\DvergrStarterEncounter.cs" />
     <Compile Include="Core\Features\Progression\DvergrStarterCharacterState.cs" />
     <Compile Include="Core\Features\Progression\DvergrStarterProgressionService.cs" />
+    <Compile Include="Core\Features\Progression\DvergrStarterRevivalManager.cs" />
+    <Compile Include="Patches\Companions\StarterTombstonePatch.cs" />
     <Compile Include="Core\Features\Progression\DvergrStarterBalanceConfig.cs" />
     <Compile Include="Core\Features\Progression\DvergrStarterBalanceService.cs" />
     <Compile Include="Core\Features\Progression\DvergrStarterEligibility.cs" />
