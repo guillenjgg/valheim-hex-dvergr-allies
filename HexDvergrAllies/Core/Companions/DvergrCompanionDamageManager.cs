@@ -33,7 +33,7 @@ namespace HexDvergrAllies.Core.Companions
 
             if (DvergrCompanionState.IsHired(character))
             {
-                var damageTakenMultiplier = HexDvergrAlliesConfiguration.CompanionDamageTakenMultiplier.Value;
+                var damageTakenMultiplier = Features.Progression.DvergrStarterProgressionService.DamageTakenMultiplier(netView.GetZDO());
                 hit.ApplyModifier(damageTakenMultiplier);
             }
 
@@ -44,7 +44,7 @@ namespace HexDvergrAllies.Core.Companions
                 return;
             }
 
-            var damageDealtMultiplier = Features.Progression.DvergrStarterCharacterState.IsStarter(attacker) ? 1f : HexDvergrAlliesConfiguration.CompanionDamageDealtMultiplier.Value;
+            var damageDealtMultiplier = Features.Progression.DvergrStarterCharacterState.IsStarter(attacker) ? 1f : HexDvergrAlliesConfiguration.CompanionDamageDealtMultiplier.Value * Features.Progression.DvergrStarterProgressionService.FaderMultiplier(attacker.GetComponent<ZNetView>().GetZDO());
             hit.ApplyModifier(damageDealtMultiplier);
 
             if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value && Features.Progression.DvergrStarterCharacterState.IsStarter(attacker))

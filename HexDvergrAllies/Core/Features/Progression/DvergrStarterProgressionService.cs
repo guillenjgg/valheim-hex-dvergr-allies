@@ -8,9 +8,40 @@ namespace HexDvergrAllies.Core.Features.Progression
 {
     internal static class DvergrStarterProgressionService
     {
+        private const string FaderOwnerKey = "hex_dvergr_fader_owner";
+
+        internal static float FaderMultiplier(ZDO companion)
+        {
+            var owner = DvergrCompanionState.GetOwnerPlayerId(companion);
+
+            return owner != 0L && DvergrCompanionState.IsHired(companion) && companion.GetLong(FaderOwnerKey, 0L) == owner ? DvergrStarterBalanceConfig.FaderBonusMultiplier : 1f;
+        }
+
+        internal static bool HasFaderBonus(ZDO companion)
+        {
+            if (!DvergrCompanionState.IsHired(companion))
+            {
+                return false;
+            }
+
+            return companion.GetBool(DvergrStarterCharacterState.StarterKey, false) ? companion.GetInt(DvergrStarterBalanceService.TierKey, 0) >= (int)DvergrStarterTier.DeepNorth : FaderMultiplier(companion) > 1f;
+        }
+
+        internal static float HealthMultiplier(ZDO companion)
+        {
+            return HasFaderBonus(companion) ? DvergrStarterBalanceConfig.FaderHealthMultiplier : 1f;
+        }
+
+        internal static float DamageTakenMultiplier(ZDO companion)
+        {
+            var configured = HexDvergrAlliesConfiguration.CompanionDamageTakenMultiplier.Value;
+
+            return HasFaderBonus(companion) ? Mathf.Min(configured, DvergrStarterBalanceConfig.FaderDamageTakenMultiplier) : configured;
+        }
+
         internal const string ReportRpc = "HexStarterBossProgress";
         internal const string ApplyRpc = "HexStarterApplyTier";
-        private static readonly string[] BossNames = { "$enemy_eikthyr", "$enemy_gdking", "$enemy_bonemass", "$enemy_dragon", "$enemy_goblinking", "$enemy_seekerqueen" };
+        private static readonly string[] BossNames = { "$enemy_eikthyr", "$enemy_gdking", "$enemy_bonemass", "$enemy_dragon", "$enemy_goblinking", "$enemy_seekerqueen", "$enemy_fader" };
 
         internal static int TierFromKills(IDictionary<string, float> kills)
         {
@@ -49,7 +80,7 @@ namespace HexDvergrAllies.Core.Features.Progression
 
         internal static void OnReport(long sender, ZDOID playerId, int tier)
         {
-            if (!ZNet.instance || !ZNet.instance.IsServer() || tier < 0 || tier > (int)DvergrStarterTier.Ashlands)
+            if (!ZNet.instance || !ZNet.instance.IsServer() || tier < 0 || tier > (int)DvergrStarterTier.DeepNorth)
             {
                 return;
             }
@@ -79,9 +110,11 @@ namespace HexDvergrAllies.Core.Features.Progression
                 return;
             }
 
-            foreach (var starter in DvergrPersistentOwnership.GetStarters(characterId))
+            foreach (var starter in DvergrPersistentOwnership.GetHiredCompanions(characterId))
             {
-                if (!starter.HasOwner() || !DvergrCompanionState.IsHired(starter) || DvergrCompanionState.GetOwnerPlayerId(starter) != characterId || tier <= starter.GetInt(DvergrStarterBalanceService.TierKey, 0))
+                var isStarter = starter.GetBool(DvergrStarterCharacterState.StarterKey, false);
+
+                if (!starter.HasOwner() || (isStarter ? tier <= starter.GetInt(DvergrStarterBalanceService.TierKey, 0) : tier < (int)DvergrStarterTier.DeepNorth || starter.GetLong(FaderOwnerKey, 0L) == characterId))
                 {
                     continue;
                 }
@@ -93,7 +126,7 @@ namespace HexDvergrAllies.Core.Features.Progression
 
         internal static void OnApply(long sender, ZDOID companionId, long characterId, int tier)
         {
-            if (!ZNetScene.instance || sender != DvergrCompanionManager.GetServerPeerID(ZRoutedRpc.instance) || tier < 0 || tier > (int)DvergrStarterTier.Ashlands)
+            if (!ZNetScene.instance || sender != DvergrCompanionManager.GetServerPeerID(ZRoutedRpc.instance) || tier < 0 || tier > (int)DvergrStarterTier.DeepNorth)
             {
                 return;
             }
@@ -101,7 +134,7 @@ namespace HexDvergrAllies.Core.Features.Progression
             var instance = ZNetScene.instance.FindInstance(companionId);
             var character = instance ? instance.GetComponent<Character>() : null;
 
-            if (!DvergrStarterCharacterState.IsStarter(character))
+            if (!character)
             {
                 return;
             }
@@ -109,9 +142,21 @@ namespace HexDvergrAllies.Core.Features.Progression
             var view = character.GetComponent<ZNetView>();
             var zdo = view.GetZDO();
             var oldTier = zdo.GetInt(DvergrStarterBalanceService.TierKey, 0);
+            var isStarter = DvergrStarterCharacterState.IsStarter(character);
 
-            if (!view.IsOwner() || character.IsDead() || !DvergrCompanionState.IsHired(zdo) || DvergrCompanionState.GetOwnerPlayerId(zdo) != characterId || zdo.GetLong(DvergrStarterCharacterState.CharacterKey, 0L) != characterId || tier <= oldTier)
+            if (!view.IsOwner() || character.IsDead() || !DvergrCompanionState.IsHired(zdo) || DvergrCompanionState.GetOwnerPlayerId(zdo) != characterId || (isStarter && (zdo.GetLong(DvergrStarterCharacterState.CharacterKey, 0L) != characterId || tier <= oldTier)))
             {
+                return;
+            }
+
+            if (!isStarter)
+            {
+                if (tier == (int)DvergrStarterTier.DeepNorth && zdo.GetLong(FaderOwnerKey, 0L) != characterId)
+                {
+                    zdo.Set(FaderOwnerKey, characterId);
+                    HexLog.LogInfo($"[Dvergr Progression] Fader bonus applied: Character={characterId}, Companion={companionId}, HealthMultiplier={DvergrStarterBalanceConfig.FaderHealthMultiplier}, DamageMultiplier={DvergrStarterBalanceConfig.FaderBonusMultiplier}, DamageTakenMultiplier={DamageTakenMultiplier(zdo)}");
+                }
+
                 return;
             }
 
@@ -139,7 +184,7 @@ namespace HexDvergrAllies.Core.Features.Progression
 
         internal static string LevelLabel(Character character)
         {
-            var tier = Mathf.Clamp(character.GetComponent<ZNetView>().GetZDO().GetInt(DvergrStarterBalanceService.TierKey, 0), 0, (int)DvergrStarterTier.Ashlands);
+            var tier = Mathf.Clamp(character.GetComponent<ZNetView>().GetZDO().GetInt(DvergrStarterBalanceService.TierKey, 0), 0, (int)DvergrStarterTier.DeepNorth);
             var biome = HexLocalizationManager.Localize("$hex_dvergr_tier_" + tier);
 
             return string.Format(HexLocalizationManager.Localize("$hex_dvergr_starter_level"), tier + 1, biome);
@@ -152,7 +197,7 @@ namespace HexDvergrAllies.Core.Features.Progression
                 return name;
             }
 
-            var tier = Mathf.Clamp(character.GetComponent<ZNetView>().GetZDO().GetInt(DvergrStarterBalanceService.TierKey, 0), 0, (int)DvergrStarterTier.Ashlands);
+            var tier = Mathf.Clamp(character.GetComponent<ZNetView>().GetZDO().GetInt(DvergrStarterBalanceService.TierKey, 0), 0, (int)DvergrStarterTier.DeepNorth);
 
             return name + " · " + (tier + 1);
         }

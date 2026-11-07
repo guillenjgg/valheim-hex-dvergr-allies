@@ -10,7 +10,8 @@ namespace HexDvergrAllies.Core.Features.Progression
         Mountains,
         Plains,
         Mistlands,
-        Ashlands
+        Ashlands,
+        DeepNorth
     }
 
     internal sealed class DvergrStarterTierProfile
@@ -29,6 +30,10 @@ namespace HexDvergrAllies.Core.Features.Progression
 
     internal static class DvergrStarterBalanceConfig
     {
+        internal const float FaderHealthMultiplier = 2f;
+        internal const float FaderBonusMultiplier = 1.5f;
+        internal const float FaderDamageTakenMultiplier = 0.25f;
+        private static DvergrStarterTierProfile _deepNorth;
         // Edit starter balance here, then rebuild. These are absolute base stats.
         // Ashlands matches DvergerAshlands and its shooting/melee weapon prefabs.
         private static readonly Dictionary<DvergrStarterTier, DvergrStarterTierProfile> Profiles = new Dictionary<DvergrStarterTier, DvergrStarterTierProfile>
@@ -44,6 +49,18 @@ namespace HexDvergrAllies.Core.Features.Progression
 
         internal static DvergrStarterTierProfile Get(DvergrStarterTier tier)
         {
+            if (tier == DvergrStarterTier.DeepNorth)
+            {
+                var ashlands = Profiles[DvergrStarterTier.Ashlands];
+
+                if (_deepNorth == null)
+                {
+                    _deepNorth = new DvergrStarterTierProfile(ashlands.Health * FaderHealthMultiplier, ashlands.ArbalestPierce * FaderBonusMultiplier, ashlands.MeleeBlunt * FaderBonusMultiplier);
+                }
+
+                return _deepNorth;
+            }
+
             DvergrStarterTierProfile profile;
 
             return Profiles.TryGetValue(tier, out profile) ? profile : Profiles[DvergrStarterTier.Meadows];

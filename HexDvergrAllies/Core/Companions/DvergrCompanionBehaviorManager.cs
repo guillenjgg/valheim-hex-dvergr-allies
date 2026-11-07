@@ -386,7 +386,7 @@ namespace HexDvergrAllies.Core.Companions
 
             var multiplier = HexDvergrAlliesConfiguration.CompanionHealthMultiplier.Value;
             var originalMaxHealth = GetOriginalMaxHealth(character, state);
-            var targetMaxHealth = originalMaxHealth * multiplier;
+            var targetMaxHealth = originalMaxHealth * multiplier * Features.Progression.DvergrStarterProgressionService.HealthMultiplier(character.GetComponent<ZNetView>().GetZDO());
             var currentMaxHealth = character.GetMaxHealth();
 
             if (Mathf.Approximately(currentMaxHealth, targetMaxHealth))

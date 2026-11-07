@@ -107,7 +107,7 @@ namespace HexDvergrAllies.Core.Features.Progression
             var zdo = view.GetZDO();
             var tier = zdo.GetInt(TierKey, 0);
             var hired = Companions.DvergrCompanionState.IsHired(zdo);
-            var taken = HexDvergrAlliesConfiguration.CompanionDamageTakenMultiplier.Value;
+            var taken = DvergrStarterProgressionService.DamageTakenMultiplier(zdo);
             var state = LoggedBalance.GetValue(character, _ => new BalanceLogState());
 
             if (state.Initialized && state.Tier == tier && state.Hired == hired && state.MaximumHealth == character.GetMaxHealth() && state.Pierce == profile.ArbalestPierce && state.Blunt == profile.MeleeBlunt && state.DamageTaken == taken)

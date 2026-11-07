@@ -175,6 +175,28 @@ namespace HexDvergrAllies.Core.Companions
             return false;
         }
 
+        internal static List<ZDO> GetHiredCompanions(long characterId)
+        {
+            HasCompanion(characterId);
+            var result = new List<ZDO>();
+            List<ZDOID> ids;
+
+            if (HiresByCharacter.TryGetValue(characterId, out ids))
+            {
+                foreach (var id in ids)
+                {
+                    var zdo = ZDOMan.instance.GetZDO(id);
+
+                    if (zdo != null && DvergrCompanionState.IsHired(zdo) && DvergrCompanionState.GetOwnerPlayerId(zdo) == characterId)
+                    {
+                        result.Add(zdo);
+                    }
+                }
+            }
+
+            return result;
+        }
+
         internal static void Track(long characterId, ZDOID companionId)
         {
             List<ZDOID> companions;

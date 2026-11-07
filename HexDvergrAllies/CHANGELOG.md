@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Show existing hired companions in the Compendium; add a character-specific 50% Fader health/damage bonus and a Deep North starter tier.
 - Release invalid trade-session locks, clean companion scan/follow caches on unload, index starter records per world, and reuse frame-loop scratch buffers.
 - Add owner-only starter tombstone revival at full health, preserving identity, name and progression; normal companions and player graves retain their existing behavior.
 - Add a native Dvergr Companion Compendium entry with starter stats and boss unlocks; simplify overhead level display to a number.

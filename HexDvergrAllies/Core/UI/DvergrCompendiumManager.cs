@@ -12,7 +12,7 @@ namespace HexDvergrAllies.Core.UI
         // Verified private in the installed Valheim assembly. Native list construction
         // handles button creation, scrolling and gamepad selection for our entry.
         private static readonly AccessTools.FieldRef<TextsDialog, List<TextsDialog.TextInfo>> TextsField = AccessTools.FieldRefAccess<TextsDialog, List<TextsDialog.TextInfo>>("m_texts");
-        private static readonly string[] UnlockBosses = { "", "$enemy_eikthyr", "$enemy_gdking", "$enemy_bonemass", "$enemy_dragon", "$enemy_goblinking", "$enemy_seekerqueen" };
+        private static readonly string[] UnlockBosses = { "", "$enemy_eikthyr", "$enemy_gdking", "$enemy_bonemass", "$enemy_dragon", "$enemy_goblinking", "$enemy_seekerqueen", "$enemy_fader" };
 
         internal static void AddEntry(TextsDialog dialog)
         {
@@ -33,26 +33,34 @@ namespace HexDvergrAllies.Core.UI
             ZDO companion;
             var currentTier = -1;
 
-            if (DvergrCompanionManager.TryGetHiredCompanionZDO(player, out companion) && companion.GetBool(DvergrStarterCharacterState.StarterKey, false))
+            if (DvergrCompanionManager.TryGetHiredCompanionZDO(player, out companion) && DvergrCompanionState.IsHired(companion) && DvergrCompanionState.GetOwnerPlayerId(companion) == player.GetPlayerID())
             {
-                var tier = UnityEngine.Mathf.Clamp(companion.GetInt(DvergrStarterBalanceService.TierKey, 0), 0, (int)DvergrStarterTier.Ashlands);
-                currentTier = tier;
                 text.AppendLine(HexLocalizationManager.Localize("$hex_dvergr_compendium_current"));
-                AppendTier(text, tier);
+
+                if (companion.GetBool(DvergrStarterCharacterState.StarterKey, false))
+                {
+                    var tier = UnityEngine.Mathf.Clamp(companion.GetInt(DvergrStarterBalanceService.TierKey, 0), 0, (int)DvergrStarterTier.DeepNorth);
+                    currentTier = tier;
+                    AppendTier(text, tier);
+                }
+                else
+                {
+                    AppendNormalCompanion(text, companion);
+                }
             }
             else
             {
                 text.AppendLine(HexLocalizationManager.Localize("$hex_dvergr_compendium_no_starter"));
             }
 
-            var reduction = (1f - HexDvergrAlliesConfiguration.CompanionDamageTakenMultiplier.Value) * 100f;
+            var reduction = (1f - (currentTier >= 0 || companion != null ? DvergrStarterProgressionService.DamageTakenMultiplier(companion) : HexDvergrAlliesConfiguration.CompanionDamageTakenMultiplier.Value)) * 100f;
             text.AppendLine(HexLocalizationManager.Localize("$hex_dvergr_compendium_reduction", reduction));
             text.AppendLine();
             if (currentTier >= 0)
             {
                 text.AppendLine(HexLocalizationManager.Localize("$hex_dvergr_compendium_next"));
 
-                if (currentTier < (int)DvergrStarterTier.Ashlands)
+                if (currentTier < (int)DvergrStarterTier.DeepNorth)
                 {
                     var nextTier = currentTier + 1;
                     AppendTier(text, nextTier);
@@ -68,7 +76,7 @@ namespace HexDvergrAllies.Core.UI
 
             text.AppendLine(HexLocalizationManager.Localize("$hex_dvergr_compendium_tiers"));
 
-            for (var tier = 0; tier <= (int)DvergrStarterTier.Ashlands; tier++)
+            for (var tier = 0; tier <= (int)DvergrStarterTier.DeepNorth; tier++)
             {
                 AppendTier(text, tier);
                 var unlock = tier == 0 ? HexLocalizationManager.Localize("$hex_dvergr_compendium_start") : HexLocalizationManager.Localize("$hex_dvergr_compendium_unlock", Localization.instance.Localize(UnlockBosses[tier]));
@@ -79,6 +87,74 @@ namespace HexDvergrAllies.Core.UI
             text.AppendLine(HexLocalizationManager.Localize("$hex_dvergr_compendium_damage_note"));
 
             return text.ToString();
+        }
+
+        private static void AppendNormalCompanion(StringBuilder text, ZDO companion)
+        {
+            var prefab = ZNetScene.instance.GetPrefab(companion.GetPrefab());
+            var template = prefab ? prefab.GetComponent<Humanoid>() : null;
+            var instance = ZNetScene.instance.FindInstance(companion.m_uid);
+            var humanoid = instance ? instance.GetComponent<Humanoid>() : null;
+            var tierKey = prefab && prefab.name.StartsWith(PrefabHelper.AshlandsDvergrPrefix) ? "$hex_dvergr_tier_6" : "$hex_dvergr_tier_5";
+            text.AppendLine(HexLocalizationManager.Localize("$hex_dvergr_compendium_native_tier", HexLocalizationManager.Localize(tierKey)));
+            var maximumHealth = humanoid ? humanoid.GetMaxHealth() : companion.GetFloat(ZDOVars.s_maxHealth, 0f);
+
+            if (maximumHealth > 0f)
+            {
+                text.AppendLine(HexLocalizationManager.Localize("$hex_dvergr_compendium_health", maximumHealth));
+            }
+            else
+            {
+                text.AppendLine(HexLocalizationManager.Localize("$hex_dvergr_compendium_unavailable"));
+            }
+
+            text.AppendLine(HexLocalizationManager.Localize(humanoid ? "$hex_dvergr_compendium_attacks" : "$hex_dvergr_compendium_reference_attacks"));
+
+            if (humanoid)
+            {
+                foreach (var item in humanoid.GetInventory().GetAllItems())
+                {
+                    AppendWeapon(text, item, companion);
+                }
+            }
+            else if (template && template.m_defaultItems != null)
+            {
+                foreach (var itemPrefab in template.m_defaultItems)
+                {
+                    var drop = itemPrefab ? itemPrefab.GetComponent<ItemDrop>() : null;
+
+                    if (drop)
+                    {
+                        AppendWeapon(text, drop.m_itemData, companion);
+                    }
+                }
+            }
+
+            if (DvergrStarterProgressionService.FaderMultiplier(companion) > 1f)
+            {
+                text.AppendLine(HexLocalizationManager.Localize("$hex_dvergr_compendium_fader_bonus", (DvergrStarterBalanceConfig.FaderHealthMultiplier - 1f) * 100f, (DvergrStarterBalanceConfig.FaderBonusMultiplier - 1f) * 100f));
+            }
+
+            text.AppendLine(HexLocalizationManager.Localize("$hex_dvergr_compendium_native_note"));
+        }
+
+        private static void AppendWeapon(StringBuilder text, ItemDrop.ItemData item, ZDO companion)
+        {
+            if (item == null || item.m_shared.m_itemType == ItemDrop.ItemData.ItemType.Utility)
+            {
+                return;
+            }
+
+            var damage = item.GetDamage();
+
+            if (damage.GetTotalDamage() <= 0f)
+            {
+                return;
+            }
+
+            damage.Modify(HexDvergrAlliesConfiguration.CompanionDamageDealtMultiplier.Value * DvergrStarterProgressionService.FaderMultiplier(companion));
+            text.AppendLine("<color=orange>" + Localization.instance.Localize(item.m_shared.m_name) + "</color>");
+            text.AppendLine(Localization.instance.Localize(damage.GetTooltipString()));
         }
 
         private static void AppendTier(StringBuilder text, int tier)

@@ -65,8 +65,8 @@ hex_dvergr_tier_6,Ashlands
 hex_dvergr_compendium_title,Dvergr Companion
 hex_dvergr_compendium_intro,Your starter grows with your character. The highest boss credited to your character unlocks the next biome tier. Boss order and repeat kills do not matter. The number beside your companion's health identifies their level.
 hex_dvergr_compendium_current,<color=orange>Your current companion's stats</color>
-hex_dvergr_compendium_no_starter,You do not currently have a hired starter companion in this world.
-hex_dvergr_compendium_reduction,Damage reduction: {0:0}% (shared companion setting)
+hex_dvergr_compendium_no_starter,You do not currently have a hired companion in this world.
+hex_dvergr_compendium_reduction,Damage reduction: {0:0}%
 hex_dvergr_compendium_tiers,<color=orange>Progression</color>
 hex_dvergr_compendium_start,Available from the beginning.
 hex_dvergr_compendium_unlock,Unlocked by defeating {0}.
@@ -79,3 +79,11 @@ hex_dvergr_revive_blocked,You must release your other companion before reviving 
 hex_dvergr_revive_failed,Your companion could not be revived. Stay near the tombstone and try again.
 hex_dvergr_compendium_next,<color=orange>Next level</color>
 hex_dvergr_compendium_max_level,Your companion has reached the highest available level.
+hex_dvergr_compendium_native_tier,Tier: {0}
+hex_dvergr_compendium_health,Maximum health: {0:0}
+hex_dvergr_compendium_unavailable,Health data is unavailable. Move closer to your companion and reopen the Compendium.
+hex_dvergr_compendium_attacks,<color=orange>Base weapon and spell damage</color>
+hex_dvergr_compendium_reference_attacks,<color=orange>Weapon and spell damage (prefab reference; companion unloaded)</color>
+hex_dvergr_compendium_native_note,"Base damage includes the configured companion damage multiplier. Creature level, difficulty, attack variation and target defenses can further change actual hits. This companion keeps their normal stats and does not use starter progression."
+hex_dvergr_tier_7,Deep North
+hex_dvergr_compendium_fader_bonus,"Fader defeated: +{0:0}% maximum health, +{1:0}% outgoing damage, and at least 75% damage reduction."
