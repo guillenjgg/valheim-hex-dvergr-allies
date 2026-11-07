@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using HexDvergrAllies.Core;
+using HarmonyLib;
 
 namespace HexDvergrAllies.Patches
 {
@@ -31,7 +32,7 @@ namespace HexDvergrAllies.Patches
             var ai = character.GetBaseAI();
             var statusEffect = character.GetSEMan().GetStatusEffect("SE_DvergrAlly".GetStableHashCode());
 
-            Plugin.Log.LogInfo($"[Dvergr Damage - {phase}] " + $"Attacker={attacker?.name ?? "None"}, " + $"Player={attacker != null && attacker.IsPlayer()}, " + $"Damage={hit.GetTotalDamage():F1}, " + $"Health={character.GetHealth():F1}, " + $"Alerted={ai != null && ai.IsAlerted()}, " + $"Aggravated={ai != null && ai.IsAggravated()}, " + $"AllyEffect={statusEffect != null}, " + $"Immunity={HexDvergrAlliesConfiguration.EnablePlayerDamageImmunity.Value}");
+            HexLog.LogInfo($"[Dvergr Damage - {phase}] " + $"Attacker={attacker?.name ?? "None"}, " + $"Player={attacker != null && attacker.IsPlayer()}, " + $"Damage={hit.GetTotalDamage():F1}, " + $"Health={character.GetHealth():F1}, " + $"Alerted={ai != null && ai.IsAlerted()}, " + $"Aggravated={ai != null && ai.IsAggravated()}, " + $"AllyEffect={statusEffect != null}, " + $"Immunity={HexDvergrAlliesConfiguration.EnablePlayerDamageImmunity.Value}");
         }
     }
 }

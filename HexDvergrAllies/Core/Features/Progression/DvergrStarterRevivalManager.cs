@@ -1,3 +1,4 @@
+using HexDvergrAllies.Core;
 using HarmonyLib;
 using HexDvergrAllies.Core.Companions;
 using HexDvergrAllies.Core.HexLocalization;
@@ -43,7 +44,7 @@ namespace HexDvergrAllies.Core.Features.Progression
 
             if (!prefab)
             {
-                Plugin.Log.LogError("[Starter Revival] Cannot create tombstone: Player_tombstone prefab unavailable.");
+                HexLog.LogError("[Starter Revival] Cannot create tombstone: Player_tombstone prefab unavailable.");
                 return;
             }
 
@@ -74,7 +75,7 @@ namespace HexDvergrAllies.Core.Features.Progression
                 drops.SetDropsEnabled(false);
             }
 
-            Plugin.Log.LogInfo($"[Starter Revival] Tombstone created: Character={owner}, Companion={source.m_uid}, Tombstone={grave.m_uid}, Identity={identity}, Tier={grave.GetInt(DvergrStarterBalanceService.TierKey, 0)}");
+            HexLog.LogInfo($"[Starter Revival] Tombstone created: Character={owner}, Companion={source.m_uid}, Tombstone={grave.m_uid}, Identity={identity}, Tier={grave.GetInt(DvergrStarterBalanceService.TierKey, 0)}");
         }
 
         internal static bool SuppressDeathLoot(Component component)
@@ -205,7 +206,7 @@ namespace HexDvergrAllies.Core.Features.Progression
                 DvergrPersistentOwnership.Track(characterId, zdo.m_uid);
                 DvergrCompanionManager.CacheHiredCompanion(characterId, zdo.m_uid);
                 DvergrStarterEncounterManager.RecordCompletion(characterId);
-                Plugin.Log.LogInfo($"[Starter Revival] Revived: Character={characterId}, Tombstone={graveId}, Companion={zdo.m_uid}, Identity={zdo.GetString(IdentityKey, "")}, Health={character.GetHealth()}/{character.GetMaxHealth()}, Tier={zdo.GetInt(DvergrStarterBalanceService.TierKey, 0)}");
+                HexLog.LogInfo($"[Starter Revival] Revived: Character={characterId}, Tombstone={graveId}, Companion={zdo.m_uid}, Identity={zdo.GetString(IdentityKey, "")}, Health={character.GetHealth()}/{character.GetMaxHealth()}, Tier={zdo.GetInt(DvergrStarterBalanceService.TierKey, 0)}");
             }
             catch (Exception error)
             {
@@ -222,7 +223,7 @@ namespace HexDvergrAllies.Core.Features.Progression
                 }
 
                 grave.Set(UsedKey, false);
-                Plugin.Log.LogError("[Starter Revival] Revival failed; tombstone retained: " + error);
+                HexLog.LogError("[Starter Revival] Revival failed; tombstone retained: " + error);
                 Reply(sender, 0);
                 return;
             }

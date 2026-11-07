@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HexDvergrAllies.Core;
+using System;
 using System.IO;
 using System.Reflection;
 using HarmonyLib;
@@ -23,7 +24,7 @@ namespace HexDvergrAllies.Assets
             {
                 if (stream == null)
                 {
-                    Plugin.Log.LogError($"[AssetHelper] Embedded resource not found: {resourceName}");
+                    HexLog.LogError($"[AssetHelper] Embedded resource not found: {resourceName}");
 
                     return null;
                 }
@@ -38,7 +39,7 @@ namespace HexDvergrAllies.Assets
 
                     if (imageConversionType == null)
                     {
-                        Plugin.Log.LogError("[AssetHelper] Unity ImageConversion type not found.");
+                        HexLog.LogError("[AssetHelper] Unity ImageConversion type not found.");
 
                         UnityEngine.Object.Destroy(texture);
                         return null;
@@ -48,7 +49,7 @@ namespace HexDvergrAllies.Assets
 
                     if (loadImage == null)
                     {
-                        Plugin.Log.LogError("[AssetHelper] ImageConversion.LoadImage method not found.");
+                        HexLog.LogError("[AssetHelper] ImageConversion.LoadImage method not found.");
 
                         UnityEngine.Object.Destroy(texture);
                         return null;
@@ -60,7 +61,7 @@ namespace HexDvergrAllies.Assets
 
                         if (!success)
                         {
-                            Plugin.Log.LogError($"[AssetHelper] Failed to decode image: {resourceName}");
+                            HexLog.LogError($"[AssetHelper] Failed to decode image: {resourceName}");
 
                             UnityEngine.Object.Destroy(texture);
                             return null;
@@ -68,7 +69,7 @@ namespace HexDvergrAllies.Assets
                     }
                     catch (Exception exception)
                     {
-                        Plugin.Log.LogError($"[AssetHelper] Error loading image: {exception}");
+                        HexLog.LogError($"[AssetHelper] Error loading image: {exception}");
 
                         UnityEngine.Object.Destroy(texture);
                         return null;
@@ -78,7 +79,7 @@ namespace HexDvergrAllies.Assets
 
                     Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
 
-                    Plugin.Log.LogInfo($"[AssetHelper] Loaded sprite: {resourceName}");
+                    HexLog.LogInfo($"[AssetHelper] Loaded sprite: {resourceName}");
 
                     return sprite;
                 }

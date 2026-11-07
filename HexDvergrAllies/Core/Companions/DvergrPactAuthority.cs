@@ -1,4 +1,5 @@
-﻿using HexDvergrAllies.Core.Features.Progression;
+﻿using HexDvergrAllies.Core;
+using HexDvergrAllies.Core.Features.Progression;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -178,7 +179,7 @@ namespace HexDvergrAllies.Core.Companions
             }
             catch (Exception exception)
             {
-                Plugin.Log.LogError($"[Dvergr Pact] Persistent ownership validation failed: {exception}");
+                HexLog.LogError($"[Dvergr Pact] Persistent ownership validation failed: {exception}");
                 Reply(sender, playerId, companionId, requestId, false);
                 return;
             }

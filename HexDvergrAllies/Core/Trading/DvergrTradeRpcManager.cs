@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using HexDvergrAllies.Core;
+using HarmonyLib;
 using HexDvergrAllies.Core.Networking;
 using System;
 using System.Collections.Generic;
@@ -52,7 +53,7 @@ namespace HexDvergrAllies.Core.Trading
 
             DvergrTradeTransaction.Reset();
 
-            Plugin.Log.LogInfo("[Dvergr Trade] RPC handlers registered.");
+            HexLog.LogInfo("[Dvergr Trade] RPC handlers registered.");
         }
 
         internal static void Update()
@@ -64,7 +65,7 @@ namespace HexDvergrAllies.Core.Trading
 
             if (_hasPendingPurchase && Time.time - _pendingStartTime >= PurchaseTimeout)
             {
-                Plugin.Log.LogWarning($"[Dvergr Trade] Purchase timed out: Peer={_pendingPeer}, Request={_pendingRequestId}");
+                HexLog.LogWarning($"[Dvergr Trade] Purchase timed out: Peer={_pendingPeer}, Request={_pendingRequestId}");
                 FinishPurchase(false);
             }
 
@@ -77,7 +78,7 @@ namespace HexDvergrAllies.Core.Trading
         internal static void RequestPrice(ZDOID traderZdoId)
         {
             HasCurrentPrice = false;
-            Plugin.Log.LogInfo($"[Dvergr Trade] Requesting price: Trader={traderZdoId}");
+            HexLog.LogInfo($"[Dvergr Trade] Requesting price: Trader={traderZdoId}");
             ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), DvergrRpcManager.PriceRequestRpc, traderZdoId);
         }
 
@@ -90,13 +91,13 @@ namespace HexDvergrAllies.Core.Trading
 
             if (!DvergrTradeTransaction.TryBegin(out long requestId))
             {
-                Plugin.Log.LogInfo("[Dvergr Trade] Purchase blocked: Transaction already pending.");
+                HexLog.LogInfo("[Dvergr Trade] Purchase blocked: Transaction already pending.");
                 return;
             }
 
             _requestedPurchaseType = (int)purchaseType;
 
-            Plugin.Log.LogInfo($"[Dvergr Trade] Purchase requested: Trader={traderZdoId}, Type={purchaseType}, Request={requestId}");
+            HexLog.LogInfo($"[Dvergr Trade] Purchase requested: Trader={traderZdoId}, Type={purchaseType}, Request={requestId}");
 
             ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), DvergrRpcManager.PurchaseRequestRpc, traderZdoId, (int)purchaseType, requestId);
         }
@@ -123,7 +124,7 @@ namespace HexDvergrAllies.Core.Trading
             _purchaseCount = 0;
             _initialized = true;
 
-            Plugin.Log.LogInfo("[Dvergr Trade] World purchase counter reset to 0.");
+            HexLog.LogInfo("[Dvergr Trade] World purchase counter reset to 0.");
         }
 
         internal static void OnPriceRequest(long sender, ZDOID traderZdoId)
@@ -135,13 +136,13 @@ namespace HexDvergrAllies.Core.Trading
 
             if (sender != ZNet.GetUID() && ZNet.instance.GetPeer(sender) == null)
             {
-                Plugin.Log.LogWarning($"[Dvergr Trade] Price rejected: Unknown peer={sender}");
+                HexLog.LogWarning($"[Dvergr Trade] Price rejected: Unknown peer={sender}");
                 return;
             }
 
             if (!DvergrTradeSessionManager.HasAccess(sender, traderZdoId))
             {
-                Plugin.Log.LogWarning($"[Dvergr Trade] Price rejected: No trading session for peer={sender}");
+                HexLog.LogWarning($"[Dvergr Trade] Price rejected: No trading session for peer={sender}");
                 return;
             }
 
@@ -164,7 +165,7 @@ namespace HexDvergrAllies.Core.Trading
             CurrentSapCost = sapCost;
             HasCurrentPrice = true;
 
-            Plugin.Log.LogInfo($"[Dvergr Trade] Price received: Purchase={purchaseNumber}, Sap={sapCost}");
+            HexLog.LogInfo($"[Dvergr Trade] Price received: Purchase={purchaseNumber}, Sap={sapCost}");
         }
 
         internal static void OnBuyRequest(long sender, ZDOID traderZdoId, int purchaseType, long requestId)
@@ -208,7 +209,7 @@ namespace HexDvergrAllies.Core.Trading
 
             _purchaseQueue.Enqueue((sender, traderZdoId, purchaseType, requestId));
 
-            Plugin.Log.LogInfo($"[Dvergr Trade] Purchase queued: Peer={sender}, Type={(DvergrPurchaseType)purchaseType}, Request={requestId}, Position={_purchaseQueue.Count}");
+            HexLog.LogInfo($"[Dvergr Trade] Purchase queued: Peer={sender}, Type={(DvergrPurchaseType)purchaseType}, Request={requestId}, Position={_purchaseQueue.Count}");
 
             if (!_hasPendingPurchase)
             {
@@ -225,7 +226,7 @@ namespace HexDvergrAllies.Core.Trading
 
             if (!DvergrTradeTransaction.IsPending || DvergrTradeTransaction.RequestId != requestId || purchaseType != _requestedPurchaseType)
             {
-                Plugin.Log.LogWarning($"[Dvergr Trade] Authorization rejected: Request={requestId}, Type={purchaseType}");
+                HexLog.LogWarning($"[Dvergr Trade] Authorization rejected: Request={requestId}, Type={purchaseType}");
                 return;
             }
 
@@ -236,7 +237,7 @@ namespace HexDvergrAllies.Core.Trading
 
             bool success = ExecutePurchase(traderZdoId, (DvergrPurchaseType)purchaseType, sapCost);
 
-            Plugin.Log.LogInfo($"[Dvergr Trade] Client transaction result: Type={(DvergrPurchaseType)purchaseType}, Request={requestId}, Success={success}");
+            HexLog.LogInfo($"[Dvergr Trade] Client transaction result: Type={(DvergrPurchaseType)purchaseType}, Request={requestId}, Success={success}");
 
             ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), DvergrRpcManager.PurchaseCompleteRpc, traderZdoId, purchaseType, purchaseNumber, success, transactionId, requestId);
         }
@@ -250,7 +251,7 @@ namespace HexDvergrAllies.Core.Trading
 
             if (!_hasPendingPurchase || sender != _pendingPeer || traderZdoId != _pendingTrader || purchaseType != _pendingPurchaseType || purchaseNumber != _pendingPurchaseNumber || transactionId != _pendingTransactionId || requestId != _pendingRequestId)
             {
-                Plugin.Log.LogWarning("[Dvergr Trade] Completion rejected: No matching pending transaction.");
+                HexLog.LogWarning("[Dvergr Trade] Completion rejected: No matching pending transaction.");
                 return;
             }
 
@@ -273,16 +274,16 @@ namespace HexDvergrAllies.Core.Trading
 
                     ZRoutedRpc.instance.InvokeRoutedRPC(sender, DvergrRpcManager.PriceResponseRpc, nextPurchaseNumber, nextSapCost);
 
-                    Plugin.Log.LogInfo($"[Dvergr Trade] Extractor purchase finalized: WorldPurchaseCount={_purchaseCount}");
+                    HexLog.LogInfo($"[Dvergr Trade] Extractor purchase finalized: WorldPurchaseCount={_purchaseCount}");
                 }
                 else
                 {
-                    Plugin.Log.LogInfo($"[Dvergr Trade] {(DvergrPurchaseType)purchaseType} purchase finalized. Extractor counter unchanged.");
+                    HexLog.LogInfo($"[Dvergr Trade] {(DvergrPurchaseType)purchaseType} purchase finalized. Extractor counter unchanged.");
                 }
             }
             else
             {
-                Plugin.Log.LogWarning($"[Dvergr Trade] Purchase failed: Type={(DvergrPurchaseType)purchaseType}, Request={requestId}");
+                HexLog.LogWarning($"[Dvergr Trade] Purchase failed: Type={(DvergrPurchaseType)purchaseType}, Request={requestId}");
             }
 
             FinishPurchase(success);
@@ -298,13 +299,13 @@ namespace HexDvergrAllies.Core.Trading
 
             if (!DvergrTradeTransaction.TryComplete(requestId))
             {
-                Plugin.Log.LogWarning($"[Dvergr Trade] Ignored stale purchase result: Request={requestId}");
+                HexLog.LogWarning($"[Dvergr Trade] Ignored stale purchase result: Request={requestId}");
                 return;
             }
 
             _requestedPurchaseType = 0;
 
-            Plugin.Log.LogInfo($"[Dvergr Trade] Transaction finalized: Request={requestId}, Success={success}. Client unlocked.");
+            HexLog.LogInfo($"[Dvergr Trade] Transaction finalized: Request={requestId}, Success={success}. Client unlocked.");
         }
 
         private static bool IsValidPurchaseType(int purchaseType)
@@ -354,7 +355,7 @@ namespace HexDvergrAllies.Core.Trading
 
                 if (sender != ZNet.GetUID() && peer == null)
                 {
-                    Plugin.Log.LogWarning($"[Dvergr Trade] Queued purchase skipped: Peer disconnected={sender}");
+                    HexLog.LogWarning($"[Dvergr Trade] Queued purchase skipped: Peer disconnected={sender}");
                     continue;
                 }
 
@@ -393,7 +394,7 @@ namespace HexDvergrAllies.Core.Trading
                 _pendingStartTime = Time.time;
                 _hasPendingPurchase = true;
 
-                Plugin.Log.LogInfo($"[Dvergr Trade] Purchase authorized: Peer={sender}, Type={(DvergrPurchaseType)request.Type}, Request={request.RequestId}, Transaction={_pendingTransactionId}, Sap={sapCost}");
+                HexLog.LogInfo($"[Dvergr Trade] Purchase authorized: Peer={sender}, Type={(DvergrPurchaseType)request.Type}, Request={request.RequestId}, Transaction={_pendingTransactionId}, Sap={sapCost}");
 
                 ZRoutedRpc.instance.InvokeRoutedRPC(sender, DvergrRpcManager.PurchaseResponseRpc, request.Trader, request.Type, purchaseNumber, sapCost, _pendingTransactionId, request.RequestId);
                 return;
@@ -402,7 +403,7 @@ namespace HexDvergrAllies.Core.Trading
 
         private static void RejectQueuedPurchase((long Peer, ZDOID Trader, int Type, long RequestId) request, string reason)
         {
-            Plugin.Log.LogWarning($"[Dvergr Trade] Queued purchase rejected: Peer={request.Peer}, Type={request.Type}, Request={request.RequestId}, Reason={reason}");
+            HexLog.LogWarning($"[Dvergr Trade] Queued purchase rejected: Peer={request.Peer}, Type={request.Type}, Request={request.RequestId}, Reason={reason}");
             SendPurchaseResult(request.Peer, request.RequestId, false);
         }
 
@@ -420,7 +421,7 @@ namespace HexDvergrAllies.Core.Trading
 
             if (!trader || !DvergrTraderManager.IsDvergrTrader(trader) || Features.Progression.DvergrStarterVendorService.IsStarter(trader))
             {
-                Plugin.Log.LogWarning("[Dvergr Trade] Client purchase failed: Trader unavailable.");
+                HexLog.LogWarning("[Dvergr Trade] Client purchase failed: Trader unavailable.");
                 return false;
             }
 
@@ -457,7 +458,7 @@ namespace HexDvergrAllies.Core.Trading
 
             if (!flametalPrefab || string.IsNullOrEmpty(paymentName))
             {
-                Plugin.Log.LogWarning("[Dvergr Trade] Flametal purchase failed: Required prefab unavailable.");
+                HexLog.LogWarning("[Dvergr Trade] Flametal purchase failed: Required prefab unavailable.");
                 return false;
             }
 
@@ -466,19 +467,19 @@ namespace HexDvergrAllies.Core.Trading
 
             if (inventory.CountItems(paymentName) < cost)
             {
-                Plugin.Log.LogWarning("[Dvergr Trade] Flametal purchase failed: Insufficient Molten Cores.");
+                HexLog.LogWarning("[Dvergr Trade] Flametal purchase failed: Insufficient Molten Cores.");
                 return false;
             }
 
             if (!inventory.CanAddItem(flametalPrefab, quantity))
             {
-                Plugin.Log.LogWarning("[Dvergr Trade] Flametal purchase failed: Inventory full.");
+                HexLog.LogWarning("[Dvergr Trade] Flametal purchase failed: Inventory full.");
                 return false;
             }
 
             if (!inventory.AddItem(flametalPrefab, quantity))
             {
-                Plugin.Log.LogWarning("[Dvergr Trade] Flametal purchase failed: Unable to add Flametal.");
+                HexLog.LogWarning("[Dvergr Trade] Flametal purchase failed: Unable to add Flametal.");
                 return false;
             }
 
@@ -491,7 +492,7 @@ namespace HexDvergrAllies.Core.Trading
                 player.ShowPickupMessage(itemDrop.m_itemData, quantity);
             }
 
-            Plugin.Log.LogInfo($"[Dvergr Trade] Flametal purchase complete: FlametalAdded={quantity}, MoltenCoreRemoved={cost}");
+            HexLog.LogInfo($"[Dvergr Trade] Flametal purchase complete: FlametalAdded={quantity}, MoltenCoreRemoved={cost}");
             return true;
         }
 
@@ -504,7 +505,7 @@ namespace HexDvergrAllies.Core.Trading
 
             if (trophyName == null || !sapPrefab || !needlePrefab)
             {
-                Plugin.Log.LogWarning("[Dvergr Trade] Extractor purchase failed: Required item unavailable.");
+                HexLog.LogWarning("[Dvergr Trade] Extractor purchase failed: Required item unavailable.");
                 return false;
             }
 
@@ -520,19 +521,19 @@ namespace HexDvergrAllies.Core.Trading
 
             if (inventory.CountItems(sapName) < sapCost)
             {
-                Plugin.Log.LogWarning("[Dvergr Trade] Extractor purchase failed: Insufficient Sap.");
+                HexLog.LogWarning("[Dvergr Trade] Extractor purchase failed: Insufficient Sap.");
                 return false;
             }
 
             if (!inventory.CanAddItem(needlePrefab, 1))
             {
-                Plugin.Log.LogWarning("[Dvergr Trade] Extractor purchase failed: Inventory full.");
+                HexLog.LogWarning("[Dvergr Trade] Extractor purchase failed: Inventory full.");
                 return false;
             }
 
             if (!inventory.AddItem(needlePrefab, 1))
             {
-                Plugin.Log.LogWarning("[Dvergr Trade] Extractor purchase failed: Could not add DvergrNeedle.");
+                HexLog.LogWarning("[Dvergr Trade] Extractor purchase failed: Could not add DvergrNeedle.");
                 return false;
             }
 
@@ -545,7 +546,7 @@ namespace HexDvergrAllies.Core.Trading
 
             player.ShowPickupMessage(needleItem.m_itemData, 1);
 
-            Plugin.Log.LogInfo($"[Dvergr Trade] Extractor purchase complete: NeedleAdded=1, TrophyRemoved=1, SapRemoved={sapCost}");
+            HexLog.LogInfo($"[Dvergr Trade] Extractor purchase complete: NeedleAdded=1, TrophyRemoved=1, SapRemoved={sapCost}");
             return true;
         }
 
@@ -585,7 +586,7 @@ namespace HexDvergrAllies.Core.Trading
 
             _initialized = true;
 
-            Plugin.Log.LogInfo($"[Dvergr Trade] Loaded world purchase counter: {_purchaseCount}");
+            HexLog.LogInfo($"[Dvergr Trade] Loaded world purchase counter: {_purchaseCount}");
         }
     }
 }

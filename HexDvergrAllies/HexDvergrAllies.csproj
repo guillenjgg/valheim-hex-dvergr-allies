@@ -226,6 +226,7 @@
     <Compile Include="Core\UI\DvergrTraderDisplayManager.cs" />
     <Compile Include="Core\UI\DvergrCompendiumManager.cs" />
     <Compile Include="Patches\UI\TextsDialogDvergrCompendiumPatch.cs" />
+    <Compile Include="Core\HexLog.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

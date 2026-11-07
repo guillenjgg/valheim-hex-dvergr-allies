@@ -77,3 +77,5 @@ hex_dvergr_revive_owner_only,Only this companion's owner can revive them.
 hex_dvergr_revived,Your companion is back at full health.
 hex_dvergr_revive_blocked,You must release your other companion before reviving this one. If a pact is still being processed try again shortly.
 hex_dvergr_revive_failed,Your companion could not be revived. Stay near the tombstone and try again.
+hex_dvergr_compendium_next,<color=orange>Next level</color>
+hex_dvergr_compendium_max_level,Your companion has reached the highest available level.

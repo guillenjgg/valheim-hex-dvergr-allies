@@ -1,4 +1,5 @@
-﻿using HexDvergrAllies.Core.Companions;
+﻿using HexDvergrAllies.Core;
+using HexDvergrAllies.Core.Companions;
 using HexDvergrAllies.Core.HexLocalization;
 using HexDvergrAllies.Core.Trading;
 using UnityEngine;
@@ -152,7 +153,7 @@ namespace HexDvergrAllies.Core.Features.Progression
             }
             catch (System.Exception exception)
             {
-                Plugin.Log.LogError($"[Starter Encounter] Ownership query failed: {exception}");
+                HexLog.LogError($"[Starter Encounter] Ownership query failed: {exception}");
             }
 
             ZRoutedRpc.instance.InvokeRoutedRPC(sender, StatusRpc, vendorId, status);

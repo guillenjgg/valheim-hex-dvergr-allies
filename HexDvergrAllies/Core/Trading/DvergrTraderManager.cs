@@ -1,3 +1,4 @@
+using HexDvergrAllies.Core;
 using HexDvergrAllies.Core.HexLocalization;
 using HexDvergrAllies.Core.Companions;
 using UnityEngine;
@@ -179,7 +180,7 @@ namespace HexDvergrAllies.Core.Trading
 
             if (!prefab)
             {
-                Plugin.Log.LogWarning("[Dvergr Trader] MeadTasty prefab not found.");
+                HexLog.LogWarning("[Dvergr Trader] MeadTasty prefab not found.");
                 return;
             }
 
@@ -197,7 +198,7 @@ namespace HexDvergrAllies.Core.Trading
             }
             else
             {
-                Plugin.Log.LogWarning("[Dvergr Trader] DvergrNeedle prefab not found.");
+                HexLog.LogWarning("[Dvergr Trader] DvergrNeedle prefab not found.");
             }
 
             GameObject softTissuePrefab = ObjectDB.instance.GetItemPrefab(PrefabHelper.Softtissue);
@@ -208,7 +209,7 @@ namespace HexDvergrAllies.Core.Trading
             }
             else
             {
-                Plugin.Log.LogWarning("[Dvergr Trader] Softtissue prefab not found.");
+                HexLog.LogWarning("[Dvergr Trader] Softtissue prefab not found.");
             }
         }
 
@@ -218,7 +219,7 @@ namespace HexDvergrAllies.Core.Trading
 
             if (!flametalPrefab)
             {
-                Plugin.Log.LogWarning("[Dvergr Trader] FlametalNew prefab not found.");
+                HexLog.LogWarning("[Dvergr Trader] FlametalNew prefab not found.");
                 return;
             }
 
@@ -226,13 +227,13 @@ namespace HexDvergrAllies.Core.Trading
 
             if (!itemDrop)
             {
-                Plugin.Log.LogWarning("[Dvergr Trader] FlametalNew ItemDrop component not found.");
+                HexLog.LogWarning("[Dvergr Trader] FlametalNew ItemDrop component not found.");
                 return;
             }
 
             trader.m_items.Add(new Trader.TradeItem { m_prefab = itemDrop, m_stack = DvergrPricingConfig.AshlandsFlametalQuantity, m_price = 0, m_tooltip = HexLocalizationManager.Localize("$hex_dvergr_flametal_tooltip", DvergrPricingConfig.AshlandsMoltenCoreCost, DvergrPricingConfig.AshlandsFlametalQuantity), m_buyPlayerEffects = new EffectList() });
 
-            Plugin.Log.LogInfo($"[Dvergr Trader] Ashlands inventory initialized: FlametalNew={DvergrPricingConfig.AshlandsFlametalQuantity}, MoltenCore={DvergrPricingConfig.AshlandsMoltenCoreCost}");
+            HexLog.LogInfo($"[Dvergr Trader] Ashlands inventory initialized: FlametalNew={DvergrPricingConfig.AshlandsFlametalQuantity}, MoltenCore={DvergrPricingConfig.AshlandsMoltenCoreCost}");
         }
     }
 }

@@ -31,10 +31,12 @@ namespace HexDvergrAllies.Core.UI
             text.AppendLine(HexLocalizationManager.Localize("$hex_dvergr_compendium_intro"));
             text.AppendLine();
             ZDO companion;
+            var currentTier = -1;
 
             if (DvergrCompanionManager.TryGetHiredCompanionZDO(player, out companion) && companion.GetBool(DvergrStarterCharacterState.StarterKey, false))
             {
                 var tier = UnityEngine.Mathf.Clamp(companion.GetInt(DvergrStarterBalanceService.TierKey, 0), 0, (int)DvergrStarterTier.Ashlands);
+                currentTier = tier;
                 text.AppendLine(HexLocalizationManager.Localize("$hex_dvergr_compendium_current"));
                 AppendTier(text, tier);
             }
@@ -46,6 +48,24 @@ namespace HexDvergrAllies.Core.UI
             var reduction = (1f - HexDvergrAlliesConfiguration.CompanionDamageTakenMultiplier.Value) * 100f;
             text.AppendLine(HexLocalizationManager.Localize("$hex_dvergr_compendium_reduction", reduction));
             text.AppendLine();
+            if (currentTier >= 0)
+            {
+                text.AppendLine(HexLocalizationManager.Localize("$hex_dvergr_compendium_next"));
+
+                if (currentTier < (int)DvergrStarterTier.Ashlands)
+                {
+                    var nextTier = currentTier + 1;
+                    AppendTier(text, nextTier);
+                    text.AppendLine(HexLocalizationManager.Localize("$hex_dvergr_compendium_unlock", Localization.instance.Localize(UnlockBosses[nextTier])));
+                }
+                else
+                {
+                    text.AppendLine(HexLocalizationManager.Localize("$hex_dvergr_compendium_max_level"));
+                }
+
+                text.AppendLine();
+            }
+
             text.AppendLine(HexLocalizationManager.Localize("$hex_dvergr_compendium_tiers"));
 
             for (var tier = 0; tier <= (int)DvergrStarterTier.Ashlands; tier++)

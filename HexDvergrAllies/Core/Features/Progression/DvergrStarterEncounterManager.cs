@@ -1,4 +1,5 @@
-﻿using HexDvergrAllies.Assets;
+﻿using HexDvergrAllies.Core;
+using HexDvergrAllies.Assets;
 using HexDvergrAllies.Core.Companions;
 using HexDvergrAllies.Core.HexLocalization;
 using System.Collections.Generic;
@@ -166,7 +167,7 @@ namespace HexDvergrAllies.Core.Features.Progression
                     world.RemoveGlobalKey(prefix + "built");
                     world.RemoveGlobalKey(prefix + "slot_dvergr");
                     _encounters[characterId] = new DvergrStarterEncounter(characterId);
-                    Plugin.Log.LogInfo($"[Starter Encounter] Recovering missing unhired starter for character {characterId}; existing camp pieces are retained.");
+                    HexLog.LogInfo($"[Starter Encounter] Recovering missing unhired starter for character {characterId}; existing camp pieces are retained.");
                 }
             }
 
@@ -236,7 +237,7 @@ namespace HexDvergrAllies.Core.Features.Progression
 
             if (!reset)
             {
-                Plugin.Log.LogInfo("[Starter Test] Kill requested for loaded starters belonging to character " + characterId);
+                HexLog.LogInfo("[Starter Test] Kill requested for loaded starters belonging to character " + characterId);
                 return;
             }
 
@@ -257,7 +258,7 @@ namespace HexDvergrAllies.Core.Features.Progression
             _recoverAt.Remove(characterId);
             _encounters[characterId] = new DvergrStarterEncounter(characterId);
             RemovePin();
-            Plugin.Log.LogInfo("[Starter Test] Introduction reset at existing camp for character " + characterId);
+            HexLog.LogInfo("[Starter Test] Introduction reset at existing camp for character " + characterId);
         }
 
         internal static void OnRegister(long sender, ZDOID playerId, bool completed)
@@ -318,7 +319,7 @@ namespace HexDvergrAllies.Core.Features.Progression
             if (!ZoneSystem.instance.GetGlobalKey(key))
             {
                 ZoneSystem.instance.SetGlobalKey(key);
-                Plugin.Log.LogInfo($"[Starter Encounter] Introduction completed for character {characterId} after accepted pact.");
+                HexLog.LogInfo($"[Starter Encounter] Introduction completed for character {characterId} after accepted pact.");
             }
         }
 

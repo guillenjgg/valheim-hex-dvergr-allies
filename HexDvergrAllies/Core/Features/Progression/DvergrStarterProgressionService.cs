@@ -1,3 +1,4 @@
+using HexDvergrAllies.Core;
 using System.Collections.Generic;
 using HexDvergrAllies.Core.Companions;
 using HexDvergrAllies.Core.HexLocalization;
@@ -118,7 +119,7 @@ namespace HexDvergrAllies.Core.Features.Progression
                 PlayEffect("sfx_levelup", character);
             }
 
-            Plugin.Log.LogInfo($"[Starter Progression] Character={characterId}, Dvergr={companionId}, Tier={tier}, Level={tier + 1}");
+            HexLog.LogInfo($"[Starter Progression] Character={characterId}, Dvergr={companionId}, Tier={tier}, Level={tier + 1}");
         }
 
         private static void PlayEffect(string name, Character character)

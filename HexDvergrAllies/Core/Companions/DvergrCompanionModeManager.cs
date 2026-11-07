@@ -1,3 +1,4 @@
+using HexDvergrAllies.Core;
 using HexDvergrAllies.Core.Networking;
 using UnityEngine;
 
@@ -95,7 +96,7 @@ namespace HexDvergrAllies.Core.Companions
             }
 
             zdo.Set(DvergrCompanionState.ModeKey, (int)mode);
-            Plugin.Log.LogInfo($"[Dvergr Companion] Mode changed: Dvergr={character.name}, Player={player.GetPlayerName()}, Mode={mode}");
+            HexLog.LogInfo($"[Dvergr Companion] Mode changed: Dvergr={character.name}, Player={player.GetPlayerName()}, Mode={mode}");
         }
 
         internal static void RequestRemoteToggleMode(Player player)

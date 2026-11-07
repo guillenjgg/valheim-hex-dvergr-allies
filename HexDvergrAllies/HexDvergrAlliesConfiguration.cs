@@ -76,7 +76,7 @@ namespace HexDvergrAllies
 
             CompanionUIShortcut = config.Bind("Dvergr Companion", "UIShortcut", new KeyboardShortcut(KeyCode.F9), new ConfigDescription("Keyboard shortcut to open or close the Dvergr Companion Management UI.", null, new ConfigurationManagerAttributes { Order = 1010 }));
 
-            EnableDebugLogs = config.Bind("Debug", "EnableDebugLogs", false, new ConfigDescription("Logs Dvergr damage events, status effects, and AI states.", null, new ConfigurationManagerAttributes { Order = 2770, IsAdvanced = true }));
+            EnableDebugLogs = config.Bind("Debug", "EnableDebugLogs", false, new ConfigDescription("Enables all mod diagnostics, warnings, and errors. Plugin lifecycle and configuration messages remain independent.", null, new ConfigurationManagerAttributes { Order = 2770, IsAdvanced = true }));
 
             config.Bind("Debug", "StarterTestKill", false, new ConfigDescription("Temporary host-only test control: kill your loaded starter, bypassing pre-hire immunity.", null, new ConfigurationManagerAttributes
             {

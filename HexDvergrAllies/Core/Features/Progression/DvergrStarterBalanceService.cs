@@ -1,3 +1,4 @@
+using HexDvergrAllies.Core;
 using HarmonyLib;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -98,7 +99,7 @@ namespace HexDvergrAllies.Core.Features.Progression
 
         private static void LogAppliedBalance(Character character, ZNetView view, DvergrStarterTierProfile profile, Humanoid humanoid)
         {
-            if (!view.IsOwner() || character.IsDead())
+            if (!HexDvergrAlliesConfiguration.EnableDebugLogs.Value || !view.IsOwner() || character.IsDead())
             {
                 return;
             }
@@ -121,14 +122,14 @@ namespace HexDvergrAllies.Core.Features.Progression
             state.Pierce = profile.ArbalestPierce;
             state.Blunt = profile.MeleeBlunt;
             state.DamageTaken = taken;
-            Plugin.Log.LogInfo($"[Starter Balance] Character={zdo.GetLong(DvergrStarterCharacterState.CharacterKey, 0L)}, Dvergr={zdo.m_uid}, Tier={(DvergrStarterTier)tier}, Level={tier + 1}, Hired={hired}, Health={character.GetHealth():F1}/{character.GetMaxHealth():F1}, TargetHealth={profile.Health:F1}, ArbalestBasePierce={profile.ArbalestPierce:F1}, MeleeBaseBlunt={profile.MeleeBlunt:F1}, DamageTakenMultiplier={taken:F2}, DamageReduction={(1f - taken) * 100f:F0}%, PreHireImmune={DvergrStarterCharacterState.IsProtected(character)}");
+            HexLog.LogInfo($"[Starter Balance] Character={zdo.GetLong(DvergrStarterCharacterState.CharacterKey, 0L)}, Dvergr={zdo.m_uid}, Tier={(DvergrStarterTier)tier}, Level={tier + 1}, Hired={hired}, Health={character.GetHealth():F1}/{character.GetMaxHealth():F1}, TargetHealth={profile.Health:F1}, ArbalestBasePierce={profile.ArbalestPierce:F1}, MeleeBaseBlunt={profile.MeleeBlunt:F1}, DamageTakenMultiplier={taken:F2}, DamageReduction={(1f - taken) * 100f:F0}%, PreHireImmune={DvergrStarterCharacterState.IsProtected(character)}");
 
             foreach (var item in humanoid.GetInventory().GetAllItems())
             {
                 if (Weapons.TryGetValue(item, out _))
                 {
                     var damage = item.m_shared.m_damages;
-                    Plugin.Log.LogInfo($"[Starter Weapon] Dvergr={zdo.m_uid}, Item={item.m_shared.m_name}, BasePierce={damage.m_pierce:F1}, BaseBlunt={damage.m_blunt:F1}");
+                    HexLog.LogInfo($"[Starter Weapon] Dvergr={zdo.m_uid}, Item={item.m_shared.m_name}, BasePierce={damage.m_pierce:F1}, BaseBlunt={damage.m_blunt:F1}");
                 }
             }
         }

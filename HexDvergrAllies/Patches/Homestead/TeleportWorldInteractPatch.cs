@@ -44,7 +44,7 @@ namespace HexDvergrAllies.Patches
 
             if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
             {
-                Plugin.Log.LogInfo($"[Dvergr Homestead] Portal interaction allowed: Portal={prefabName}, Position={position}");
+                HexLog.LogInfo($"[Dvergr Homestead] Portal interaction allowed: Portal={prefabName}, Position={position}");
             }
 
             return false;

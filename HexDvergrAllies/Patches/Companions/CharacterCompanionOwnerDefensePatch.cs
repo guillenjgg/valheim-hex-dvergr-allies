@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using HexDvergrAllies.Core;
+using HarmonyLib;
 using HexDvergrAllies.Core.Companions;
 using UnityEngine;
 
@@ -96,7 +97,7 @@ namespace HexDvergrAllies.Patches
 
                 if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
                 {
-                    Plugin.Log.LogInfo(
+                    HexLog.LogInfo(
                         $"[Dvergr Companion] Owner defense triggered: " +
                         $"Dvergr={companion.name}, " +
                         $"Owner={__instance.name}, " +

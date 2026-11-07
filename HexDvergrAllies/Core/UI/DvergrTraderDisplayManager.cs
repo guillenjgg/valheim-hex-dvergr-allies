@@ -1,4 +1,5 @@
-﻿using HexDvergrAllies.Core.HexLocalization;
+﻿using HexDvergrAllies.Core;
+using HexDvergrAllies.Core.HexLocalization;
 using HarmonyLib;
 using HexDvergrAllies.Assets;
 using HexDvergrAllies.Core.Trading;
@@ -256,7 +257,7 @@ namespace HexDvergrAllies.Core.UI
                 }
             }
 
-            Plugin.Log.LogWarning("[Dvergr Trader] Forge Pact name field not found.");
+            HexLog.LogWarning("[Dvergr Trader] Forge Pact name field not found.");
         }
 
         private static TMP_Text ConfigureCustomPrice(Transform item)
@@ -365,7 +366,7 @@ namespace HexDvergrAllies.Core.UI
 
             if (!iconTransform)
             {
-                Plugin.Log.LogWarning("[Dvergr Trader] Forge Pact icon not found.");
+                HexLog.LogWarning("[Dvergr Trader] Forge Pact icon not found.");
                 return;
             }
 

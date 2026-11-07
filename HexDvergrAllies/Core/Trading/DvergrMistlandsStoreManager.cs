@@ -1,3 +1,4 @@
+using HexDvergrAllies.Core;
 using HexDvergrAllies.Core.HexLocalization;
 using System.Collections.Generic;
 using UnityEngine;
@@ -29,7 +30,7 @@ namespace HexDvergrAllies.Core.Trading
 
             if (!item)
             {
-                Plugin.Log.LogWarning($"[Dvergr Trader] Required Mistlands stock unavailable: {prefabName}.");
+                HexLog.LogWarning($"[Dvergr Trader] Required Mistlands stock unavailable: {prefabName}.");
                 return;
             }
 
@@ -109,7 +110,7 @@ namespace HexDvergrAllies.Core.Trading
             }
 
             player.ShowPickupMessage(item.m_itemData, 1);
-            Plugin.Log.LogInfo($"[Dvergr Trade] Fallen brother trophy purchased for {DvergrPricingConfig.FallenBrotherTrophyCost} allowed enemy trophies.");
+            HexLog.LogInfo($"[Dvergr Trade] Fallen brother trophy purchased for {DvergrPricingConfig.FallenBrotherTrophyCost} allowed enemy trophies.");
             return true;
         }
     }

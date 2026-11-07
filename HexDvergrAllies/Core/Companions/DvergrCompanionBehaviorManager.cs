@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using HexDvergrAllies.Core;
+using HarmonyLib;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -74,7 +75,7 @@ namespace HexDvergrAllies.Core.Companions
                 }
             }
 
-            Plugin.Log.LogInfo($"[Dvergr Companion] Original stats cached: Dvergr={character.name}, Speed={state.OriginalSpeed}, WalkSpeed={state.OriginalWalkSpeed}, RunSpeed={state.OriginalRunSpeed}, AttackInterval={state.OriginalMinAttackInterval}, MaxHealth={state.OriginalMaxHealth}");
+            HexLog.LogInfo($"[Dvergr Companion] Original stats cached: Dvergr={character.name}, Speed={state.OriginalSpeed}, WalkSpeed={state.OriginalWalkSpeed}, RunSpeed={state.OriginalRunSpeed}, AttackInterval={state.OriginalMinAttackInterval}, MaxHealth={state.OriginalMaxHealth}");
         }
 
         internal static void UpdateCombatLeash(MonsterAI monsterAI)
@@ -123,7 +124,7 @@ namespace HexDvergrAllies.Core.Companions
 
             if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
             {
-                Plugin.Log.LogInfo(
+                HexLog.LogInfo(
                     $"[Dvergr Companion] Combat leash exceeded: " +
                     $"Dvergr={character.name}, " +
                     $"Target={combatTarget.name}, " +
@@ -220,7 +221,7 @@ namespace HexDvergrAllies.Core.Companions
 
                 if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
                 {
-                    Plugin.Log.LogInfo($"[Dvergr Companion] Animation initialized: Dvergr={character.name}, OriginalSpeed={state.OriginalAnimationSpeed:F2}");
+                    HexLog.LogInfo($"[Dvergr Companion] Animation initialized: Dvergr={character.name}, OriginalSpeed={state.OriginalAnimationSpeed:F2}");
                 }
             }
 
@@ -248,7 +249,7 @@ namespace HexDvergrAllies.Core.Companions
 
             if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
             {
-                Plugin.Log.LogInfo($"[Dvergr Companion] Animation speed changed: Dvergr={character.name}, InAttack={inAttack}, Multiplier={targetMultiplier:F2}, OriginalSpeed={state.OriginalAnimationSpeed:F2}, PreviousSpeed={previousSpeed:F2}, TargetSpeed={targetSpeed:F2}, ActualSpeed={animator.speed:F2}");
+                HexLog.LogInfo($"[Dvergr Companion] Animation speed changed: Dvergr={character.name}, InAttack={inAttack}, Multiplier={targetMultiplier:F2}, OriginalSpeed={state.OriginalAnimationSpeed:F2}, PreviousSpeed={previousSpeed:F2}, TargetSpeed={targetSpeed:F2}, ActualSpeed={animator.speed:F2}");
             }
         }
 
@@ -294,7 +295,7 @@ namespace HexDvergrAllies.Core.Companions
 
             zdo.Set(OriginalMaxHealthSavedKey, false);
 
-            Plugin.Log.LogInfo($"[Dvergr Companion] Original stats restored: Dvergr={character.name}, MaxHealth={originalMaxHealth}");
+            HexLog.LogInfo($"[Dvergr Companion] Original stats restored: Dvergr={character.name}, MaxHealth={originalMaxHealth}");
         }
 
         internal static void RemoveCharacter(Character character)
@@ -353,7 +354,7 @@ namespace HexDvergrAllies.Core.Companions
 
             if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
             {
-                Plugin.Log.LogInfo($"[Dvergr Companion] Movement speed applied: Dvergr={character.name}, Multiplier={multiplier:F2}, OriginalSpeed={state.OriginalSpeed:F2}, AppliedSpeed={character.m_speed:F2}, OriginalWalkSpeed={state.OriginalWalkSpeed:F2}, AppliedWalkSpeed={character.m_walkSpeed:F2}, OriginalRunSpeed={state.OriginalRunSpeed:F2}, AppliedRunSpeed={character.m_runSpeed:F2}");
+                HexLog.LogInfo($"[Dvergr Companion] Movement speed applied: Dvergr={character.name}, Multiplier={multiplier:F2}, OriginalSpeed={state.OriginalSpeed:F2}, AppliedSpeed={character.m_speed:F2}, OriginalWalkSpeed={state.OriginalWalkSpeed:F2}, AppliedWalkSpeed={character.m_walkSpeed:F2}, OriginalRunSpeed={state.OriginalRunSpeed:F2}, AppliedRunSpeed={character.m_runSpeed:F2}");
             }
         }
 
@@ -372,7 +373,7 @@ namespace HexDvergrAllies.Core.Companions
 
             if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
             {
-                Plugin.Log.LogInfo($"[Dvergr Companion] Attack interval applied: Dvergr={monsterAI.name}, OriginalInterval={state.OriginalMinAttackInterval:F2}, Multiplier={multiplier:F2}, AppliedInterval={monsterAI.m_minAttackInterval:F2}");
+                HexLog.LogInfo($"[Dvergr Companion] Attack interval applied: Dvergr={monsterAI.name}, OriginalInterval={state.OriginalMinAttackInterval:F2}, Multiplier={multiplier:F2}, AppliedInterval={monsterAI.m_minAttackInterval:F2}");
             }
         }
 
@@ -452,7 +453,7 @@ namespace HexDvergrAllies.Core.Companions
             var cooldown = HexDvergrAlliesConfiguration.CompanionAutoHealCooldown.Value;
             state.NextAutoHealTime = Time.time + cooldown;
 
-            Plugin.Log.LogInfo($"[Dvergr Companion] Auto-healed: Dvergr={character.name}, PreviousHealth={currentHealth:F1}, MaxHealth={maxHealth:F1}, Cooldown={cooldown:F1}s");
+            HexLog.LogInfo($"[Dvergr Companion] Auto-healed: Dvergr={character.name}, PreviousHealth={currentHealth:F1}, MaxHealth={maxHealth:F1}, Cooldown={cooldown:F1}s");
         }
 
         private static float GetOriginalMaxHealth(Character character, CompanionBehaviorState state)

@@ -36,7 +36,7 @@ namespace HexDvergrAllies.Core.Trading
 
                     if (!coinPrefab)
                     {
-                        Plugin.Log.LogError("[Dvergr Trader] Coins prefab not found.");
+                        HexLog.LogError("[Dvergr Trader] Coins prefab not found.");
                         return false;
                     }
 

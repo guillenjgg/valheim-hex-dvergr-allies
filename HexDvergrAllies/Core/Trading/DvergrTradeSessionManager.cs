@@ -1,3 +1,4 @@
+using HexDvergrAllies.Core;
 using HexDvergrAllies.Core.HexLocalization;
 using HarmonyLib;
 using System;
@@ -191,7 +192,7 @@ namespace HexDvergrAllies.Core.Trading
                 }
             }
 
-            Plugin.Log.LogInfo($"[Dvergr Trade Session] Open: Peer={sender}, Trader={traderZdoId}, Approved={approved}, Reason={reason}");
+            HexLog.LogInfo($"[Dvergr Trade Session] Open: Peer={sender}, Trader={traderZdoId}, Approved={approved}, Reason={reason}");
 
             ZRoutedRpc.instance.InvokeRoutedRPC(sender, OpenResponseRpc, traderZdoId, approved, reason);
         }
@@ -242,19 +243,19 @@ namespace HexDvergrAllies.Core.Trading
 
             if (!_sessions.TryGetValue(traderZdoId, out var session))
             {
-                Plugin.Log.LogInfo($"[Dvergr Trade Session] Close: Peer={sender}, Trader={traderZdoId}, Reason=No active session");
+                HexLog.LogInfo($"[Dvergr Trade Session] Close: Peer={sender}, Trader={traderZdoId}, Reason=No active session");
                 return;
             }
 
             if (session.Peer != sender)
             {
-                Plugin.Log.LogWarning($"[Dvergr Trade Session] Close rejected: Peer={sender}, Trader={traderZdoId}, Owner={session.Peer}");
+                HexLog.LogWarning($"[Dvergr Trade Session] Close rejected: Peer={sender}, Trader={traderZdoId}, Owner={session.Peer}");
                 return;
             }
 
             _sessions.Remove(traderZdoId);
 
-            Plugin.Log.LogInfo($"[Dvergr Trade Session] Close: Peer={sender}, Trader={traderZdoId}, Session removed");
+            HexLog.LogInfo($"[Dvergr Trade Session] Close: Peer={sender}, Trader={traderZdoId}, Session removed");
         }
 
         private static void OnHeartbeat(long sender, ZDOID traderZdoId)

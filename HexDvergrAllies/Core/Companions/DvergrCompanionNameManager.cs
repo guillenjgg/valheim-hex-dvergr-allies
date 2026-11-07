@@ -1,3 +1,4 @@
+using HexDvergrAllies.Core;
 using HexDvergrAllies.Core.HexLocalization;
 using HexDvergrAllies.Core.Networking;
 using HexDvergrAllies.Core.UI;
@@ -72,7 +73,7 @@ namespace HexDvergrAllies.Core.Companions
 
             nview.GetZDO().Set(DvergrCompanionState.NameKey, name);
 
-            Plugin.Log.LogInfo($"[Dvergr Companion] Renamed: Dvergr={character.name}, Name={name}, Player={player.GetPlayerName()}");
+            HexLog.LogInfo($"[Dvergr Companion] Renamed: Dvergr={character.name}, Name={name}, Player={player.GetPlayerName()}");
         }
 
         internal static void RequestRemoteRename(Player player, string name)

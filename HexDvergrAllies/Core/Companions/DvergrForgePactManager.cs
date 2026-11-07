@@ -1,3 +1,4 @@
+using HexDvergrAllies.Core;
 using HexDvergrAllies.Core.HexLocalization;
 using HexDvergrAllies.Core.Trading;
 using HexDvergrAllies.Core.UI;
@@ -75,7 +76,7 @@ namespace HexDvergrAllies.Core.Companions
 
             if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
             {
-                Plugin.Log.LogInfo($"[Dvergr Companion] Forge Pact requested: Player={player.GetPlayerName()}, Dvergr={character.name}, Request={_pendingRequestId}, Cost={cost} MeadTasty");
+                HexLog.LogInfo($"[Dvergr Companion] Forge Pact requested: Player={player.GetPlayerName()}, Dvergr={character.name}, Request={_pendingRequestId}, Cost={cost} MeadTasty");
             }
 
             RequestHire(player, character, _pendingRequestId);
@@ -107,7 +108,7 @@ namespace HexDvergrAllies.Core.Companions
 
                 if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
                 {
-                    Plugin.Log.LogInfo($"[Dvergr Companion] Forge Pact completed: Request={requestId}, Cost={cost} MeadTasty");
+                    HexLog.LogInfo($"[Dvergr Companion] Forge Pact completed: Request={requestId}, Cost={cost} MeadTasty");
                 }
             }
             else
@@ -124,7 +125,7 @@ namespace HexDvergrAllies.Core.Companions
 
                 if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
                 {
-                    Plugin.Log.LogWarning($"[Dvergr Companion] Forge Pact rejected: Request={requestId}");
+                    HexLog.LogWarning($"[Dvergr Companion] Forge Pact rejected: Request={requestId}");
                 }
             }
 
@@ -152,11 +153,11 @@ namespace HexDvergrAllies.Core.Companions
 
             if (!nview || !nview.IsValid())
             {
-                Plugin.Log.LogWarning("[Dvergr Companion] Hire request rejected: Reason=Invalid ZNetView");
+                HexLog.LogWarning("[Dvergr Companion] Hire request rejected: Reason=Invalid ZNetView");
                 return;
             }
 
-            Plugin.Log.LogInfo($"[Dvergr Companion] Sending hire RPC: DvergrZDO={nview.GetZDO().m_uid}, PlayerZDO={player.GetZDOID()}");
+            HexLog.LogInfo($"[Dvergr Companion] Sending hire RPC: DvergrZDO={nview.GetZDO().m_uid}, PlayerZDO={player.GetZDOID()}");
 
             DvergrPactAuthority.Request(player, character, requestId);
         }
@@ -210,7 +211,7 @@ namespace HexDvergrAllies.Core.Companions
 
             if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
             {
-                Plugin.Log.LogInfo($"[Dvergr Companion] Hired successfully: Dvergr={character.name}, Player={player.GetPlayerName()}, PlayerID={ownerPlayerId}");
+                HexLog.LogInfo($"[Dvergr Companion] Hired successfully: Dvergr={character.name}, Player={player.GetPlayerName()}, PlayerID={ownerPlayerId}");
             }
 
             return true;

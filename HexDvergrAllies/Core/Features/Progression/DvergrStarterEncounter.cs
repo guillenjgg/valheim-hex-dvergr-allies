@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HexDvergrAllies.Core;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -131,7 +132,7 @@ namespace HexDvergrAllies.Core.Features.Progression
             var samples = 0;
             _searchCounts.Clear();
             RefreshNearbyLocations(origin);
-            Plugin.Log.LogInfo($"[Starter Encounter] Searching Meadows camp sites within 200m of initial spawn {origin}.");
+            HexLog.LogInfo($"[Starter Encounter] Searching Meadows camp sites within 200m of initial spawn {origin}.");
 
             // Search outward from the world's initial spawn, never a player's bed.
             for (var radius = 60f; radius <= 200f; radius += 5f)
@@ -207,7 +208,7 @@ namespace HexDvergrAllies.Core.Features.Progression
                         var value = string.Join("_", root.x.ToString("R", Invariant), root.y.ToString("R", Invariant), root.z.ToString("R", Invariant), direction.ToString(Invariant), _hasWreck ? "1" : "0");
                         _positionKey = PositionPrefix + value;
                         _candidatePending = true;
-                        Plugin.Log.LogInfo($"[Starter Encounter] Checking character {_characterId} camp at {point}, Wreck={_hasWreck}, {radius:0}m from initial spawn. Marker will appear after placement succeeds.");
+                        HexLog.LogInfo($"[Starter Encounter] Checking character {_characterId} camp at {point}, Wreck={_hasWreck}, {radius:0}m from initial spawn. Marker will appear after placement succeeds.");
                         // Resume this same search after a loaded candidate fails,
                         // rather than rescanning every inner ring from scratch.
                         do
@@ -231,7 +232,7 @@ namespace HexDvergrAllies.Core.Features.Progression
                 counts.Add(entry.Key + "=" + entry.Value);
             }
 
-            Plugin.Log.LogWarning($"[Starter Encounter] No suitable Meadows camp within 200m of initial spawn. Samples={samples}, Rejections: {string.Join(", ", counts)}. No distant fallback or encounter was created.");
+            HexLog.LogWarning($"[Starter Encounter] No suitable Meadows camp within 200m of initial spawn. Samples={samples}, Rejections: {string.Join(", ", counts)}. No distant fallback or encounter was created.");
         }
 
         private void CountRejection(string reason)
@@ -485,7 +486,7 @@ namespace HexDvergrAllies.Core.Features.Progression
 
         private void RejectShore(string reason)
         {
-            Plugin.Log.LogInfo($"[Starter Encounter] Shore at {_position} rejected: {reason}; searching for another nearby camp.");
+            HexLog.LogInfo($"[Starter Encounter] Shore at {_position} rejected: {reason}; searching for another nearby camp.");
             _rejected.Add(PointKey(_position));
 
             if (_world.GetGlobalKey(_positionKey))
@@ -559,7 +560,7 @@ namespace HexDvergrAllies.Core.Features.Progression
                         _world.RemoveGlobalKey(previousKey);
                     }
 
-                    Plugin.Log.LogInfo($"[Starter Encounter] Omitting optional wreck for character {_characterId}: {reason}.");
+                    HexLog.LogInfo($"[Starter Encounter] Omitting optional wreck for character {_characterId}: {reason}.");
 
                     if (!PreparedSiteClear(out reason))
                     {
@@ -618,7 +619,7 @@ namespace HexDvergrAllies.Core.Features.Progression
                 SpawnPiece("dvergr", "Dverger", new Vector3(0f, 0.3f, 11f), rotation);
                 _world.SetGlobalKey(CompleteKey);
                 _candidatePending = false;
-                Plugin.Log.LogInfo($"[Starter Encounter] Created for character {_characterId} at {_position + _inland * 14f}, Wreck={_hasWreck}.");
+                HexLog.LogInfo($"[Starter Encounter] Created for character {_characterId} at {_position + _inland * 14f}, Wreck={_hasWreck}.");
             }
             catch (Exception exception)
             {
@@ -680,7 +681,7 @@ namespace HexDvergrAllies.Core.Features.Progression
         private void Fail(string reason)
         {
             _spawnFailed = true;
-            Plugin.Log.LogWarning("[Starter Encounter] " + reason);
+            HexLog.LogWarning("[Starter Encounter] " + reason);
         }
 
     }
