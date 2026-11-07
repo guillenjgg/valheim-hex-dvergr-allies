@@ -9,50 +9,52 @@ namespace HexDvergrAllies
         internal static ConfigEntry<bool> EnablePlayerDamageImmunity;
         internal static ConfigEntry<bool> EnableDebugLogs;
         internal static ConfigEntry<bool> AllowTemporaryHomestead;
-
+        internal static ConfigEntry<bool> CompanionEnableDungeonTargetFiltering;
+        internal static ConfigEntry<bool> CompanionEnableDungeonFollowRecovery;
+        internal static ConfigEntry<bool> CompanionEnableCombatCircling;
+        internal static ConfigEntry<bool> CompanionEnableBloodMagicExperience;
+        internal static ConfigEntry<bool> CompanionEnableAutoHealing;
         internal static ConfigEntry<KeyboardShortcut> CompanionInteractionShortcut;
         internal static ConfigEntry<KeyboardShortcut> CompanionSentryShortcut;
         internal static ConfigEntry<KeyboardShortcut> CompanionRecallShortcut;
         internal static ConfigEntry<float> CompanionMovementSpeedMultiplier;
         internal static ConfigEntry<float> CompanionFollowDistance;
         internal static ConfigEntry<float> CompanionTargetScanInterval;
-        internal static ConfigEntry<bool> CompanionEnableDungeonTargetFiltering;
-        internal static ConfigEntry<bool> CompanionEnableDungeonFollowRecovery;
         internal static ConfigEntry<float> CompanionDungeonFollowRecoveryDelay;
-        internal static ConfigEntry<bool> CompanionEnableCombatCircling;
-        internal static ConfigEntry<bool> CompanionEnableBloodMagicExperience;
         internal static ConfigEntry<float> CompanionBloodMagicExperienceFactor;
         internal static ConfigEntry<float> CompanionHealthMultiplier;
         internal static ConfigEntry<float> CompanionDamageTakenMultiplier;
         internal static ConfigEntry<float> CompanionDamageDealtMultiplier;
         internal static ConfigEntry<float> CompanionAttackSpeedMultiplier;
-        internal static ConfigEntry<bool> CompanionEnableAutoHealing;
         internal static ConfigEntry<float> CompanionAutoHealThreshold;
         internal static ConfigEntry<float> CompanionAutoHealCooldown;
         internal static ConfigEntry<KeyboardShortcut> CompanionUIShortcut;
 
         internal static void Init(ConfigFile config)
         {
-            CompanionEnableDungeonFollowRecovery = config.Bind("Dvergr Companion", "EnableDungeonFollowRecovery", true, new ConfigDescription("Automatically recover a following companion separated by dungeon walls or floors. Does not affect outdoor following or Sentry mode.", null, new ConfigurationManagerAttributes { Order = 850 }));
+            EnablePlayerDamageImmunity = config.Bind("General", "EnablePlayerDamageImmunity", true, new ConfigDescription("Prevents players from damaging Dvergr.", null, new ConfigurationManagerAttributes { Order = 2910 }));
+
+            AllowTemporaryHomestead = config.Bind("Dvergr Wards", "AllowTemporaryHomestead", true, new ConfigDescription("Allows players to place a workbench, stonecutter, wood portal, and stone portal inside Dvergr ward-protected areas. All other structures remain restricted.", null, new ConfigurationManagerAttributes { Order = 2900 }));
+
+            CompanionEnableDungeonFollowRecovery = config.Bind("Dvergr Companion", "EnableDungeonFollowRecovery", true, new ConfigDescription("Automatically recover a following companion separated by dungeon walls or floors. Does not affect outdoor following or Sentry mode.", null, new ConfigurationManagerAttributes { Order = 3000 }));
+
+            CompanionEnableDungeonTargetFiltering = config.Bind("Dvergr Companion", "EnableDungeonTargetFiltering", true, new ConfigDescription("In dungeons, keep an actionable enemy target and ignore enemies that cannot be reached or attacked with a clear view. Prevents chasing noises through walls and floors.", null, new ConfigurationManagerAttributes { Order = 2980 }));
+
+            CompanionEnableCombatCircling = config.Bind("Dvergr Companion", "EnableCombatCircling", false, new ConfigDescription("Allow hired Dvergr to periodically stop attacking and circle their enemy. Does not change movement during weapon cooldowns.", null, new ConfigurationManagerAttributes { Order = 2970 }));
+
+            CompanionEnableBloodMagicExperience = config.Bind("Dvergr Companion", "EnableBloodMagicExperience", true, new ConfigDescription("Hired Dvergr grant their owner Blood Magic experience when they deal health damage to a creature.", null, new ConfigurationManagerAttributes { Order = 2950 }));
+
+            CompanionEnableAutoHealing = config.Bind("Dvergr Companion", "EnableAutoHealing", true, new ConfigDescription("Automatically heals hired Dvergr companions when their health reaches the configured threshold.", null, new ConfigurationManagerAttributes { Order = 2820 }));
+
             CompanionDungeonFollowRecoveryDelay = config.Bind("Dvergr Companion", "DungeonFollowRecoveryDelay", 4f, new ConfigDescription("Seconds without progress before recovering a separated dungeon companion to a clear spot on your floor.", new AcceptableValueRange<float>(1f, 30f), new ConfigurationManagerAttributes { Order = 840 }));
 
-            CompanionEnableDungeonTargetFiltering = config.Bind("Dvergr Companion", "EnableDungeonTargetFiltering", true, new ConfigDescription("In dungeons, keep an actionable enemy target and ignore enemies that cannot be reached or attacked with a clear view. Prevents chasing noises through walls and floors.", null, new ConfigurationManagerAttributes { Order = 860 }));
-
-            CompanionEnableCombatCircling = config.Bind("Dvergr Companion", "EnableCombatCircling", false, new ConfigDescription("Allow hired Dvergr to periodically stop attacking and circle their enemy. Does not change movement during weapon cooldowns.", null, new ConfigurationManagerAttributes { Order = 870 }));
-
             CompanionTargetScanInterval = config.Bind("Dvergr Companion", "TargetScanInterval", 1f, new ConfigDescription("Seconds between enemy scans for hired Dvergr in Companion and Sentry modes. Lower values scan more often. Does not change attack cooldowns or special delays after giving up a chase.", new AcceptableValueRange<float>(0.1f, 10f), new ConfigurationManagerAttributes { Order = 880 }));
-
-            CompanionEnableBloodMagicExperience = config.Bind("Dvergr Companion", "EnableBloodMagicExperience", true, new ConfigDescription("Hired Dvergr grant their owner Blood Magic experience when they deal health damage to a creature.", null, new ConfigurationManagerAttributes { Order = 1100 }));
 
             CompanionBloodMagicExperienceFactor = config.Bind("Dvergr Companion", "BloodMagicExperienceFactor", 1f, new ConfigDescription("Blood Magic skill experience factor per damaging hit. Uses normal skill progression, not whole skill levels.", new AcceptableValueRange<float>(0f, 10f), new ConfigurationManagerAttributes { Order = 1090 }));
 
             CompanionRecallShortcut = config.Bind("Dvergr Companion", "RecallShortcut", new KeyboardShortcut(KeyCode.O), new ConfigDescription("Keyboard shortcut for Get over here. Recalls your hired Dvergr to your location and switches them to Companion mode.", null, new ConfigurationManagerAttributes { Order = 980 }));
 
             CompanionSentryShortcut = config.Bind("Dvergr Companion", "SentryShortcut", new KeyboardShortcut(KeyCode.P, KeyCode.LeftControl), new ConfigDescription("Keyboard shortcut to toggle your hired Dvergr between Sentry and Companion mode. Sentry mode guards your current position.", null, new ConfigurationManagerAttributes { Order = 990 }));
-
-            EnablePlayerDamageImmunity = config.Bind("General", "EnablePlayerDamageImmunity", true, new ConfigDescription("Prevents players from damaging Dvergr.", null, new ConfigurationManagerAttributes { Order = 100 }));
-
-            AllowTemporaryHomestead = config.Bind("Dvergr Wards", "AllowTemporaryHomestead", true, new ConfigDescription("Allows players to place a workbench, stonecutter, wood portal, and stone portal inside Dvergr ward-protected areas. All other structures remain restricted.", null, new ConfigurationManagerAttributes { Order = 100 }));
 
             CompanionInteractionShortcut = config.Bind("Dvergr Companion", "InteractionShortcut", new KeyboardShortcut(KeyCode.E, KeyCode.LeftShift), new ConfigDescription("Keyboard shortcut to forge or break a pact with a Dvergr companion.", null, new ConfigurationManagerAttributes { Order = 1000 }));
 
@@ -68,14 +70,17 @@ namespace HexDvergrAllies
 
             CompanionAttackSpeedMultiplier = config.Bind("Dvergr Companion", "AttackSpeedMultiplier", 3.0f, new ConfigDescription("Attack cooldown speed multiplier. 2.0 means 100% faster cooldown recovery.", new AcceptableValueRange<float>(1f, 5f), new ConfigurationManagerAttributes { Order = 770 }));
 
-            CompanionEnableAutoHealing = config.Bind("Dvergr Companion", "EnableAutoHealing", true, new ConfigDescription("Automatically heals hired Dvergr companions when their health reaches the configured threshold.", null, new ConfigurationManagerAttributes { Order = 700 }));
-
             CompanionAutoHealThreshold = config.Bind("Dvergr Companion", "AutoHealThreshold", 0.5f, new ConfigDescription("Health percentage that triggers automatic healing. 0.5 means 50% health.", new AcceptableValueRange<float>(0.01f, 1f), new ConfigurationManagerAttributes { Order = 690 }));
 
             CompanionAutoHealCooldown = config.Bind("Dvergr Companion", "AutoHealCooldown", 60f, new ConfigDescription("Minimum number of seconds between automatic heals for each companion.", new AcceptableValueRange<float>(0f, 3600f), new ConfigurationManagerAttributes { Order = 680 }));
 
+            CompanionUIShortcut = config.Bind("Dvergr Companion", "UIShortcut", new KeyboardShortcut(KeyCode.F9), new ConfigDescription("Keyboard shortcut to open or close the Dvergr Companion Management UI.", null, new ConfigurationManagerAttributes { Order = 1010 }));
+
+            EnableDebugLogs = config.Bind("Debug", "EnableDebugLogs", false, new ConfigDescription("Logs Dvergr damage events, status effects, and AI states.", null, new ConfigurationManagerAttributes { Order = 2770, IsAdvanced = true }));
+
             config.Bind("Debug", "StarterTestKill", false, new ConfigDescription("Temporary host-only test control: kill your loaded starter, bypassing pre-hire immunity.", null, new ConfigurationManagerAttributes
             {
+                Order = 1000,
                 HideDefaultButton = true,
                 CustomDrawer = _ =>
                 {
@@ -88,6 +93,7 @@ namespace HexDvergrAllies
 
             config.Bind("Debug", "StarterTestReset", false, new ConfigDescription("Temporary host-only test control: remove your starter and restore the free pact at the existing camp in this world. Keeps camp structures.", null, new ConfigurationManagerAttributes
             {
+                Order = 1000,
                 HideDefaultButton = true,
                 CustomDrawer = _ =>
                 {
@@ -98,9 +104,6 @@ namespace HexDvergrAllies
                 }
             }));
 
-            EnableDebugLogs = config.Bind("Debug", "EnableDebugLogs", false, new ConfigDescription("Logs Dvergr damage events, status effects, and AI states.", null, new ConfigurationManagerAttributes { Order = 100, IsAdvanced = true }));
-
-            CompanionUIShortcut = config.Bind("Dvergr Companion", "UIShortcut", new KeyboardShortcut(KeyCode.F9), new ConfigDescription("Keyboard shortcut to open or close the Dvergr Companion Management UI.", null, new ConfigurationManagerAttributes { Order = 1010 }));
         }
     }
 

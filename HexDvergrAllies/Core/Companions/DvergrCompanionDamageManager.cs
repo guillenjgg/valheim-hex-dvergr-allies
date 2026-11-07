@@ -41,7 +41,7 @@ namespace HexDvergrAllies.Core.Companions
                 return;
             }
 
-            var damageDealtMultiplier = HexDvergrAlliesConfiguration.CompanionDamageDealtMultiplier.Value;
+            var damageDealtMultiplier = Features.Progression.DvergrStarterCharacterState.IsStarter(attacker) ? 1f : HexDvergrAlliesConfiguration.CompanionDamageDealtMultiplier.Value;
             hit.ApplyModifier(damageDealtMultiplier);
 
             if (HexDvergrAlliesConfiguration.CompanionEnableBloodMagicExperience.Value &&

@@ -146,6 +146,8 @@ namespace HexDvergrAllies.Core.Companions
                 return;
             }
 
+            Features.Progression.DvergrStarterBalanceService.Update(character);
+
             if (!DvergrCompanionState.IsHired(character))
             {
                 if (CompanionStates.ContainsKey(character))
@@ -376,6 +378,11 @@ namespace HexDvergrAllies.Core.Companions
 
         private static void ApplyMaximumHealth(Character character, CompanionBehaviorState state)
         {
+            if (Features.Progression.DvergrStarterCharacterState.IsStarter(character))
+            {
+                return;
+            }
+
             var multiplier = HexDvergrAlliesConfiguration.CompanionHealthMultiplier.Value;
             var originalMaxHealth = GetOriginalMaxHealth(character, state);
             var targetMaxHealth = originalMaxHealth * multiplier;

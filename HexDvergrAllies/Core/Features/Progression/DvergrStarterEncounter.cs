@@ -654,6 +654,7 @@ namespace HexDvergrAllies.Core.Features.Progression
             {
                 view.GetZDO().Set(StarterKey, true);
                 view.GetZDO().Set(DvergrStarterCharacterState.CharacterKey, _characterId);
+                DvergrStarterBalanceService.Update(instance.GetComponent<Character>());
                 instance.GetComponent<MonsterAI>().SetPatrolPoint();
             }
 

@@ -78,6 +78,7 @@ namespace HexDvergrAllies.Core.Features.Progression
                 if (view && view.IsValid() && view.IsOwner())
                 {
                     ZRoutedRpc.instance.InvokeRoutedRPC(DvergrCompanionManager.GetServerPeerID(ZRoutedRpc.instance), RegisterRpc, player.GetZDOID(), completed);
+                    DvergrStarterProgressionService.Report(player);
                 }
             }
 

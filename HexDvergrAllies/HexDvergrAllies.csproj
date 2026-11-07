@@ -211,6 +211,9 @@
     <Compile Include="Core\Features\Progression\DvergrStarterEncounterManager.cs" />
     <Compile Include="Core\Features\Progression\DvergrStarterEncounter.cs" />
     <Compile Include="Core\Features\Progression\DvergrStarterCharacterState.cs" />
+    <Compile Include="Core\Features\Progression\DvergrStarterProgressionService.cs" />
+    <Compile Include="Core\Features\Progression\DvergrStarterBalanceConfig.cs" />
+    <Compile Include="Core\Features\Progression\DvergrStarterBalanceService.cs" />
     <Compile Include="Core\Features\Progression\DvergrStarterEligibility.cs" />
     <Compile Include="Core\Features\Progression\DvergrStarterVendorService.cs" />
     <Compile Include="Patches\StoreGui\StoreGuiStarterVendorPatch.cs" />
@@ -219,6 +222,8 @@
     <Compile Include="Core\Features\Progression\DvergrStarterMapRefreshGuard.cs" />
     <Compile Include="Patches\Networking\ZoneSystemStarterKeyMapPatch.cs" />
     <Compile Include="Core\UI\DvergrTraderDisplayManager.cs" />
+    <Compile Include="Core\UI\DvergrCompendiumManager.cs" />
+    <Compile Include="Patches\UI\TextsDialogDvergrCompendiumPatch.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

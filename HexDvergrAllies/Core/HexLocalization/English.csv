@@ -54,3 +54,21 @@ hex_dvergr_accepted_trophy_names,Seeker\nSeeker Soldier\nGjall
 hex_dvergr_starter_journey,"Begin a journey with a friend, and grow stronger together."
 hex_dvergr_test_kill,Kill starter
 hex_dvergr_test_reset,Respawn starter (reset pact)
+hex_dvergr_starter_level,Level {0} · {1}
+hex_dvergr_tier_0,Meadows
+hex_dvergr_tier_1,Black Forest
+hex_dvergr_tier_2,Swamp
+hex_dvergr_tier_3,Mountains
+hex_dvergr_tier_4,Plains
+hex_dvergr_tier_5,Mistlands
+hex_dvergr_tier_6,Ashlands
+hex_dvergr_compendium_title,Dvergr Companion
+hex_dvergr_compendium_intro,Your starter grows with your character. The highest boss credited to your character unlocks the next biome tier. Boss order and repeat kills do not matter. The number beside your companion's health identifies their level.
+hex_dvergr_compendium_current,<color=orange>Your current companion's stats</color>
+hex_dvergr_compendium_no_starter,You do not currently have a hired starter companion in this world.
+hex_dvergr_compendium_reduction,Damage reduction: {0:0}% (shared companion setting)
+hex_dvergr_compendium_tiers,<color=orange>Progression</color>
+hex_dvergr_compendium_start,Available from the beginning.
+hex_dvergr_compendium_unlock,Unlocked by defeating {0}.
+hex_dvergr_compendium_stats,Maximum health: {0:0}\nArbalest pierce damage: {1:0}\nMelee blunt damage: {2:0}
+hex_dvergr_compendium_damage_note,Damage values are base weapon values. Attack variation and difficulty modify outgoing damage; armor and resistances affect the damage received. Movement and other companion settings remain the same at every tier. Normal hired Dvergr do not use starter progression.
