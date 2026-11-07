@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using HexDvergrAllies.Core;
+using HarmonyLib;
 using HexDvergrAllies.Core.Companions;
 using HexDvergrAllies.Core.StatusEffects;
 using HexDvergrAllies.Core.Trading;
@@ -42,7 +43,7 @@ namespace HexDvergrAllies.Patches
 
             if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
             {
-                Plugin.Log.LogInfo($"[Dvergr Init] Name={__instance.name}, " + $"AttackPlayerObjects={monsterAI?.m_attackPlayerObjects}");
+                HexLog.LogInfo($"[Dvergr Init] Name={__instance.name}, " + $"AttackPlayerObjects={monsterAI?.m_attackPlayerObjects}");
             }
         }
     }

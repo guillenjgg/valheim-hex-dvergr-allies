@@ -1,3 +1,4 @@
+using HexDvergrAllies.Core;
 using HexDvergrAllies.Core.HexLocalization;
 using HexDvergrAllies.Core.Trading;
 using HexDvergrAllies.Core.UI;
@@ -9,6 +10,8 @@ namespace HexDvergrAllies.Core.Companions
 {
     internal static class DvergrForgePactManager
     {
+        internal static bool IsHirePending => _hirePending;
+
         private static bool _hirePending;
         private static long _pendingRequestId;
         private static ZDOID _pendingCompanionId;
@@ -16,6 +19,19 @@ namespace HexDvergrAllies.Core.Companions
         private static Player _pendingPlayer;
         private static Inventory _pendingInventory;
         private static int _pendingCost;
+
+        internal static void ResetSessionState()
+        {
+            // Old-world replies cannot settle a new-world request. Payment is
+            // reconciled by the authority while connected, never guessed here.
+            _hirePending = false;
+            _pendingRequestId = 0L;
+            _pendingCompanionId = ZDOID.None;
+            _pendingPlayerId = ZDOID.None;
+            _pendingPlayer = null;
+            _pendingInventory = null;
+            _pendingCost = 0;
+        }
 
         internal static void RequestForgePact(Player player, Character character)
         {
@@ -38,9 +54,9 @@ namespace HexDvergrAllies.Core.Companions
 
             var paymentName = DvergrTraderManager.GetForgePactPaymentName();
             var inventory = player.GetInventory();
-            var cost = DvergrPricingConfig.ForgePactCost;
+            var cost = Core.Features.Progression.DvergrStarterEncounterManager.PactCost(character);
 
-            if (string.IsNullOrEmpty(paymentName) || inventory.CountItems(paymentName) < cost)
+            if (cost > 0 && (string.IsNullOrEmpty(paymentName) || inventory.CountItems(paymentName) < cost))
             {
                 return;
             }
@@ -53,27 +69,28 @@ namespace HexDvergrAllies.Core.Companions
             _pendingInventory = inventory;
             _pendingCost = cost;
 
-            inventory.RemoveItem(paymentName, cost);
+            if (cost > 0)
+            {
+                inventory.RemoveItem(paymentName, cost);
+            }
 
             if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
             {
-                Plugin.Log.LogInfo($"[Dvergr Companion] Forge Pact requested: Player={player.GetPlayerName()}, Dvergr={character.name}, Request={_pendingRequestId}, Cost={cost} MeadTasty");
+                HexLog.LogInfo($"[Dvergr Companion] Forge Pact requested: Player={player.GetPlayerName()}, Dvergr={character.name}, Request={_pendingRequestId}, Cost={cost} MeadTasty");
             }
 
             RequestHire(player, character, _pendingRequestId);
             StoreGui.instance.Hide();
         }
 
-        internal static void OnHireResult(Character character, long sender, ZDOID playerId, long requestId, bool success)
+        internal static void OnAuthoritativeResult(long sender, ZDOID playerId, ZDOID companionId, long requestId, bool success)
         {
             if (!_hirePending || requestId != _pendingRequestId || playerId != _pendingPlayerId)
             {
                 return;
             }
 
-            var nview = character.GetComponent<ZNetView>();
-
-            if (!nview || !nview.IsValid() || nview.GetZDO().m_uid != _pendingCompanionId || sender != nview.GetZDO().GetOwner())
+            if (sender != DvergrCompanionManager.GetServerPeerID(ZRoutedRpc.instance) || companionId != _pendingCompanionId)
             {
                 return;
             }
@@ -91,20 +108,24 @@ namespace HexDvergrAllies.Core.Companions
 
                 if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
                 {
-                    Plugin.Log.LogInfo($"[Dvergr Companion] Forge Pact completed: Request={requestId}, Cost={cost} MeadTasty");
+                    HexLog.LogInfo($"[Dvergr Companion] Forge Pact completed: Request={requestId}, Cost={cost} MeadTasty");
                 }
             }
             else
             {
                 if (player)
                 {
-                    inventory.AddItem(PrefabHelper.MeadTasty, cost, 1, 0, 0L, "", false, false);
-                    player.Message(MessageHud.MessageType.Center, HexLocalizationManager.Localize("$hex_dvergr_pact_refunded"));
+                    if (cost > 0)
+                    {
+                        inventory.AddItem(PrefabHelper.MeadTasty, cost, 1, 0, 0L, "", false, false);
+                    }
+
+                    player.Message(MessageHud.MessageType.Center, HexLocalizationManager.Localize(cost > 0 ? "$hex_dvergr_pact_refunded" : "$hex_dvergr_starter_rejected"));
                 }
 
                 if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
                 {
-                    Plugin.Log.LogWarning($"[Dvergr Companion] Forge Pact rejected: Request={requestId}");
+                    HexLog.LogWarning($"[Dvergr Companion] Forge Pact rejected: Request={requestId}");
                 }
             }
 
@@ -114,17 +135,11 @@ namespace HexDvergrAllies.Core.Companions
             _pendingInventory = null;
         }
 
-        internal static void Hire(Character character, long sender, ZDOID playerId, long requestId)
+        internal static bool CommitApproved(Character character, ZDOID playerId)
         {
-            var nview = character.GetComponent<ZNetView>();
+            var view = character.GetComponent<ZNetView>();
 
-            if (!nview || !nview.IsValid() || !nview.IsOwner())
-            {
-                return;
-            }
-
-            var success = TryHire(character, playerId);
-            nview.InvokeRPC(sender, DvergrRpcManager.HireResultRpc, playerId, requestId, success);
+            return view && view.IsValid() && view.IsOwner() && TryHire(character, playerId);
         }
 
         internal static void RequestHire(Player player, Character character, long requestId)
@@ -138,28 +153,20 @@ namespace HexDvergrAllies.Core.Companions
 
             if (!nview || !nview.IsValid())
             {
-                Plugin.Log.LogWarning("[Dvergr Companion] Hire request rejected: Reason=Invalid ZNetView");
+                HexLog.LogWarning("[Dvergr Companion] Hire request rejected: Reason=Invalid ZNetView");
                 return;
             }
 
-            if (DvergrCompanionManager.TryGetHiredCompanion(player.GetPlayerID(), out var existingCompanion))
-            {
-                Plugin.Log.LogWarning($"[Dvergr Companion] Hire request rejected: Player={player.GetPlayerName()}, ExistingCompanion={existingCompanion}, Reason=Already has companion");
+            HexLog.LogInfo($"[Dvergr Companion] Sending hire RPC: DvergrZDO={nview.GetZDO().m_uid}, PlayerZDO={player.GetZDOID()}");
 
-                player.Message(MessageHud.MessageType.Center, HexLocalizationManager.Localize("$hex_dvergr_one_companion_only"));
-                return;
-            }
-
-            Plugin.Log.LogInfo($"[Dvergr Companion] Sending hire RPC: DvergrZDO={nview.GetZDO().m_uid}, PlayerZDO={player.GetZDOID()}");
-
-            nview.InvokeRPC(DvergrRpcManager.HireRpc, player.GetZDOID(), requestId);
+            DvergrPactAuthority.Request(player, character, requestId);
         }
 
         private static bool TryHire(Character character, ZDOID playerId)
         {
             var player = DvergrCompanionManager.ResolvePlayer(playerId);
 
-            if (!player || !DvergrInteractionHelper.IsWithinRange(player, character))
+            if (!player || !DvergrInteractionHelper.IsWithinRange(player, character) || !Features.Progression.DvergrStarterCharacterState.CanHire(player, character))
             {
                 return false;
             }
@@ -174,11 +181,8 @@ namespace HexDvergrAllies.Core.Companions
 
             var ownerPlayerId = player.GetPlayerID();
 
-            if (DvergrCompanionManager.TryGetHiredCompanion(ownerPlayerId, out var existingCompanion))
-            {
-                return false;
-            }
-
+            // The server validated persistent ownership and simultaneous requests.
+            // An owning client's unloaded-hire cache must not veto that decision.
             var monsterAI = character.GetComponent<MonsterAI>();
 
             if (!monsterAI)
@@ -203,10 +207,11 @@ namespace HexDvergrAllies.Core.Companions
 
             monsterAI.ResetPatrolPoint();
             monsterAI.SetFollowTarget(player.gameObject);
+            Features.Progression.DvergrStarterCharacterState.OnPactAccepted(player, character);
 
             if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
             {
-                Plugin.Log.LogInfo($"[Dvergr Companion] Hired successfully: Dvergr={character.name}, Player={player.GetPlayerName()}, PlayerID={ownerPlayerId}");
+                HexLog.LogInfo($"[Dvergr Companion] Hired successfully: Dvergr={character.name}, Player={player.GetPlayerName()}, PlayerID={ownerPlayerId}");
             }
 
             return true;

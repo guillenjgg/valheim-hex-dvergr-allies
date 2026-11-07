@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HexDvergrAllies.Core;
+using System;
 using System.IO;
 using System.Reflection;
 using HarmonyLib;
@@ -46,7 +47,7 @@ namespace HexDvergrAllies.Core.HexLocalization
             {
                 if (stream == null)
                 {
-                    Plugin.Log.LogError($"Localization resource not found: {EnglishResourceName}");
+                    HexLog.LogError($"Localization resource not found: {EnglishResourceName}");
                 }
                 else
                 {
@@ -72,7 +73,7 @@ namespace HexDvergrAllies.Core.HexLocalization
                 }
                 catch (Exception exception)
                 {
-                    Plugin.Log.LogError($"Failed to load localization file {file}: {exception}");
+                    HexLog.LogError($"Failed to load localization file {file}: {exception}");
                 }
             }
         }
@@ -90,7 +91,7 @@ namespace HexDvergrAllies.Core.HexLocalization
 
                 if (loaded)
                 {
-                    Plugin.Log.LogInfo($"Dvergr localization loaded: {source}, Language={language}");
+                    HexLog.LogInfo($"Dvergr localization loaded: {source}, Language={language}");
                 }
             }
             finally

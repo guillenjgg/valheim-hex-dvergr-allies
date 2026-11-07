@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using HexDvergrAllies.Core;
+using HarmonyLib;
 using HexDvergrAllies.Core.Companions;
 
 namespace HexDvergrAllies.Patches.Companions
@@ -33,7 +34,7 @@ namespace HexDvergrAllies.Patches.Companions
                 var target = monsterAI.GetTargetCreature();
                 var targetName = target ? target.name : "None";
 
-                Plugin.Log.LogInfo($"[Dvergr Companion] Flee suppressed: Dvergr={character.name}, Health={character.GetHealth():F1}, MaxHealth={character.GetMaxHealth():F1}, Target={targetName}");
+                HexLog.LogInfo($"[Dvergr Companion] Flee suppressed: Dvergr={character.name}, Health={character.GetHealth():F1}, MaxHealth={character.GetMaxHealth():F1}, Target={targetName}");
             }
 
             return false;

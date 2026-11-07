@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using HexDvergrAllies.Core;
+using HarmonyLib;
 using HexDvergrAllies.Core.Companions;
 
 namespace HexDvergrAllies.Patches.Debug
@@ -26,7 +27,7 @@ namespace HexDvergrAllies.Patches.Debug
             var weapon = humanoid.GetCurrentWeapon();
             var attack = weapon?.m_shared.m_attack;
 
-            Plugin.Log.LogInfo(
+            HexLog.LogInfo(
                 $"[Dvergr Attack Diagnostic] " +
                 $"Dvergr={character.name}, " +
                 $"Target={(target ? target.name : "None")}, " +

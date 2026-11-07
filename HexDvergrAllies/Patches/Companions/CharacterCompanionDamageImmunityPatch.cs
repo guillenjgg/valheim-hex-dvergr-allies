@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using HexDvergrAllies.Core.Monoscripts;
+using HexDvergrAllies.Core.Features.Progression;
 
 namespace HexDvergrAllies.Patches
 {
@@ -8,6 +9,11 @@ namespace HexDvergrAllies.Patches
     {
         private static bool Prefix(Character __instance, HitData hit)
         {
+            if (DvergrStarterCharacterState.IsProtected(__instance))
+            {
+                return false;
+            }
+
             if (!__instance.TryGetComponent<DvergrCompanionComponent>(out var companion))
             {
                 return true;

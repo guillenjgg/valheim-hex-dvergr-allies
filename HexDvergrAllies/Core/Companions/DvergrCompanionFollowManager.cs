@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using HexDvergrAllies.Core;
+using System.Collections.Generic;
 using UnityEngine;
 using CompanionMode = HexDvergrAllies.Core.Companions.DvergrCompanionMode;
 
@@ -8,6 +9,8 @@ namespace HexDvergrAllies.Core.Companions
     {
         private const float FollowLogInterval = 5f;
         private const float FollowOwnerGracePeriod = 10f;
+
+        private static readonly Dictionary<Character, ZDOID> CharacterIds = new Dictionary<Character, ZDOID>();
 
         private static readonly Dictionary<ZDOID, float> _lastFollowLogTimes = new Dictionary<ZDOID, float>();
         private static readonly Dictionary<ZDOID, float> _followOwnerMissingSince = new Dictionary<ZDOID, float>();
@@ -32,6 +35,7 @@ namespace HexDvergrAllies.Core.Companions
             }
 
             var zdo = nview.GetZDO();
+            CharacterIds[character] = zdo.m_uid;
 
             if (zdo.GetBool(DvergrCompanionState.PendingUnhireKey, false))
             {
@@ -89,7 +93,7 @@ namespace HexDvergrAllies.Core.Companions
                 {
                     if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
                     {
-                        Plugin.Log.LogInfo($"[Dvergr Companion] Follow owner resolved: Dvergr={character.name}, OwnerPlayerID={playerId}, Waited={Time.time - missingSince:F2}s");
+                        HexLog.LogInfo($"[Dvergr Companion] Follow owner resolved: Dvergr={character.name}, OwnerPlayerID={playerId}, Waited={Time.time - missingSince:F2}s");
                     }
 
                     _followOwnerMissingSince.Remove(zdo.m_uid);
@@ -102,7 +106,7 @@ namespace HexDvergrAllies.Core.Companions
 
                     if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
                     {
-                        Plugin.Log.LogInfo($"[Dvergr Companion] Follow target assigned: Dvergr={character.name}, Player={player.GetPlayerName()}");
+                        HexLog.LogInfo($"[Dvergr Companion] Follow target assigned: Dvergr={character.name}, Player={player.GetPlayerName()}");
                     }
                 }
 
@@ -110,7 +114,7 @@ namespace HexDvergrAllies.Core.Companions
                 {
                     var distance = Vector3.Distance(monsterAI.transform.position, player.transform.position);
 
-                    Plugin.Log.LogInfo($"[Dvergr Companion] Follow status: Dvergr={character.name}, Player={player.GetPlayerName()}, Distance={distance:F2}");
+                    HexLog.LogInfo($"[Dvergr Companion] Follow status: Dvergr={character.name}, Player={player.GetPlayerName()}, Distance={distance:F2}");
                 }
 
                 return;
@@ -138,12 +142,12 @@ namespace HexDvergrAllies.Core.Companions
             {
                 if (ShouldLogFollow(zdo.m_uid))
                 {
-                    Plugin.Log.LogWarning($"[Dvergr Companion] Local follow owner not found: Dvergr={character.name}, ZDO={zdo.m_uid}, OwnerPlayerID={playerId}, LocalPlayerID={localPlayer.GetPlayerID()}, MissingFor={missingDuration:F2}s");
+                    HexLog.LogWarning($"[Dvergr Companion] Local follow owner not found: Dvergr={character.name}, ZDO={zdo.m_uid}, OwnerPlayerID={playerId}, LocalPlayerID={localPlayer.GetPlayerID()}, MissingFor={missingDuration:F2}s");
                 }
             }
             else if (ShouldLogFollow(zdo.m_uid))
             {
-                Plugin.Log.LogInfo($"[Dvergr Companion] Remote follow owner unavailable: Dvergr={character.name}, ZDO={zdo.m_uid}, OwnerPlayerID={playerId}, LocalPlayerID={(localPlayer ? localPlayer.GetPlayerID() : 0L)}, MissingFor={missingDuration:F2}s");
+                HexLog.LogInfo($"[Dvergr Companion] Remote follow owner unavailable: Dvergr={character.name}, ZDO={zdo.m_uid}, OwnerPlayerID={playerId}, LocalPlayerID={(localPlayer ? localPlayer.GetPlayerID() : 0L)}, MissingFor={missingDuration:F2}s");
             }
 
             if (followTarget)
@@ -154,8 +158,20 @@ namespace HexDvergrAllies.Core.Companions
 
         internal static void ResetSessionState()
         {
+            CharacterIds.Clear();
             _lastFollowLogTimes.Clear();
             _followOwnerMissingSince.Clear();
+        }
+
+        internal static void RemoveCharacter(Character character)
+        {
+            ZDOID id;
+
+            if (CharacterIds.TryGetValue(character, out id))
+            {
+                RemoveFollowState(id);
+                CharacterIds.Remove(character);
+            }
         }
 
         internal static void RemoveFollowState(ZDOID companionId)

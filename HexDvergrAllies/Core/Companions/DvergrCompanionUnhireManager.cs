@@ -1,4 +1,5 @@
-﻿using HexDvergrAllies.Core.Networking;
+﻿using HexDvergrAllies.Core;
+using HexDvergrAllies.Core.Networking;
 using HexDvergrAllies.Core.Monoscripts;
 using UnityEngine;
 using CompanionMode = HexDvergrAllies.Core.Companions.DvergrCompanionMode;
@@ -30,7 +31,7 @@ namespace HexDvergrAllies.Core.Companions
             {
                 if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
                 {
-                    Plugin.Log.LogWarning($"[Dvergr Companion] Unhire request rejected: Invalid ZNetView for Character={character.name}");
+                    HexLog.LogWarning($"[Dvergr Companion] Unhire request rejected: Invalid ZNetView for Character={character.name}");
                 }
 
                 return;
@@ -38,7 +39,7 @@ namespace HexDvergrAllies.Core.Companions
 
             if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
             {
-                Plugin.Log.LogInfo($"[Dvergr Companion] Sending unhire RPC: DvergrZDO={nview.GetZDO().m_uid}, PlayerZDO={player.GetZDOID()}");
+                HexLog.LogInfo($"[Dvergr Companion] Sending unhire RPC: DvergrZDO={nview.GetZDO().m_uid}, PlayerZDO={player.GetZDOID()}");
             }
 
             nview.InvokeRPC(DvergrRpcManager.UnhireRpc, player.GetZDOID());
@@ -59,7 +60,7 @@ namespace HexDvergrAllies.Core.Companions
             {
                 if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
                 {
-                    Plugin.Log.LogInfo($"[Dvergr Companion] Unhire request ignored: Dvergr={character.name}, Reason=Not hired");
+                    HexLog.LogInfo($"[Dvergr Companion] Unhire request ignored: Dvergr={character.name}, Reason=Not hired");
                 }
 
                 return;
@@ -78,7 +79,7 @@ namespace HexDvergrAllies.Core.Companions
             {
                 if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
                 {
-                    Plugin.Log.LogInfo($"[Dvergr Companion] Unhire request ignored: Dvergr={character.name}, PlayerZDO={playerId}, Reason=Player missing or out of range");
+                    HexLog.LogInfo($"[Dvergr Companion] Unhire request ignored: Dvergr={character.name}, PlayerZDO={playerId}, Reason=Player missing or out of range");
                 }
 
                 return;
@@ -90,7 +91,7 @@ namespace HexDvergrAllies.Core.Companions
             {
                 if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
                 {
-                    Plugin.Log.LogInfo($"[Dvergr Companion] Unhire request ignored: Dvergr={character.name}, Player={player.GetPlayerName()}, PlayerID={player.GetPlayerID()}, OwnerPlayerID={ownerPlayerId}, Reason=Not owner");
+                    HexLog.LogInfo($"[Dvergr Companion] Unhire request ignored: Dvergr={character.name}, Player={player.GetPlayerName()}, PlayerID={player.GetPlayerID()}, OwnerPlayerID={ownerPlayerId}, Reason=Not owner");
                 }
 
                 return;
@@ -125,7 +126,7 @@ namespace HexDvergrAllies.Core.Companions
             {
                 if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
                 {
-                    Plugin.Log.LogWarning($"[Dvergr Companion] Remote unhire rejected: ZDO={companionId}, Reason=Original home missing");
+                    HexLog.LogWarning($"[Dvergr Companion] Remote unhire rejected: ZDO={companionId}, Reason=Original home missing");
                 }
 
                 return;
@@ -268,7 +269,7 @@ namespace HexDvergrAllies.Core.Companions
             {
                 if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
                 {
-                    Plugin.Log.LogWarning($"[Dvergr Companion] Unhire rejected: Dvergr={character.name}, Reason=MonsterAI missing");
+                    HexLog.LogWarning($"[Dvergr Companion] Unhire rejected: Dvergr={character.name}, Reason=MonsterAI missing");
                 }
 
                 return;
@@ -278,7 +279,7 @@ namespace HexDvergrAllies.Core.Companions
             {
                 if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
                 {
-                    Plugin.Log.LogWarning($"[Dvergr Companion] Unhire rejected: Dvergr={character.name}, Reason=Home not saved");
+                    HexLog.LogWarning($"[Dvergr Companion] Unhire rejected: Dvergr={character.name}, Reason=Home not saved");
                 }
 
                 return;
@@ -304,7 +305,7 @@ namespace HexDvergrAllies.Core.Companions
 
             if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
             {
-                Plugin.Log.LogInfo($"[Dvergr Companion] Unhire cleanup completed: Dvergr={character.name}, OwnerPlayerID={ownerPlayerId}, Home={homePosition}");
+                HexLog.LogInfo($"[Dvergr Companion] Unhire cleanup completed: Dvergr={character.name}, OwnerPlayerID={ownerPlayerId}, Home={homePosition}");
             }
         }
 
@@ -314,7 +315,7 @@ namespace HexDvergrAllies.Core.Companions
             {
                 if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
                 {
-                    Plugin.Log.LogWarning($"[Dvergr Companion] Remote unhire rejected: ZDO={zdo.m_uid}, Reason=Original home missing");
+                    HexLog.LogWarning($"[Dvergr Companion] Remote unhire rejected: ZDO={zdo.m_uid}, Reason=Original home missing");
                 }
 
                 return;
@@ -332,7 +333,7 @@ namespace HexDvergrAllies.Core.Companions
 
             if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
             {
-                Plugin.Log.LogInfo($"[Dvergr Companion] Remote unhire completed: ZDO={zdo.m_uid}, PlayerID={ownerPlayerId}, Home={homePosition}");
+                HexLog.LogInfo($"[Dvergr Companion] Remote unhire completed: ZDO={zdo.m_uid}, PlayerID={ownerPlayerId}, Home={homePosition}");
             }
         }
 
@@ -386,7 +387,7 @@ namespace HexDvergrAllies.Core.Companions
             character.transform.position = homePosition;
             zdo.SetPosition(homePosition);
 
-            Plugin.Log.LogInfo($"[Dvergr Companion] Returned home: Dvergr={character.name}, ZDO={zdo.m_uid}, From={previousPosition}, To={homePosition}, Distance={distance:F2}");
+            HexLog.LogInfo($"[Dvergr Companion] Returned home: Dvergr={character.name}, ZDO={zdo.m_uid}, From={previousPosition}, To={homePosition}, Distance={distance:F2}");
         }
 
         private static void RemoveCompanion(Character character)

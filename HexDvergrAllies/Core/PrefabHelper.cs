@@ -5,6 +5,8 @@ namespace HexDvergrAllies.Core
     internal static class PrefabHelper
     {
         internal const string Coins = "Coins";
+        internal const string JuteBlue = "JuteBlue";
+        internal const string TrophyDvergr = "TrophyDvergr";
         internal const string Softtissue = "Softtissue";
         internal const string MeadTasty = "MeadTasty";
         internal const string StaffShieldAoe = "staff_shield_aoe";

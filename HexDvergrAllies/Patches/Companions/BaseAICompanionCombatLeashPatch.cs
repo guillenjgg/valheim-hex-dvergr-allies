@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using HexDvergrAllies.Core;
+using System.Collections.Generic;
 using HarmonyLib;
 using HexDvergrAllies.Core.Companions;
 using UnityEngine;
@@ -66,7 +67,7 @@ namespace HexDvergrAllies.Patches
                 var target = monsterAI.GetTargetCreature();
                 var targetDistance = target ? Vector3.Distance(character.transform.position, target.transform.position) : -1f;
 
-                Plugin.Log.LogInfo(
+                HexLog.LogInfo(
                     $"[Dvergr Companion] Combat leash movement blocked: " +
                     $"Dvergr={character.name}, " +
                     $"OwnerDistance={distance:F1}, " +

@@ -1,3 +1,4 @@
+using HexDvergrAllies.Core;
 using System;
 using System.Collections.Generic;
 using HarmonyLib;
@@ -116,7 +117,7 @@ namespace HexDvergrAllies.Core.Companions
 
             if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
             {
-                Plugin.Log.LogInfo($"[Dvergr Dungeon Follow Recovery] Dvergr={character.GetZDOID()}, Distance={distance:F2}, HeightDifference={heightDifference:F2}, Blocked={blocked}, HavePath={hasPath}, From={character.transform.position}, To={destination}");
+                HexLog.LogInfo($"[Dvergr Dungeon Follow Recovery] Dvergr={character.GetZDOID()}, Distance={distance:F2}, HeightDifference={heightDifference:F2}, Blocked={blocked}, HavePath={hasPath}, From={character.transform.position}, To={destination}");
             }
 
             var body = character.GetComponent<Rigidbody>();

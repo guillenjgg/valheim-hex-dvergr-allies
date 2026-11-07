@@ -10,13 +10,39 @@ Hire Dvergr to fight beside you, trade with them, and set up temporary homestead
 
 * Hire a Dvergr ally to fight beside you.
 * Earn Blood Magic experience when your hired ally damages a creature. You can turn this off in the config.
-* Trade for Dvergr extractors, soft tissue, and flametal.
+* Trade for Dvergr extractors, soft tissue, blue jute, fallen brother trophies, and flametal.
 * Adjust companion settings like follow distance, movement speed, health, attack speed, damage, and auto-healing.
 * Your ally follows you through portals.
 * They teleport back to you if they get stuck or fall too far behind.
 * Walk through your ally. No more getting stuck in a doorway.
 * They teleport aboard your ship when you board.
 * Press `F9` to open the ally command UI. Switch modes, rename your ally, recall them, or break your pact. The keybind is configurable.
+
+### Your First Dvergr
+
+Each character gets a separate starter Dvergr camp in each world near the world's starting stones. Look for **Dvergr camp** on your map. It has a small roofed shelter, a fire, and a Dvergr offering that character one free pact. If the site has a usable coast, it also gets a shipwreck.
+
+The server searches 60–200 meters from the starting stones and creates the encounter automatically. You don't have to approach it to trigger spawning. The marker appears after placement succeeds. Trees, rocks, player buildings, and protected locations are left alone; the search skips blocked sites. If no site fits within 200 meters, the log explains why instead of sending you farther away.
+
+Hiring your starter ends the introduction and removes its camp marker. Completion is saved for that character in that world. Your starter stays in that world; entering another world begins a separate companion journey. Another character gets their own encounter and cannot hire your starter. You can still only have one companion at a time. Other Dvergr charge normally, and releasing your starter does not grant another free pact.
+
+The starter only offers the introduction pact. They do not buy or sell items. Already have a hired Mistlands or Ashlands Dvergr? The camp still appears, but its pact stays blocked until you no longer own a companion—even if that companion is far away after a reload. Owning a normal Dvergr does not complete the introduction.
+
+The starter is immune to damage until hired. After the first pact, normal companion damage rules apply, including after release. If your hired starter dies, they leave a personal tombstone at the death location. Interact with it to revive them for free at full health, preserving their name, identity and tier. Only the owning character can revive them, and another hired companion or pending pact blocks revival. The tombstone stays in that world across reloads and is consumed only after successful revival. Breaking the pact does not create a revival tombstone. Normal Dvergr and player tombstones keep their existing behavior.
+
+Already-hired survivors from the old shared encounter count as a completed introduction. Existing camps and companions are left in place. Install the mod on the server and every player who needs its features.
+
+Temporary testing buttons are available under **Debug** in BepInEx Configuration Manager: **Kill starter** kills your loaded starter; **Respawn starter (reset pact)** removes your starter and restores the free pact at the existing camp. Both work only for the local host. Reset affects only your character in the current world and keeps camp structures.
+
+## Starter Balance
+
+Edit starter stats directly in **Core/Features/Progression/DvergrStarterBalanceConfig.cs**, then rebuild. Each tier has named health, pierce and blunt values in one table. These values are code-only; BepInEx config does not override them. Movement, attack speed, healing, and damage reduction use the shared companion settings at every tier. Damage reduction defaults to 50%. Meadows starts at 200 health, 40 base pierce, and 15 base blunt. These replace general companion health and outgoing damage multipliers for starters. Normal Dvergr retain their existing settings. Vanilla attack variation, difficulty, armor and resistances still affect actual damage.
+
+After hiring, starters advance automatically from the highest boss credited in their owning character's saved kill statistics, regardless of kill order: Eikthyr unlocks Black Forest, Elder unlocks Swamp, Bonemass unlocks Mountains, Moder unlocks Plains, Yagluth unlocks Mistlands, and Queen unlocks Ashlands. Ashlands is the current cap. World boss flags and other characters do not grant progress. The overhead name shows a compact level number from 1 (Meadows) to 7 (Ashlands). Open Valheim Compendium > Dvergr Companion for the current starter profile, all tier stats, and boss unlocks. The entry reads values directly from the code balance table and refreshes when the Compendium is reopened. A newly earned tier plays a level-up effect while hired; persisted tiers do not replay it after loading. Progress is checked every five seconds while the owner is connected; unloaded starters catch up when loaded. Health edits preserve current health percentage. Use the same mod build on the server and clients. The provisional curve scales from Meadows (200/40/15) to the Ashlands prefab reference (1000/210/70).
+
+## New Mistlands Stock
+
+Normal Mistlands Dvergr sell **2 blue jute for 500 coins** and **1 fallen brother trophy for 4 allowed enemy trophies**. You can mix trophies from the same allowed list used for extractors. This trophy purchase does not need Sap or change the world's extractor purchase count. The starter Dvergr does not offer this stock.
 
 ### Ally Modes
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using HexDvergrAllies.Core;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace HexDvergrAllies.Core.Companions
@@ -75,7 +76,7 @@ namespace HexDvergrAllies.Core.Companions
                     _boardingPending = true;
                     _boardingReadyTime = Time.time + BoardingDelay;
 
-                    Plugin.Log.LogInfo($"[Dvergr Ship] Player entered ship: " + $"Ship={_currentShip.name}, " + $"BoardingDelay={BoardingDelay:F2}s, " + $"InitialPlayerPosition={player.transform.position}");
+                    HexLog.LogInfo($"[Dvergr Ship] Player entered ship: " + $"Ship={_currentShip.name}, " + $"BoardingDelay={BoardingDelay:F2}s, " + $"InitialPlayerPosition={player.transform.position}");
                 }
             }
 
@@ -97,7 +98,7 @@ namespace HexDvergrAllies.Core.Companions
 
                 _boardingPending = false;
 
-                Plugin.Log.LogInfo($"[Dvergr Ship] Boarding delay completed: " + $"Ship={_currentShip.name}, " + $"PlayerPosition={player.transform.position}");
+                HexLog.LogInfo($"[Dvergr Ship] Boarding delay completed: " + $"Ship={_currentShip.name}, " + $"PlayerPosition={player.transform.position}");
 
                 BoardCompanions(player, _currentShip);
 
@@ -147,7 +148,7 @@ namespace HexDvergrAllies.Core.Companions
                 _boardingRightLocalDirection.Normalize();
             }
 
-            Plugin.Log.LogInfo($"[Dvergr Ship] Boarding reference captured: " + $"Ship={ship.name}, " + $"LocalPosition={_boardingOriginLocalPosition}, " + $"LocalForward={_boardingForwardLocalDirection}, " + $"LocalRight={_boardingRightLocalDirection}");
+            HexLog.LogInfo($"[Dvergr Ship] Boarding reference captured: " + $"Ship={ship.name}, " + $"LocalPosition={_boardingOriginLocalPosition}, " + $"LocalForward={_boardingForwardLocalDirection}, " + $"LocalRight={_boardingRightLocalDirection}");
         }
 
         private static void BoardCompanions(Player player, Ship ship)
@@ -197,7 +198,7 @@ namespace HexDvergrAllies.Core.Companions
 
                 _nextPassengerIndex++;
 
-                Plugin.Log.LogInfo($"[Dvergr Ship] Boarded: " + $"Dvergr={character.name}, " + $"Ship={ship.name}, " + $"Position={worldPosition}, " + $"LocalPosition={localPosition}, " + $"PassengerIndex={passengerIndex}, " + $"Distance={distance:F2}");
+                HexLog.LogInfo($"[Dvergr Ship] Boarded: " + $"Dvergr={character.name}, " + $"Ship={ship.name}, " + $"Position={worldPosition}, " + $"LocalPosition={localPosition}, " + $"PassengerIndex={passengerIndex}, " + $"Distance={distance:F2}");
             }
         }
 
@@ -338,11 +339,11 @@ namespace HexDvergrAllies.Core.Companions
                 {
                     MoveCharacter(character, destination);
 
-                    Plugin.Log.LogInfo($"[Dvergr Ship] Relocated on disembark: " + $"Dvergr={character.name}, " + $"Destination={destination}");
+                    HexLog.LogInfo($"[Dvergr Ship] Relocated on disembark: " + $"Dvergr={character.name}, " + $"Destination={destination}");
                 }
                 else
                 {
-                    Plugin.Log.LogWarning($"[Dvergr Ship] Disembark relocation skipped: " + $"Dvergr={character.name}, " + $"Reason=No safe ground found");
+                    HexLog.LogWarning($"[Dvergr Ship] Disembark relocation skipped: " + $"Dvergr={character.name}, " + $"Reason=No safe ground found");
                 }
             }
 
@@ -354,7 +355,7 @@ namespace HexDvergrAllies.Core.Companions
                 monsterAI.SetFollowTarget(player.gameObject);
             }
 
-            Plugin.Log.LogInfo($"[Dvergr Ship] Disembarked: " + $"Dvergr={character.name}");
+            HexLog.LogInfo($"[Dvergr Ship] Disembarked: " + $"Dvergr={character.name}");
         }
 
         private static bool TryGetDisembarkPosition(Player player, int passengerIndex, out Vector3 destination)

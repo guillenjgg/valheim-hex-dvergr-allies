@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using HexDvergrAllies.Core;
+using HarmonyLib;
 using HexDvergrAllies.Core.Monoscripts;
 using HexDvergrAllies.Core.Networking;
 using System;
@@ -24,7 +25,7 @@ namespace HexDvergrAllies.Core.Companions
 
             if (!nview || !nview.IsValid())
             {
-                Plugin.Log.LogWarning($"[Dvergr Companion] Initialize failed: Dvergr={character.name}, Reason=Invalid ZNetView");
+                HexLog.LogWarning($"[Dvergr Companion] Initialize failed: Dvergr={character.name}, Reason=Invalid ZNetView");
                 return;
             }
 
@@ -54,18 +55,18 @@ namespace HexDvergrAllies.Core.Companions
                     {
                         _hiredCompanions[ownerPlayerId] = zdo.m_uid;
 
-                        Plugin.Log.LogInfo($"[Dvergr Companion] Existing hire cached: PlayerID={ownerPlayerId}, DvergrZDO={zdo.m_uid}");
+                        HexLog.LogInfo($"[Dvergr Companion] Existing hire cached: PlayerID={ownerPlayerId}, DvergrZDO={zdo.m_uid}");
                     }
                     else if (existingCompanion != zdo.m_uid)
                     {
-                        Plugin.Log.LogWarning($"[Dvergr Companion] Multiple existing hires detected: PlayerID={ownerPlayerId}, Cached={existingCompanion}, Additional={zdo.m_uid}");
+                        HexLog.LogWarning($"[Dvergr Companion] Multiple existing hires detected: PlayerID={ownerPlayerId}, Cached={existingCompanion}, Additional={zdo.m_uid}");
                     }
                 }
             }
 
             if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
             {
-                Plugin.Log.LogInfo($"[Dvergr Companion] Initialized: Dvergr={character.name}, ZDO={zdo.m_uid}, IsOwner={nview.IsOwner()}, IsHired={DvergrCompanionState.IsHired(zdo)}");
+                HexLog.LogInfo($"[Dvergr Companion] Initialized: Dvergr={character.name}, ZDO={zdo.m_uid}, IsOwner={nview.IsOwner()}, IsHired={DvergrCompanionState.IsHired(zdo)}");
             }
         }
 
@@ -111,7 +112,7 @@ namespace HexDvergrAllies.Core.Companions
         {
             if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
             {
-                Plugin.Log.LogInfo($"[Dvergr Companion] Session state reset: CachedHires={_hiredCompanions.Count}, FollowLogs={DvergrCompanionFollowManager.FollowLogCount}, MissingOwners={DvergrCompanionFollowManager.MissingOwnerCount}");
+                HexLog.LogInfo($"[Dvergr Companion] Session state reset: CachedHires={_hiredCompanions.Count}, FollowLogs={DvergrCompanionFollowManager.FollowLogCount}, MissingOwners={DvergrCompanionFollowManager.MissingOwnerCount}");
             }
 
             _hiredCompanions.Clear();
@@ -143,7 +144,7 @@ namespace HexDvergrAllies.Core.Companions
 
             if (HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
             {
-                Plugin.Log.LogInfo($"[Dvergr Companion] Companion died: PlayerID={ownerPlayerId}, DvergrZDO={zdo.m_uid}, Hire released");
+                HexLog.LogInfo($"[Dvergr Companion] Companion died: PlayerID={ownerPlayerId}, DvergrZDO={zdo.m_uid}, Hire released");
             }
         }
 
@@ -205,7 +206,7 @@ namespace HexDvergrAllies.Core.Companions
 
             _hiredCompanions.Remove(playerId);
 
-            Plugin.Log.LogInfo($"[Dvergr Companion] Stale hire cache removed: PlayerID={playerId}, DvergrZDO={companionId}");
+            HexLog.LogInfo($"[Dvergr Companion] Stale hire cache removed: PlayerID={playerId}, DvergrZDO={companionId}");
 
             return false;
         }
@@ -235,7 +236,7 @@ namespace HexDvergrAllies.Core.Companions
 
                 if (logRemoval && HexDvergrAlliesConfiguration.EnableDebugLogs.Value)
                 {
-                    Plugin.Log.LogInfo($"[Dvergr Companion] Hire cache removed: PlayerID={ownerPlayerId}, DvergrZDO={companionId}");
+                    HexLog.LogInfo($"[Dvergr Companion] Hire cache removed: PlayerID={ownerPlayerId}, DvergrZDO={companionId}");
                 }
             }
 

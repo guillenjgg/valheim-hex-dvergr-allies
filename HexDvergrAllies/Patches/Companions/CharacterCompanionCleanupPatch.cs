@@ -12,6 +12,13 @@ namespace HexDvergrAllies.Patches
             DvergrCompanionShipManager.RemoveCharacter(__instance);
             DvergrCompanionDungeonTargeting.RemoveCharacter(__instance);
             DvergrCompanionDungeonFollowManager.RemoveCharacter(__instance);
+            DvergrCompanionFollowManager.RemoveCharacter(__instance);
+            var monsterAI = __instance.GetComponent<MonsterAI>();
+
+            if (!object.ReferenceEquals(monsterAI, null))
+            {
+                DvergrCompanionSpawnerTargeting.RemoveCharacter(monsterAI);
+            }
         }
     }
 }

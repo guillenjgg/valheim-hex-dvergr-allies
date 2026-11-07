@@ -1,3 +1,4 @@
+using HexDvergrAllies.Core;
 using HexDvergrAllies.Core.HexLocalization;
 using HexDvergrAllies.Core.Companions;
 using UnityEngine;
@@ -17,21 +18,21 @@ namespace HexDvergrAllies.Core.UI
 
             if (_confirmationPending)
             {
-                Plugin.Log.LogInfo("[Dvergr Companion] Break Pact confirmation already pending.");
+                HexLog.LogInfo("[Dvergr Companion] Break Pact confirmation already pending.");
 
                 return false;
             }
 
             if (!UnifiedPopup.IsAvailable())
             {
-                Plugin.Log.LogWarning("[Dvergr Companion] Break Pact confirmation unavailable: UnifiedPopup is not available.");
+                HexLog.LogWarning("[Dvergr Companion] Break Pact confirmation unavailable: UnifiedPopup is not available.");
 
                 return false;
             }
 
             if (UnifiedPopup.IsVisible())
             {
-                Plugin.Log.LogWarning("[Dvergr Companion] Break Pact confirmation unavailable: Another popup is visible.");
+                HexLog.LogWarning("[Dvergr Companion] Break Pact confirmation unavailable: Another popup is visible.");
 
                 return false;
             }
@@ -50,14 +51,14 @@ namespace HexDvergrAllies.Core.UI
 
             ZDOID companionId = nview.GetZDO().m_uid;
 
-            YesNoPopup popup = new YesNoPopup(HexLocalizationManager.Localize("$hex_dvergr_break_title"), HexLocalizationManager.Localize("$hex_dvergr_break_description"), () => { _confirmationPending = false; UnifiedPopup.Pop(); if (!player || ZNetScene.instance == null) { return; } GameObject companionObject = ZNetScene.instance.FindInstance(companionId); if (!companionObject) { Plugin.Log.LogWarning("[Dvergr Companion] Break Pact aborted: Companion no longer loaded."); return; } Character currentCharacter = companionObject.GetComponent<Character>(); if (!currentCharacter || !DvergrCompanionManager.IsHiredByPlayer(currentCharacter, player)) { Plugin.Log.LogWarning("[Dvergr Companion] Break Pact aborted: Companion no longer belongs to player."); return; } Plugin.Log.LogInfo($"[Dvergr Companion] Break Pact confirmed: ZDO={companionId}"); DvergrCompanionUnhireManager.RequestUnhire(player, currentCharacter); }, () => { _confirmationPending = false; UnifiedPopup.Pop(); Plugin.Log.LogInfo("[Dvergr Companion] Break Pact canceled by player."); }, false, false);
+            YesNoPopup popup = new YesNoPopup(HexLocalizationManager.Localize("$hex_dvergr_break_title"), HexLocalizationManager.Localize("$hex_dvergr_break_description"), () => { _confirmationPending = false; UnifiedPopup.Pop(); if (!player || ZNetScene.instance == null) { return; } GameObject companionObject = ZNetScene.instance.FindInstance(companionId); if (!companionObject) { HexLog.LogWarning("[Dvergr Companion] Break Pact aborted: Companion no longer loaded."); return; } Character currentCharacter = companionObject.GetComponent<Character>(); if (!currentCharacter || !DvergrCompanionManager.IsHiredByPlayer(currentCharacter, player)) { HexLog.LogWarning("[Dvergr Companion] Break Pact aborted: Companion no longer belongs to player."); return; } HexLog.LogInfo($"[Dvergr Companion] Break Pact confirmed: ZDO={companionId}"); DvergrCompanionUnhireManager.RequestUnhire(player, currentCharacter); }, () => { _confirmationPending = false; UnifiedPopup.Pop(); HexLog.LogInfo("[Dvergr Companion] Break Pact canceled by player."); }, false, false);
 
             _confirmationPending = true;
 
             UnifiedPopup.Push(popup);
             UnifiedPopup.SetFocus();
 
-            Plugin.Log.LogInfo($"[Dvergr Companion] Break Pact confirmation opened: Dvergr={character.name}, ZDO={companionId}");
+            HexLog.LogInfo($"[Dvergr Companion] Break Pact confirmation opened: Dvergr={character.name}, ZDO={companionId}");
 
             return true;
         }

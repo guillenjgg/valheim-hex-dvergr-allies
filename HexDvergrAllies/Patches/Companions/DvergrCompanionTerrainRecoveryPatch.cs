@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using HexDvergrAllies.Core;
+using System.Collections.Generic;
 using HarmonyLib;
 using HexDvergrAllies.Core.Companions;
 using UnityEngine;
@@ -152,7 +153,7 @@ namespace HexDvergrAllies.Patches.Companions
         {
             var destination = followTarget.transform.position + followTarget.transform.right * RecoveryOffset;
 
-            Plugin.Log.LogInfo($"[Dvergr Terrain Recovery] Dvergr={character.name}, Reason={reason}, Distance={distance:F1}, From={character.transform.position}, To={destination}");
+            HexLog.LogInfo($"[Dvergr Terrain Recovery] Dvergr={character.name}, Reason={reason}, Distance={distance:F1}, From={character.transform.position}, To={destination}");
 
             character.transform.position = destination;
         }

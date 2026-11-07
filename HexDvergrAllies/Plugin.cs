@@ -46,6 +46,7 @@ namespace HexDvergrAllies
             _harmonyInstance.PatchAll(Assembly.GetExecutingAssembly());
 
             DvergrTradeTerminalCommands.Register();
+            gameObject.AddComponent<Core.Features.Progression.DvergrStarterEncounterManager>();
 
             Log.LogInfo($"{PluginName} v{PluginVersion} loaded.");
         }
@@ -71,7 +72,9 @@ namespace HexDvergrAllies
             try
             {
                 Log.LogDebug("Attempting to reload configuration...");
+
                 Config.Reload();
+
                 if (HexConfigurationMigration.Complete(Config))
                 {
                     Config.Save();
@@ -85,6 +88,8 @@ namespace HexDvergrAllies
 
         private void OnDestroy()
         {
+            Log.LogInfo($"{PluginName} v{PluginVersion} unloaded.");
+
             if (_configFileWatcher != null)
             {
                 _configFileWatcher.EnableRaisingEvents = false;
@@ -99,8 +104,6 @@ namespace HexDvergrAllies
 
             _harmonyInstance?.UnpatchSelf();
             _harmonyInstance = null;
-
-            Log.LogInfo($"{PluginName} v{PluginVersion} unloaded.");
 
             HexLocalizationManager.Shutdown();
 

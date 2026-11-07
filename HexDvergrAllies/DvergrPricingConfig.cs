@@ -9,6 +9,11 @@ namespace HexDvergrAllies
         /// Number of extractor purchases before Sap is required.
         /// </summary>
         internal const int FreeExtractorPurchases = 2;
+        internal const int MistlandsJuteQuantity = 2;
+        internal const int MistlandsJuteCoinCost = 500;
+        internal const int FallenBrotherTrophyCost = 4;
+
+        internal static string FallenBrotherCostDisplay => Core.HexLocalization.HexLocalizationManager.Localize("$hex_dvergr_fallen_brother_cost", FallenBrotherTrophyCost);
 
         /// <summary>
         /// Sap required after the initial extractor purchases.

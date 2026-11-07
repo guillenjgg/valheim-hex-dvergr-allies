@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using HexDvergrAllies.Core;
+using System.Collections.Generic;
 using HarmonyLib;
 using HexDvergrAllies.Core.Companions;
 using UnityEngine;
@@ -49,7 +50,7 @@ namespace HexDvergrAllies.Patches.Companions
 
             if (weapon == null)
             {
-                Plugin.Log.LogInfo($"[Attack Conditions] Dvergr={character.name}, Target={target.name}, Distance={distance:F1}, CanSee={canSeeTarget}, CanHear={canHearTarget}, Alerted={__instance.IsAlerted()}, Weapon=None");
+                HexLog.LogInfo($"[Attack Conditions] Dvergr={character.name}, Target={target.name}, Distance={distance:F1}, CanSee={canSeeTarget}, CanHear={canHearTarget}, Alerted={__instance.IsAlerted()}, Weapon=None");
                 return;
             }
 
@@ -59,7 +60,7 @@ namespace HexDvergrAllies.Patches.Companions
             var inRange = distance < shared.m_aiAttackRange;
             var facingTarget = __instance.IsLookingAt(target.transform.position, shared.m_aiAttackMaxAngle, shared.m_aiInvertAngleCheck);
 
-            Plugin.Log.LogInfo(
+            HexLog.LogInfo(
                 $"[Attack Conditions] Dvergr={character.name}, " +
                 $"Target={target.name}, " +
                 $"Weapon={shared.m_name}, " +

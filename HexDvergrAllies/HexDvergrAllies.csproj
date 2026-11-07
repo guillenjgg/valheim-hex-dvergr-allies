@@ -79,6 +79,10 @@
       <HintPath>..\..\..\valheim_mod_libraries\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>..\..\..\valheim_mod_libraries\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
       <HintPath>..\..\..\valheim_mod_libraries\UnityEngine.PhysicsModule.dll</HintPath>
       <Private>False</Private>
@@ -105,6 +109,8 @@
     <Compile Include="Core\Companions\DvergrCompanionUnhireManager.cs" />
     <Compile Include="Core\Networking\DvergrRpcManager.cs" />
     <Compile Include="Core\Companions\DvergrForgePactManager.cs" />
+    <Compile Include="Core\Companions\DvergrPactAuthority.cs" />
+    <Compile Include="Core\Companions\DvergrPersistentOwnership.cs" />
     <Compile Include="Core\Companions\DvergrCompanionManager.cs" />
     <Compile Include="Core\Companions\DvergrCompanionMode.cs" />
     <Compile Include="Core\Companions\DvergrCompanionModeManager.cs" />
@@ -126,6 +132,9 @@
     <Compile Include="Core\UI\DvergrInteractionHelper.cs" />
     <Compile Include="DvergrPricingConfig.cs" />
     <Compile Include="Core\Trading\DvergrTraderManager.cs" />
+    <Compile Include="Core\Trading\DvergrMistlandsStoreManager.cs" />
+    <Compile Include="Core\Trading\DvergrTradeAffordability.cs" />
+    <Compile Include="Core\Trading\DvergrTradePurchaseController.cs" />
     <Compile Include="Core\Trading\DvergrTradeRpcManager.cs" />
     <Compile Include="Core\Trading\DvergrTradeSessionManager.cs" />
     <Compile Include="Core\Trading\DvergrTradeTerminalCommands.cs" />
@@ -199,6 +208,25 @@
     <Compile Include="Patches\Combat\WearNTearRPCDamagePatch.cs" />
     <Compile Include="Patches\Networking\ZRoutedRpcRegistrationPatch.cs" />
     <Compile Include="Patches\UI\PlayerControllerCompanionUIPatch.cs" />
+    <Compile Include="Core\Features\Progression\DvergrStarterEncounterManager.cs" />
+    <Compile Include="Core\Features\Progression\DvergrStarterEncounter.cs" />
+    <Compile Include="Core\Features\Progression\DvergrStarterCharacterState.cs" />
+    <Compile Include="Core\Features\Progression\DvergrStarterProgressionService.cs" />
+    <Compile Include="Core\Features\Progression\DvergrStarterRevivalManager.cs" />
+    <Compile Include="Patches\Companions\StarterTombstonePatch.cs" />
+    <Compile Include="Core\Features\Progression\DvergrStarterBalanceConfig.cs" />
+    <Compile Include="Core\Features\Progression\DvergrStarterBalanceService.cs" />
+    <Compile Include="Core\Features\Progression\DvergrStarterEligibility.cs" />
+    <Compile Include="Core\Features\Progression\DvergrStarterVendorService.cs" />
+    <Compile Include="Patches\StoreGui\StoreGuiStarterVendorPatch.cs" />
+    <Compile Include="Core\Features\Progression\DvergrStarterTerrainRules.cs" />
+    <Compile Include="Core\Features\Progression\DvergrStarterWorldAccess.cs" />
+    <Compile Include="Core\Features\Progression\DvergrStarterMapRefreshGuard.cs" />
+    <Compile Include="Patches\Networking\ZoneSystemStarterKeyMapPatch.cs" />
+    <Compile Include="Core\UI\DvergrTraderDisplayManager.cs" />
+    <Compile Include="Core\UI\DvergrCompendiumManager.cs" />
+    <Compile Include="Patches\UI\TextsDialogDvergrCompendiumPatch.cs" />
+    <Compile Include="Core\HexLog.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
