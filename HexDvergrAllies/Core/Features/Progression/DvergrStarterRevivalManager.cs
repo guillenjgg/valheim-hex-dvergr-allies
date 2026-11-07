@@ -203,6 +203,7 @@ namespace HexDvergrAllies.Core.Features.Progression
                 DvergrCompanionManager.InitializeCompanion(character);
                 DvergrStarterBalanceService.Update(character);
                 character.SetHealth(character.GetMaxHealth());
+                DvergrPersistentOwnership.TrackStarter(zdo);
                 DvergrPersistentOwnership.Track(characterId, zdo.m_uid);
                 DvergrCompanionManager.CacheHiredCompanion(characterId, zdo.m_uid);
                 DvergrStarterEncounterManager.RecordCompletion(characterId);

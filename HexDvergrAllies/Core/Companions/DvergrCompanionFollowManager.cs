@@ -10,6 +10,8 @@ namespace HexDvergrAllies.Core.Companions
         private const float FollowLogInterval = 5f;
         private const float FollowOwnerGracePeriod = 10f;
 
+        private static readonly Dictionary<Character, ZDOID> CharacterIds = new Dictionary<Character, ZDOID>();
+
         private static readonly Dictionary<ZDOID, float> _lastFollowLogTimes = new Dictionary<ZDOID, float>();
         private static readonly Dictionary<ZDOID, float> _followOwnerMissingSince = new Dictionary<ZDOID, float>();
 
@@ -33,6 +35,7 @@ namespace HexDvergrAllies.Core.Companions
             }
 
             var zdo = nview.GetZDO();
+            CharacterIds[character] = zdo.m_uid;
 
             if (zdo.GetBool(DvergrCompanionState.PendingUnhireKey, false))
             {
@@ -155,8 +158,20 @@ namespace HexDvergrAllies.Core.Companions
 
         internal static void ResetSessionState()
         {
+            CharacterIds.Clear();
             _lastFollowLogTimes.Clear();
             _followOwnerMissingSince.Clear();
+        }
+
+        internal static void RemoveCharacter(Character character)
+        {
+            ZDOID id;
+
+            if (CharacterIds.TryGetValue(character, out id))
+            {
+                RemoveFollowState(id);
+                CharacterIds.Remove(character);
+            }
         }
 
         internal static void RemoveFollowState(ZDOID companionId)

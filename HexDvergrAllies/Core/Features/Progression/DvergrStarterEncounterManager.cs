@@ -20,6 +20,7 @@ namespace HexDvergrAllies.Core.Features.Progression
         private readonly HashSet<long> _legacyCompleted = new HashSet<long>();
         private readonly HashSet<long> _reconciled = new HashSet<long>();
         private readonly Dictionary<long, float> _recoverAt = new Dictionary<long, float>();
+        private readonly List<long> _recoveryBuffer = new List<long>();
         private int _legacyIndex;
         private bool _legacyScanComplete;
         private ZoneSystem _world;
@@ -147,7 +148,8 @@ namespace HexDvergrAllies.Core.Features.Progression
                 }
             }
 
-            var recover = new List<long>();
+            var recover = _recoveryBuffer;
+            recover.Clear();
 
             foreach (var pending in _recoverAt)
             {

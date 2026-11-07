@@ -14,6 +14,8 @@ namespace HexDvergrAllies.Core.Companions
         private static readonly HashSet<int> DvergrPrefabs = new HashSet<int>();
         private static ZNetScene _scene;
         private static ZDOMan _indexedWorld;
+        private static ZDOMan _starterWorld;
+        private static readonly Dictionary<long, List<ZDOID>> StartersByCharacter = new Dictionary<long, List<ZDOID>>();
         private static readonly Dictionary<long, List<ZDOID>> HiresByCharacter = new Dictionary<long, List<ZDOID>>();
 
         private static IEnumerable<ZDO> GetRecords()
@@ -49,16 +51,71 @@ namespace HexDvergrAllies.Core.Companions
             return objects.Values;
         }
 
-        internal static List<ZDO> GetStarters(long characterId)
+        private static void EnsureStarterIndex()
         {
-            var starters = new List<ZDO>();
+            if (ReferenceEquals(_starterWorld, ZDOMan.instance))
+            {
+                return;
+            }
+
+            StartersByCharacter.Clear();
 
             foreach (var zdo in GetRecords())
             {
-                if (zdo.IsValid() && DvergrPrefabs.Contains(zdo.GetPrefab()) && zdo.GetBool(Features.Progression.DvergrStarterCharacterState.StarterKey, false) && zdo.GetLong(Features.Progression.DvergrStarterCharacterState.CharacterKey, 0L) == characterId)
+                if (zdo.IsValid() && DvergrPrefabs.Contains(zdo.GetPrefab()) && zdo.GetBool(Features.Progression.DvergrStarterCharacterState.StarterKey, false))
                 {
-                    starters.Add(zdo);
+                    AddStarter(zdo);
                 }
+            }
+
+            _starterWorld = ZDOMan.instance;
+        }
+
+        private static void AddStarter(ZDO zdo)
+        {
+            var characterId = zdo.GetLong(Features.Progression.DvergrStarterCharacterState.CharacterKey, 0L);
+            List<ZDOID> ids;
+
+            if (!StartersByCharacter.TryGetValue(characterId, out ids))
+            {
+                ids = new List<ZDOID>();
+                StartersByCharacter.Add(characterId, ids);
+            }
+
+            if (!ids.Contains(zdo.m_uid))
+            {
+                ids.Add(zdo.m_uid);
+            }
+        }
+
+        internal static void TrackStarter(ZDO zdo)
+        {
+            EnsureStarterIndex();
+            AddStarter(zdo);
+        }
+
+        internal static List<ZDO> GetStarters(long characterId)
+        {
+            EnsureStarterIndex();
+            var starters = new List<ZDO>();
+            List<ZDOID> ids;
+
+            if (!StartersByCharacter.TryGetValue(characterId, out ids))
+            {
+                return starters;
+            }
+
+            for (var index = ids.Count - 1; index >= 0; index--)
+            {
+                var zdo = ZDOMan.instance.GetZDO(ids[index]);
+
+                if (zdo == null || !zdo.IsValid() || !zdo.GetBool(Features.Progression.DvergrStarterCharacterState.StarterKey, false) || zdo.GetLong(Features.Progression.DvergrStarterCharacterState.CharacterKey, 0L) != characterId)
+                {
+                    ids.RemoveAt(index);
+                    continue;
+                }
+
+                starters.Add(zdo);
             }
 
             return starters;
@@ -136,9 +193,9 @@ namespace HexDvergrAllies.Core.Companions
 
         internal static bool HasLivingStarter(long characterId)
         {
-            foreach (var zdo in GetRecords())
+            foreach (var zdo in GetStarters(characterId))
             {
-                if (zdo.IsValid() && DvergrPrefabs.Contains(zdo.GetPrefab()) && zdo.GetBool(Features.Progression.DvergrStarterCharacterState.StarterKey, false) && zdo.GetLong(Features.Progression.DvergrStarterCharacterState.CharacterKey, 0L) == characterId && zdo.GetFloat(ZDOVars.s_health, 1f) > 0f)
+                if (zdo.GetFloat(ZDOVars.s_health, 1f) > 0f)
                 {
                     return true;
                 }

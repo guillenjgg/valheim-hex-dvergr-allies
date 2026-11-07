@@ -17,6 +17,7 @@ namespace HexDvergrAllies.Core.Trading
         private const float HeartbeatInterval = 5f;
 
         private static float _lastHeartbeatTime;
+        private static readonly List<ZDOID> ExpiredSessions = new List<ZDOID>();
 
         private static readonly Dictionary<ZDOID, TradeSession> _sessions = new Dictionary<ZDOID, TradeSession>();
 
@@ -83,6 +84,12 @@ namespace HexDvergrAllies.Core.Trading
                 return false;
             }
 
+            if (Time.time - session.LastActivity >= SessionTimeout || !IsPlayerNearTrader(peer, traderZdoId))
+            {
+                _sessions.Remove(traderZdoId);
+                return false;
+            }
+
             session.LastActivity = Time.time;
             return true;
         }
@@ -106,7 +113,8 @@ namespace HexDvergrAllies.Core.Trading
                 return;
             }
 
-            var expiredSessions = new List<ZDOID>();
+            var expiredSessions = ExpiredSessions;
+            expiredSessions.Clear();
 
             foreach (var entry in _sessions)
             {
@@ -211,6 +219,12 @@ namespace HexDvergrAllies.Core.Trading
 
             _waitingForApproval = false;
 
+            if (!Player.m_localPlayer || Player.m_localPlayer.IsDead() || !StoreGui.instance)
+            {
+                ZRoutedRpc.instance.InvokeRoutedRPC(GetServerPeerID(ZRoutedRpc.instance), CloseRequestRpc, traderZdoId);
+                return;
+            }
+
             if (!approved)
             {
                 Player.m_localPlayer.Message(MessageHud.MessageType.Center, HexLocalizationManager.Localize(reason));
@@ -258,6 +272,22 @@ namespace HexDvergrAllies.Core.Trading
             HexLog.LogInfo($"[Dvergr Trade Session] Close: Peer={sender}, Trader={traderZdoId}, Session removed");
         }
 
+        private static bool IsPlayerNearTrader(long sender, ZDOID traderZdoId)
+        {
+            var peer = ZNet.instance.GetPeer(sender);
+
+            if (sender != ZNet.GetUID() && (peer == null || !peer.IsReady()))
+            {
+                return false;
+            }
+
+            var playerId = sender == ZNet.GetUID() ? ZNet.instance.LocalPlayerCharacterID : peer.m_characterID;
+            var player = ZDOMan.instance.GetZDO(playerId);
+            var trader = ZDOMan.instance.GetZDO(traderZdoId);
+
+            return player != null && trader != null && player.GetOwner() == sender && player.GetFloat(ZDOVars.s_health, 0f) > 0f && Vector3.Distance(player.GetPosition(), trader.GetPosition()) <= DvergrTraderManager.InteractionDistance + 2f;
+        }
+
         private static void OnHeartbeat(long sender, ZDOID traderZdoId)
         {
             if (!ZNet.instance.IsServer())
@@ -273,8 +303,9 @@ namespace HexDvergrAllies.Core.Trading
             var traderZdo = ZDOMan.instance.GetZDO(traderZdoId);
             var peer = ZNet.instance.GetPeer(sender);
 
-            if (traderZdo == null || (sender != ZNet.GetUID() && peer == null))
+            if (traderZdo == null || (sender != ZNet.GetUID() && peer == null) || Time.time - session.LastActivity >= SessionTimeout || !IsPlayerNearTrader(sender, traderZdoId))
             {
+                _sessions.Remove(traderZdoId);
                 return;
             }
 

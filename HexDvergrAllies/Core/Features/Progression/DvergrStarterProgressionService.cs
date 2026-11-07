@@ -74,6 +74,11 @@ namespace HexDvergrAllies.Core.Features.Progression
                 return;
             }
 
+            if (tier == 0)
+            {
+                return;
+            }
+
             foreach (var starter in DvergrPersistentOwnership.GetStarters(characterId))
             {
                 if (!starter.HasOwner() || !DvergrCompanionState.IsHired(starter) || DvergrCompanionState.GetOwnerPlayerId(starter) != characterId || tier <= starter.GetInt(DvergrStarterBalanceService.TierKey, 0))
